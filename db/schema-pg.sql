@@ -18,6 +18,15 @@ CREATE TABLE IF NOT EXISTS organizations (
   slug VARCHAR(255) NOT NULL UNIQUE,
   status VARCHAR(50) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'suspended')),
   plan VARCHAR(50) NOT NULL DEFAULT 'starter' CHECK (plan IN ('starter', 'pro', 'enterprise')),
+  paystack_customer_code VARCHAR(255),
+  paystack_subscription_code VARCHAR(255),
+  paystack_auth_code VARCHAR(255),
+  subscription_status VARCHAR(50) DEFAULT 'none',
+  trial_ends_at VARCHAR(100),
+  card_brand VARCHAR(50),
+  card_last4 VARCHAR(10),
+  card_exp_month VARCHAR(10),
+  card_exp_year VARCHAR(10),
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

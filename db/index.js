@@ -1,12 +1,16 @@
 const path = require('path');
 const fs = require('fs');
+const dns = require('dns');
 const { runMigrations } = require('./runner');
+
+try { dns.setDefaultResultOrder('ipv4first'); } catch (e) {}
 
 const isPostgres = Boolean(process.env.DATABASE_URL);
 
 let db;
 
 if (isPostgres) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
   const { Pool } = require('pg');
   const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
