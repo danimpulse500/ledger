@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS organizations (
   name VARCHAR(255) NOT NULL,
   slug VARCHAR(255) NOT NULL UNIQUE,
   status VARCHAR(50) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'suspended')),
-  plan VARCHAR(50) NOT NULL DEFAULT 'starter' CHECK (plan IN ('starter', 'pro', 'enterprise')),
+  plan VARCHAR(50) NOT NULL DEFAULT 'starter',
   paystack_customer_code VARCHAR(255),
   paystack_subscription_code VARCHAR(255),
   paystack_auth_code VARCHAR(255),

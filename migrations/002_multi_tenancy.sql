@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS organizations (
   name TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'suspended')),
-  plan TEXT NOT NULL DEFAULT 'starter' CHECK (plan IN ('starter', 'pro', 'enterprise')),
+  plan TEXT NOT NULL DEFAULT 'starter',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
