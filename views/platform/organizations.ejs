@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="sidebar no-print">
+      <div class="brand">Ledger
+        <span class="co-name">Platform Control</span>
+      </div>
+      <nav>
+        <a href="/platform">Overview</a>
+        <a href="/platform/organizations" class="active">Organizations</a>
+      </nav>
+      <div class="spacer"></div>
+      <div class="user-box">
+        <div class="u-name"><%= currentPlatformAdmin ? currentPlatformAdmin.name : 'Operator' %></div>
+        <div class="u-role">Super Admin</div>
+        <form method="POST" action="/platform/logout">
+          <button type="submit">Log out</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <h1>Organizations Directory</h1>
+          <p class="text-soft">Manage tenant accounts, subscription plans, and access status.</p>
+        </div>
+        <div class="actions">
+          <button onclick="document.getElementById('createOrgCard').style.display='block'" class="btn">+ Provision Organization</button>
+        </div>
+      </div>
+
+      <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% } %>
+
+      <!-- Provision Form Card -->
+      <div id="createOrgCard" class="card" style="display:<%= error ? 'block' : 'none' %>; margin-bottom:20px;">
+        <div class="section-title">
+          <h2>Provision New Organization</h2>
+          <button type="button" onclick="document.getElementById('createOrgCard').style.display='none'" class="btn btn-sm btn-ghost">Cancel</button>
+        </div>
+        <form action="/platform/organizations" method="POST">
+          <div class="field-row">
+            <div class="field">
+              <label>Organization Name</label>
+              <input type="text" name="name" required placeholder="Acme Logistics">
+            </div>
+            <div class="field">
+              <label>URL Slug</label>
+              <input type="text" name="slug" required placeholder="acme-logistics">
+            </div>
+            <div class="field">
+              <label>Plan</label>
+              <select name="plan">
+                <option value="starter">Starter</option>
+                <option value="pro">Pro</option>
+                <option value="enterprise">Enterprise</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Tenant Admin Name</label>
+              <input type="text" name="admin_name" required placeholder="Jane Doe">
+            </div>
+            <div class="field">
+              <label>Tenant Admin Email</label>
+              <input type="email" name="admin_email" required placeholder="jane@acme.com">
+            </div>
+            <div class="field">
+              <label>Admin Password</label>
+              <input type="password" name="admin_password" required placeholder="••••••••">
+            </div>
+          </div>
+          <button type="submit" class="btn" style="margin-top:8px;">Provision Account &rarr;</button>
+        </form>
+      </div>
+
+      <!-- Filter Bar -->
+      <form action="/platform/organizations" method="GET" class="filter-bar">
+        <input type="text" name="q" value="<%= q %>" placeholder="Search by name or slug..." style="width:240px;">
+        <select name="status" onchange="this.form.submit()">
+          <option value="">All Statuses</option>
+          <option value="active" <%= status === 'active' ? 'selected' : '' %>>Active</option>
+          <option value="suspended" <%= status === 'suspended' ? 'selected' : '' %>>Suspended</option>
+        </select>
+        <select name="plan" onchange="this.form.submit()">
+          <option value="">All Plans</option>
+          <option value="starter" <%= plan === 'starter' ? 'selected' : '' %>>Starter</option>
+          <option value="pro" <%= plan === 'pro' ? 'selected' : '' %>>Pro</option>
+          <option value="enterprise" <%= plan === 'enterprise' ? 'selected' : '' %>>Enterprise</option>
+        </select>
+        <button type="submit" class="btn btn-sm btn-ghost">Filter</button>
+        <% if (q || status || plan) { %>
+          <a href="/platform/organizations" class="text-faint" style="font-size:0.85rem;">Clear</a>
+        <% } %>
+      </form>
+
+      <!-- Organizations Table -->
+      <div class="card" style="padding:0; overflow:hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>Organization</th>
+              <th>Plan</th>
+              <th>Status</th>
+              <th>Members</th>
+              <th>Invoices</th>
+              <th class="money">Total Volume</th>
+              <th>Created</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (organizations.length === 0) { %>
+              <tr><td colspan="8" class="empty-state">No matching organizations found.</td></tr>
+            <% } else { %>
+              <% organizations.forEach(org => { %>
+                <tr>
+                  <td>
+                    <strong><%= org.name %></strong>
+                    <div class="text-faint"><%= org.slug %></div>
+                  </td>
+                  <td><span class="badge badge-sent"><%= org.plan %></span></td>
+                  <td>
+                    <span class="badge <%= org.status === 'active' ? 'badge-paid' : 'badge-overdue' %>">
+                      <%= org.status %>
+                    </span>
+                  </td>
+                  <td><%= org.member_count %></td>
+                  <td><%= org.invoice_count %></td>
+                  <td class="money">$<%= Number(org.total_volume || 0).toFixed(2) %></td>
+                  <td class="text-faint"><%= org.created_at.slice(0, 10) %></td>
+                  <td><a href="/platform/organizations/<%= org.id %>" class="btn btn-sm btn-ghost">Manage &rarr;</a></td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

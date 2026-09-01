@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <div class="app-shell">
+    <%- include('../partials/sidebar') %>
+    <div class="main">
+      <h1><%= title %></h1>
+
+      <% if (errors) { %>
+        <div class="alert alert-error"><%= errors.join(' ') %></div>
+      <% } %>
+
+      <div class="card" style="max-width:600px;">
+        <form method="POST" action="<%= clientRecord.id ? '/clients/' + clientRecord.id + '?_method=PUT' : '/clients' %>">
+          <div class="field">
+            <label for="name">Client name *</label>
+            <input type="text" id="name" name="name" value="<%= clientRecord.name || '' %>" required autofocus>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" value="<%= clientRecord.email || '' %>">
+            </div>
+            <div class="field">
+              <label for="phone">Phone</label>
+              <input type="tel" id="phone" name="phone" value="<%= clientRecord.phone || '' %>">
+            </div>
+          </div>
+          <div class="field">
+            <label for="address">Address</label>
+            <textarea id="address" name="address"><%= clientRecord.address || '' %></textarea>
+          </div>
+          <div class="field">
+            <label for="tax_id">Tax / VAT ID</label>
+            <input type="text" id="tax_id" name="tax_id" value="<%= clientRecord.tax_id || '' %>">
+          </div>
+          <div class="field">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes"><%= clientRecord.notes || '' %></textarea>
+          </div>
+          <div class="actions" style="margin-top:20px;">
+            <button type="submit" class="btn">Save Client</button>
+            <a href="/clients" class="btn btn-ghost">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

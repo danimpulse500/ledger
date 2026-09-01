@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include('partials/head') %>
+</head>
+
+<body>
+  <div class="app-shell">
+    <%- include('partials/sidebar') %>
+
+      <div class="main">
+        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+          <h1 style="margin:0;">Settings</h1>
+          <span class="badge badge-info">Company profile</span>
+        </header>
+
+        <% if (error) { %>
+          <div class="alert alert-error">
+            <%= error %>
+          </div>
+          <% } %>
+            <% if (success) { %>
+              <div class="alert alert-success">
+                <%= success %>
+              </div>
+              <% } %>
+
+                <div class="card">
+                  <form method="POST" action="/settings" enctype="multipart/form-data">
+
+                    <!-- ========== COMPANY DETAILS ========== -->
+                    <fieldset style="border:0; padding:0; margin:0;">
+                      <legend
+                        style="font-weight:600; font-size:1.25rem; padding:0 0 0.5rem 0; border-bottom:2px solid #e5e7eb; width:100%;">
+                        Company details
+                      </legend>
+
+                      <div class="field-row" style="margin-top:1rem;">
+                        <div class="field">
+                          <label for="company_name">Company name</label>
+                          <input type="text" id="company_name" name="company_name" value="<%= settings.company_name %>"
+                            placeholder="e.g. Acme Inc.">
+                        </div>
+                        <div class="field">
+                          <label for="currency_symbol">Currency symbol</label>
+                          <input type="text" id="currency_symbol" name="currency_symbol"
+                            value="<%= settings.currency_symbol %>" placeholder="$">
+                        </div>
+                      </div>
+
+                      <div class="field">
+                        <label for="address">Address</label>
+                        <textarea id="address" name="address" rows="3"
+                          placeholder="Street, city, postal code"><%= settings.address %></textarea>
+                      </div>
+
+                      <div class="field-row">
+                        <div class="field">
+                          <label for="email">Email</label>
+                          <input type="email" id="email" name="email" value="<%= settings.email %>"
+                            placeholder="billing@company.com">
+                        </div>
+                        <div class="field">
+                          <label for="phone">Phone</label>
+                          <input type="tel" id="phone" name="phone" value="<%= settings.phone %>"
+                            placeholder="+1 234 567 890">
+                        </div>
+                      </div>
+
+                      <div class="field-row">
+                        <div class="field">
+                          <label for="tax_id">Tax / VAT ID</label>
+                          <input type="text" id="tax_id" name="tax_id" value="<%= settings.tax_id %>"
+                            placeholder="VAT-123456">
+                        </div>
+                        <div class="field">
+                          <label for="invoice_prefix">Invoice number prefix</label>
+                          <input type="text" id="invoice_prefix" name="invoice_prefix"
+                            value="<%= settings.invoice_prefix %>" placeholder="INV-">
+                        </div>
+                        <div class="field">
+                          <label for="default_tax_rate">Default discount (%)</label>
+                          <input type="number" id="default_tax_rate" step="0.01" name="default_tax_rate"
+                            value="<%= settings.default_tax_rate %>" placeholder="0.00">
+                        </div>
+                      </div>
+                    </fieldset>
+
+                    <hr class="divider" style="margin:1.5rem 0;">
+
+                    <!-- ========== INVOICE SETTINGS ========== -->
+                    <fieldset style="border:0; padding:0; margin:0;">
+                      <legend
+                        style="font-weight:600; font-size:1.25rem; padding:0 0 0.5rem 0; border-bottom:2px solid #e5e7eb; width:100%;">
+                        Invoice settings
+                      </legend>
+
+                      <div class="field" style="margin-top:1rem;">
+                        <label for="invoice_logo">Invoice logo</label>
+                        <label class="logo-dropzone <%= settings.invoice_logo_path ? 'has-preview' : '' %>"
+                          for="invoice_logo" id="logo-dropzone"
+                          style="display:flex; flex-direction:column; align-items:center; justify-content:center; border:2px dashed #d1d5db; border-radius:8px; padding:2rem 1rem; background:#f9fafb; transition:border-color 0.2s; cursor:pointer; min-height:150px;">
+                          <input type="file" id="invoice_logo" name="invoice_logo" accept="image/png,image/jpeg" hidden>
+                          <span class="logo-dropzone-content" <%=settings.invoice_logo_path ? 'hidden' : '' %>
+                            style="text-align:center; color:#6b7280;">
+                            <strong style="display:block; font-size:1.1rem;">Drop your logo here</strong>
+                            <span>or click to browse (PNG or JPG, max 2 MB)</span>
+                          </span>
+                          <img id="logo-preview" class="logo-preview"
+                            src="<%= settings.invoice_logo_path ? '/settings/logo' : '' %>" alt="Invoice logo preview"
+                            <%=settings.invoice_logo_path ? '' : 'hidden' %> style="max-height:120px; max-width:100%;
+                          object-fit:contain;">
+                        </label>
+                      </div>
+
+                      <div class="setting-group" style="margin-top:1.5rem;">
+                        <div class="setting-item"
+                          style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 0; border-bottom:1px solid #f3f4f6;">
+                          <div class="setting-text">
+                            <span class="setting-title" style="font-weight:500;">Display logo on invoices</span>
+                            <p class="setting-description"
+                              style="margin:0.25rem 0 0 0; font-size:0.9rem; color:#6b7280;">Show your custom business
+                              logo at the top header of all generated invoice PDFs and web previews.</p>
+                          </div>
+                          <label class="toggle-control" style="flex-shrink:0; margin-left:1rem;">
+                            <input type="checkbox" name="invoice_logo_enabled" <%=settings.invoice_logo_enabled
+                              ? 'checked' : '' %>>
+                            <span class="toggle-slider" aria-hidden="true"></span>
+                          </label>
+                        </div>
+
+                        <div class="setting-item"
+                          style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 0;">
+                          <div class="setting-text">
+                            <span class="setting-title" style="font-weight:500;">Display company name on invoices</span>
+                            <p class="setting-description"
+                              style="margin:0.25rem 0 0 0; font-size:0.9rem; color:#6b7280;">Include your registered
+                              business name alongside or beneath the main logo section.</p>
+                          </div>
+                          <label class="toggle-control" style="flex-shrink:0; margin-left:1rem;">
+                            <input type="checkbox" name="invoice_company_name_enabled"
+                              <%=settings.invoice_company_name_enabled !==0 ? 'checked' : '' %>>
+                            <span class="toggle-slider" aria-hidden="true"></span>
+                          </label>
+                        </div>
+                      </div>
+                    </fieldset>
+
+                    <br class="divider">
+                    <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.5rem;">
+                      <button type="submit" class="btn mt-3" style="padding:0.6rem 2rem;">Save Settings</button>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Team members section (commented out) -->
+                <!-- <div class="card">
+        <h3>Team members</h3>
+        <table class="compact" style="margin-bottom:18px;">
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th></th></tr></thead>
+          <tbody>
+            <% users.forEach(u => { %>
+              <tr>
+                <td><%= u.name %></td>
+                <td><%= u.email %></td>
+                <td><span class="badge badge-sent"><%= u.role %></span></td>
+                <td style="text-align:right;">
+                  <form method="POST" action="/settings/users/<%= u.id %>?_method=DELETE" onsubmit="return confirm('Remove this user?');">
+                    <button type="submit" class="btn btn-ghost btn-sm">Remove</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+
+        <h3 style="font-size:0.95rem;">Add a team member</h3>
+        <form method="POST" action="/settings/users">
+          <div class="field-row">
+            <div class="field">
+              <label>Name</label>
+              <input type="text" name="name" required>
+            </div>
+            <div class="field">
+              <label>Email</label>
+              <input type="email" name="email" required>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Password (min 8 chars)</label>
+              <input type="password" name="password" minlength="8" required>
+            </div>
+            <div class="field">
+              <label>Role</label>
+              <select name="role">
+                <option value="staff">Staff</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn">Add User</button>
+        </form>
+      </div> -->
+      </div>
+  </div>
+
+  <script>
+    const logoInput = document.getElementById('invoice_logo');
+    const logoDropzone = document.getElementById('logo-dropzone');
+    const logoPreview = document.getElementById('logo-preview');
+    const logoDropzoneContent = document.querySelector('.logo-dropzone-content');
+
+    function previewLogo(file) {
+      if (!file || !['image/png', 'image/jpeg'].includes(file.type)) return;
+      logoPreview.src = URL.createObjectURL(file);
+      logoPreview.hidden = false;
+      logoDropzoneContent.hidden = true;
+      logoDropzone.classList.add('has-preview');
+    }
+
+    logoInput.addEventListener('change', () => previewLogo(logoInput.files[0]));
+
+    ['dragenter', 'dragover'].forEach(eventName => logoDropzone.addEventListener(eventName, event => {
+      event.preventDefault();
+      logoDropzone.classList.add('is-dragging');
+    }));
+
+    ['dragleave', 'drop'].forEach(eventName => logoDropzone.addEventListener(eventName, event => {
+      event.preventDefault();
+      logoDropzone.classList.remove('is-dragging');
+    }));
+
+    logoDropzone.addEventListener('drop', event => {
+      const file = event.dataTransfer.files[0];
+      if (file) {
+        logoInput.files = event.dataTransfer.files;
+        previewLogo(file);
+      }
+    });
+  </script>
+</body>
+
+</html>

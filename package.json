@@ -1,0 +1,31 @@
+{
+  "name": "invoicing-app",
+  "version": "1.0.0",
+  "description": "Simple self-hosted invoicing system for small businesses",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node --watch server.js",
+    "dev": "nodemon server.js",
+    "seed": "node db/seed.js",
+    "seed:mock": "node db/seed-mock.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "method-override": "^3.0.0",
+    "multer": "^2.0.2",
+    "nodemailer": "^9.0.5",
+    "pdfkit": "^0.19.1"
+  },
+  "devDependencies": {
+    "connect-livereload": "^0.6.1",
+    "livereload": "^0.10.3",
+    "nodemon": "^3.1.14"
+  }
+}

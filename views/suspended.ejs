@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+  <style>
+    .suspended-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      padding: 32px 16px;
+    }
+    .suspended-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px 36px;
+      width: 480px;
+      max-width: 100%;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+  </style>
+</head>
+<body>
+  <div class="suspended-wrap">
+    <div class="suspended-card">
+      <div style="font-size:2.5rem; margin-bottom:12px;">⚠️</div>
+      <h1 style="margin-bottom:8px;">Account Suspended</h1>
+      <p class="text-soft" style="line-height:1.6; margin-bottom:24px;">
+        The organization workspace for <strong><%= orgName %></strong> has been temporarily suspended.
+        <br><br>
+        Please contact your account administrator or platform billing support to restore active status.
+      </p>
+      <a href="mailto:support@platform.com" class="btn">Contact Support</a>
+    </div>
+  </div>
+</body>
+</html>

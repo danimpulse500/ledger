@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+  <style>
+    .signup-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-dark);
+      padding: 32px 16px;
+    }
+    .signup-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 36px 40px;
+      width: 540px;
+      max-width: 100%;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+    }
+    .signup-card h1 {
+      text-align: center;
+      margin-bottom: 2px;
+    }
+    .signup-card .sub {
+      text-align: center;
+      color: var(--ink-soft);
+      font-size: 0.88rem;
+      margin-bottom: 22px;
+    }
+    .plan-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .plan-box {
+      border: 1px solid var(--border);
+      background: var(--neutral-bg);
+      border-radius: var(--radius);
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .plan-box:hover {
+      border-color: var(--accent);
+    }
+    .plan-box.selected {
+      border-color: var(--accent);
+      background: var(--surface);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    .plan-title {
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--ink);
+    }
+    .plan-cost {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin: 2px 0;
+    }
+    .plan-info {
+      font-size: 0.72rem;
+      color: var(--ink-soft);
+    }
+  </style>
+</head>
+<body>
+  <div class="signup-wrap">
+    <div class="signup-card">
+      <h1>Ledger</h1>
+      <div class="sub">Create your workspace &bull; 14-day free trial</div>
+
+      <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% } %>
+
+      <form method="POST" action="/signup">
+        <input type="hidden" name="plan" id="selectedPlanInput" value="<%= plan %>">
+
+        <label style="margin-bottom:6px;">Choose Subscription Plan</label>
+        <div class="plan-grid">
+          <div class="plan-box <%= plan === 'starter' ? 'selected' : '' %>" onclick="selectPlan('starter', this)">
+            <div class="plan-title">Starter</div>
+            <div class="plan-cost">$15<span style="font-size:0.72rem; color:var(--ink-soft)">/mo</span></div>
+            <div class="plan-info">Solo & Freelance</div>
+          </div>
+          <div class="plan-box <%= plan === 'pro' ? 'selected' : '' %>" onclick="selectPlan('pro', this)">
+            <div class="plan-title">Pro</div>
+            <div class="plan-cost">$49<span style="font-size:0.72rem; color:var(--ink-soft)">/mo</span></div>
+            <div class="plan-info">Growing Teams</div>
+          </div>
+          <div class="plan-box <%= plan === 'enterprise' ? 'selected' : '' %>" onclick="selectPlan('enterprise', this)">
+            <div class="plan-title">Enterprise</div>
+            <div class="plan-cost">$199<span style="font-size:0.72rem; color:var(--ink-soft)">/mo</span></div>
+            <div class="plan-info">Unlimited Scale</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="company_name">Company / Business Name</label>
+          <input type="text" id="company_name" name="company_name" value="<%= company_name %>" required placeholder="e.g. Apex Digital Ltd">
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" name="name" value="<%= name %>" required placeholder="Jane Doe">
+          </div>
+          <div class="field">
+            <label for="email">Work Email</label>
+            <input type="email" id="email" name="email" value="<%= email %>" required placeholder="jane@company.com">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password">Password (min 8 characters)</label>
+          <input type="password" id="password" name="password" required placeholder="••••••••">
+        </div>
+
+        <button type="submit" class="btn" style="width:100%; justify-content:center; padding:11px; margin-top:6px;">
+          Start 14-Day Free Trial &rarr;
+        </button>
+      </form>
+
+      <div style="text-align:center; margin-top:1.25rem; font-size:0.9rem; color:var(--ink-soft);">
+        Already have a workspace? <a href="/login" style="color:var(--accent); font-weight:600;">Log in</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function selectPlan(planName, el) {
+      document.getElementById('selectedPlanInput').value = planName;
+      document.querySelectorAll('.plan-box').forEach(box => box.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <div class="app-shell">
+    <%- include('../partials/sidebar') %>
+    <div class="main">
+      <div class="topbar no-print">
+        <div>
+          <h1><%= invoice.invoice_number %> <span class="badge badge-<%= invoice.status %>"><%= invoice.status %></span></h1>
+          <p class="text-soft"><%= invoice.client_name %></p>
+        </div>
+        <div class="actions">
+          <% if (invoice.status === 'draft') { %>
+            <form method="POST" action="/invoices/<%= invoice.id %>/status" style="display:inline;">
+              <input type="hidden" name="status" value="sent">
+              <button type="submit" class="btn btn-black">Publish & Mark Sent</button>
+            </form>
+          <% } %>
+          <!-- Status Dropdown Selector -->
+          <div class="action-dropdown" onclick="event.stopPropagation()">
+            <button type="button" class="btn status-dropdown-btn" onclick="toggleActionDropdown(event, this)">
+              <span><%= invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1) %></span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left:2px;">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="action-dropdown-menu">
+              <% ['draft','sent','paid','overdue','cancelled'].forEach(s => { %>
+                <form method="POST" action="/invoices/<%= invoice.id %>/status" style="display:block;">
+                  <input type="hidden" name="status" value="<%= s %>">
+                  <button type="submit" class="dropdown-item">
+                    <%= s.charAt(0).toUpperCase() + s.slice(1) %>
+                  </button>
+                </form>
+              <% }) %>
+            </div>
+          </div>
+
+          <!-- Action Icons (after status) -->
+          <button type="button" class="btn btn-expandable" onclick="openEmailModal()" aria-label="Send Email">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+            <span class="btn-label">Send Email</span>
+          </button>
+          <a href="/invoices/<%= invoice.id %>/pdf" target="_blank" class="btn btn-expandable" aria-label="Download PDF">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span class="btn-label">Download PDF</span>
+          </a>
+          <a href="/invoices/<%= invoice.id %>/edit" class="btn btn-expandable" aria-label="Edit Invoice">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            <span class="btn-label">Edit</span>
+          </a>
+          <form method="POST" action="/invoices/<%= invoice.id %>?_method=DELETE" onsubmit="return confirm('Delete this invoice? This cannot be undone.');" style="display:inline;">
+            <button type="submit" class="btn btn-expandable btn-expandable-danger" aria-label="Delete Invoice">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              <span class="btn-label">Delete</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <% if (typeof emailSent !== 'undefined' && emailSent) { %>
+        <div class="alert alert-success no-print">
+          <strong>Email Notification:</strong> <%= typeof msg !== 'undefined' && msg ? msg : 'Invoice email dispatched successfully with PDF attachment.' %>
+        </div>
+      <% } %>
+      <% if (typeof emailError !== 'undefined' && emailError && emailError.length > 0) { %>
+        <div class="alert alert-error no-print">
+          <strong>Email Alert:</strong> <%= emailError %>
+        </div>
+      <% } %>
+
+      <div class="invoice-show-container">
+        <!-- Left Panel: Invoice Sheet -->
+        <div class="invoice-left-panel">
+          <div class="invoice-doc">
+            <div class="inv-head">
+              <div>
+                <h1><%= settings.company_name %></h1>
+                <p class="text-soft" style="white-space:pre-line;"><%= settings.address %></p>
+                <p class="text-soft"><%= settings.email %> <%= settings.phone ? '· ' + settings.phone : '' %></p>
+              </div>
+              <div style="text-align:right;">
+                <h2 style="margin-bottom:2px;">Invoice</h2>
+                <div class="figure text-soft"><%= invoice.invoice_number %></div>
+              </div>
+            </div>
+
+            <div class="parties">
+              <div class="block">
+                <h4>Billed to</h4>
+                <div><strong><%= invoice.client_name %></strong></div>
+                <div class="text-soft" style="white-space:pre-line;"><%= invoice.client_address %></div>
+                <div class="text-soft"><%= invoice.client_email %></div>
+                <% if (invoice.client_tax_id) { %><div class="text-faint">Tax ID: <%= invoice.client_tax_id %></div><% } %>
+              </div>
+              <div class="block" style="text-align:right;">
+                <h4>Details</h4>
+                <div>Issue date: <span class="figure"><%= invoice.issue_date %></span></div>
+                <div>Due date: <span class="figure"><%= invoice.due_date %></span></div>
+              </div>
+            </div>
+
+            <table class="items">
+              <thead>
+                <tr><th>Description</th><th>Qty</th><th class="money">Unit Price</th><th>Discount</th><th class="money">Amount</th></tr>
+              </thead>
+              <tbody>
+                <% items.forEach(it => { %>
+                  <tr>
+                    <td><%= it.description %></td>
+                    <td class="figure"><%= it.quantity %></td>
+                    <td class="money"><%= currencySymbol %><%= it.unit_price.toFixed(2) %></td>
+                    <td class="figure"><%= it.tax_rate %>%</td>
+                    <td class="money"><%= currencySymbol %><%= it.line_total.toFixed(2) %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+
+            <div class="totals">
+              <div class="row"><span>Subtotal</span><span class="figure"><%= currencySymbol %><%= invoice.subtotal.toFixed(2) %></span></div>
+              <div class="row"><span>Discount</span><span class="figure"><%= currencySymbol %><%= invoice.tax_total.toFixed(2) %></span></div>
+              <div class="row grand"><span>Total</span><span class="figure"><%= currencySymbol %><%= invoice.total.toFixed(2) %></span></div>
+              <div class="row"><span>Paid</span><span class="figure"><%= currencySymbol %><%= invoice.amount_paid.toFixed(2) %></span></div>
+              <div class="row balance"><span>Balance due</span><span class="figure"><%= currencySymbol %><%= (invoice.total - invoice.amount_paid).toFixed(2) %></span></div>
+            </div>
+
+            <% if (invoice.notes) { %>
+              <hr class="divider">
+              <p class="text-soft"><%= invoice.notes %></p>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Right Panel: Stacked Management Cards -->
+        <div class="invoice-right-panel no-print">
+          <!-- Record Payment Card -->
+          <div class="card">
+            <h3>Record Payment</h3>
+            <form method="POST" action="/invoices/<%= invoice.id %>/payments">
+              <div class="field-row">
+                <div class="field">
+                  <label>Amount ($)</label>
+                  <input type="number" name="amount" step="0.01" min="0" value="<%= Math.max(0, invoice.total - invoice.amount_paid).toFixed(2) %>" required placeholder="0.00">
+                </div>
+                <div class="field">
+                  <label>Date</label>
+                  <input type="date" name="payment_date" value="<%= new Date().toISOString().slice(0,10) %>">
+                </div>
+              </div>
+              <div class="field">
+                <label>Method</label>
+                <input type="text" name="method" placeholder="Bank transfer, card, cash...">
+              </div>
+              <button type="submit" class="btn" style="width:100%;">Record Payment</button>
+            </form>
+
+            <% if (payments.length > 0) { %>
+              <hr class="divider">
+              <ul class="link-list">
+                <% payments.forEach(p => { %>
+                  <li style="display:flex; justify-content:space-between; align-items:center;">
+                    <span><span class="figure"><%= currencySymbol %><%= p.amount.toFixed(2) %></span> on <%= p.payment_date %> <span class="text-faint"><%= p.method %></span></span>
+                    <form method="POST" action="/invoices/<%= invoice.id %>/payments/<%= p.id %>?_method=DELETE" onsubmit="return confirm('Remove this payment?');">
+                      <button type="submit" class="btn btn-ghost btn-sm">Remove</button>
+                    </form>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- Email Invoice Modal -->
+  <div id="email-modal-overlay" class="modal-overlay" onclick="closeEmailModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Email Invoice</h3>
+        <button type="button" class="modal-close-btn" onclick="closeEmailModal()">&times;</button>
+      </div>
+      <form method="POST" action="/invoices/<%= invoice.id %>/send">
+        <div class="field">
+          <label>Recipient Email</label>
+          <input type="email" name="recipient_email" value="<%= invoice.client_email || 'daviddominic767@gmail.com' %>" required placeholder="client@example.com">
+        </div>
+        <div class="field">
+          <label>Custom Note (Optional)</label>
+          <textarea name="custom_note" placeholder="Add an optional message to your client..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" onclick="closeEmailModal()">Cancel</button>
+          <button type="submit" class="btn btn-pill-primary">Send Email with PDF</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function toggleActionDropdown(event, btn) {
+      event.stopPropagation();
+      const dropdown = btn.closest('.action-dropdown');
+      const wasActive = dropdown.classList.contains('active');
+      document.querySelectorAll('.action-dropdown.active').forEach(d => d.classList.remove('active'));
+      if (!wasActive) {
+        dropdown.classList.add('active');
+      }
+    }
+
+    function openEmailModal() {
+      document.getElementById('email-modal-overlay').classList.add('active');
+    }
+
+    function closeEmailModal(event) {
+      if (!event || event.target.id === 'email-modal-overlay' || event.target.classList.contains('modal-close-btn') || event.target.closest('.modal-close-btn')) {
+        document.getElementById('email-modal-overlay').classList.remove('active');
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.action-dropdown')) {
+        document.querySelectorAll('.action-dropdown.active').forEach(d => d.classList.remove('active'));
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeEmailModal();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+app = "your-invoicing-app-name"
+primary_region = "iad"  # pick the region closest to you; run `fly platform regions` to see options
+
+[build]
+
+[env]
+  PORT = "3000"
+  NODE_ENV = "production"
+  TRUST_PROXY = "true"  # Fly terminates HTTPS in front of your app
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+[mounts]
+  source = "invoicing_data"
+  destination = "/app/data"
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1

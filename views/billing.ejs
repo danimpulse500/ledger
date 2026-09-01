@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('partials/head') %>
+</head>
+
+<body>
+    <div class="app-shell">
+        <%- include('partials/sidebar') %>
+
+            <div class="main">
+                <!-- ====== PAGE HEADER ====== -->
+                <div class="page-heading">
+                    <div>
+                        <!-- <p class="eyebrow">Subscription & usage</p> -->
+                        <h1>Billing</h1>
+                        <p class="text-soft">Manage your plan, payment methods, and view past invoices.</p>
+                    </div>
+                    <a href="/billing/upgrade" class="btn btn-black">Upgrade plan</a>
+                </div>
+
+            <!-- ====== PLAN & USAGE SUMMARY ====== -->
+       
+                <!-- ====== PAYMENT METHODS ====== -->
+                <div class="card billing-payment-card mb-3">
+                    <div class="section-title">
+                        <div>
+                            <h3>Payment methods</h3>
+                            <p class="text-soft">Manage your credit cards and billing details.</p>
+                        </div>
+                        <button class="btn btn-ghost btn-sm" style="border: none !important;" onclick="addPaymentMethod()">+ Add method</button>
+                    </div>
+
+                    <% if (paymentMethods.length===0) { %>
+                        <div class="empty-notice">
+                            <p class="text-soft">No payment methods on file. <a href="/billing/payment">Add one</a> to
+                                avoid service interruption.</p>
+                        </div>
+                        <% } else { %>
+                            <div class="payment-methods-list">
+                                <% paymentMethods.forEach(method=> { %>
+                                    <div class="payment-method-item">
+                                        <div class="payment-method-icon">
+                                            <span class="card-icon <%= method.brand %>"></span>
+                                        </div>
+                                        <div class="payment-method-details">
+                                            <strong>
+                                                <%= method.brand %> ending in <%= method.last4 %>
+                                            </strong>
+                                            <span class="text-soft">Expires <%= method.expiry %></span>
+                                            <% if (method.isDefault) { %>
+                                                <span class="badge badge-default">Default</span>
+                                                <% } %>
+                                        </div>
+                                        <div class="payment-method-actions">
+                                            <button class="btn btn-ghost btn-sm"
+                                                onclick="editPaymentMethod('<%= method.id %>')">Edit</button>
+                                            <button class="btn btn-ghost btn-sm text-danger"
+                                                onclick="deletePaymentMethod('<%= method.id %>')">Remove</button>
+                                        </div>
+                                    </div>
+                                    <% }) %>
+                            </div>
+                            <% } %>
+
+                                <div class="billing-address">
+                                    <h4>Billing address</h4>
+                                    <p>
+                                        <%= billingAddress %>
+                                    </p>
+                                    <button class="btn" onclick="editBillingAddress()">Update
+                                        address</button>
+                                </div>
+                </div>
+
+                <!-- ====== INVOICE HISTORY ====== -->
+                <!-- <div class="card billing-invoice-history">
+                    <div class="section-title">
+                        <div>
+                            <h3>Invoice history</h3>
+                            <p class="text-soft">All past charges and receipts.</p>
+                        </div>
+                        <a href="/billing/invoices" class="btn btn-ghost btn-sm">View all</a>
+                    </div>
+
+                    <% if (invoiceHistory.length===0) { %>
+                        <div class="empty-notice">
+                            <p class="text-soft">No invoices yet.</p>
+                        </div>
+                        <% } else { %>
+                            <table class="invoxa-table">
+                                <thead>
+                                    <tr>
+                                        <th>Invoice</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% invoiceHistory.forEach(inv=> { %>
+                                        <tr>
+                                            <td><strong>
+                                                    <%= inv.number %>
+                                                </strong></td>
+                                            <td class="text-soft">
+                                                <%= inv.date %>
+                                            </td>
+                                            <td class="money">
+                                                <%= currencySymbol %>
+                                                    <%= inv.amount.toFixed(2) %>
+                                            </td>
+                                            <td><span class="status-pill status-<%= inv.status %>">
+                                                    <%= inv.status %>
+                                                </span></td>
+                                            <td style="text-align:right;">
+                                                <a href="/billing/invoices/<%= inv.id %>"
+                                                    class="btn btn-ghost btn-sm">Download PDF</a>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                </tbody>
+                            </table>
+                            <% } %>
+                </div> -->
+
+                <!-- ====== DANGER ZONE (optional) ====== -->
+                <div class="card" style="margin-top: 10px;">
+                    <div class="section-title">
+                        <div>
+                            <h3>Danger zone</h3>
+                            <p class="text-soft">Cancel your subscription and delete all billing data.</p>
+                        </div>
+                    </div>
+                    <button class="btn" style="background-color: #C53030; color: white;" onclick="confirmCancel()">Cancel subscription</button>
+                </div>
+            </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.usage-bar-fill').forEach(bar => {
+            bar.style.width = `${bar.dataset.usagePercentage}%`;
+        });
+
+        // Placeholder functions — replace with actual logic
+        function addPaymentMethod() {
+            alert('Add payment method flow');
+        }
+        function editPaymentMethod(id) {
+            alert('Edit payment method ' + id);
+        }
+        function deletePaymentMethod(id) {
+            if (confirm('Remove this payment method?')) {
+                alert('Deleted ' + id);
+            }
+        }
+        function editBillingAddress() {
+            alert('Edit billing address');
+        }
+        function confirmCancel() {
+            if (confirm('Are you sure you want to cancel your subscription? This action cannot be undone.')) {
+                alert('Subscription cancelled');
+            }
+        }
+    </script>
+
+    <style>
+        /* Quick inline styles for the new billing components – adjust to match your existing design system */
+        .billing-plan-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .billing-plan-card {
+            padding: 1.5rem;
+        }
+
+        .billing-plan-card-accent {
+            border-left: 4px solid #2563eb;
+            background: #f8fafc;
+        }
+
+        .billing-plan-details {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+
+        .usage-bar {
+            background: #e5e7eb;
+            border-radius: 99px;
+            height: 6px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .usage-bar-fill {
+            background: #2563eb;
+            height: 100%;
+            border-radius: 99px;
+        }
+
+        .payment-methods-list {
+            margin: 1rem 0;
+        }
+
+        .payment-method-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .payment-method-icon {
+            margin-right: 1rem;
+        }
+
+        .card-icon {
+            display: inline-block;
+            width: 40px;
+            height: 28px;
+            background: #d1d5db;
+            border-radius: 4px
+        }
+
+        .payment-method-details {
+            flex: 1;
+        }
+
+        .payment-method-details strong {
+            display: block;
+        }
+
+        .payment-method-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .badge-default {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 0.2rem 0.6rem;
+            border-radius: 99px;
+            font-size: 0.75rem;
+        }
+
+        .billing-address {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .billing-danger-card {
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+        }
+
+        .btn-danger:hover {
+            background: #b02a37;
+        }
+
+        .text-danger {
+            color: #dc3545;
+        }
+
+        /* reuse your existing .btn-ghost, .btn-sm, etc. */
+    </style>
+</body>
+
+</html>

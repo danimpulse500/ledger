@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+  <style>
+    .onboarding-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      padding: 32px 16px;
+    }
+    .onboarding-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 40px;
+      width: 620px;
+      max-width: 100%;
+      box-shadow: var(--shadow);
+    }
+    .onboarding-card h1 {
+      margin-bottom: 4px;
+    }
+    .onboarding-card .sub {
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+      margin-bottom: 24px;
+    }
+    .stepper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .step-node {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--neutral-bg);
+      color: var(--ink-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.82rem;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .step-node.active .step-num {
+      background: var(--accent);
+      color: #fff;
+    }
+    .step-node.active {
+      color: var(--ink);
+    }
+    .step-node.completed .step-num {
+      background: var(--success);
+      color: #fff;
+    }
+    .actions-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .action-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+  <div class="onboarding-wrap">
+    <div class="onboarding-card">
+      <h1>Welcome to <%= currentOrg ? currentOrg.name : 'Your Workspace' %></h1>
+      <div class="sub">Set up your business preferences in 3 quick steps</div>
+
+      <!-- Stepper -->
+      <div class="stepper">
+        <div class="step-node <%= step >= 1 ? (step > 1 ? 'completed' : 'active') : '' %>">
+          <div class="step-num">1</div>
+          <span>Branding</span>
+        </div>
+        <div class="step-node <%= step >= 2 ? (step > 2 ? 'completed' : 'active') : '' %>">
+          <div class="step-num">2</div>
+          <span>Catalog</span>
+        </div>
+        <div class="step-node <%= step >= 3 ? 'active' : '' %>">
+          <div class="step-num">3</div>
+          <span>Ready</span>
+        </div>
+      </div>
+
+      <% if (success) { %>
+        <div class="alert alert-success"><%= success %></div>
+      <% } %>
+
+      <!-- Step 1: Business Details & Currency -->
+      <% if (step === 1) { %>
+        <form action="/onboarding/settings" method="POST">
+          <h3 style="margin-bottom:16px;">Business Settings & Currency</h3>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="currency_symbol">Currency Symbol</label>
+              <select id="currency_symbol" name="currency_symbol">
+                <option value="$" <%= settings.currency_symbol === '$' ? 'selected' : '' %>>$ (USD / CAD / AUD)</option>
+                <option value="€" <%= settings.currency_symbol === '€' ? 'selected' : '' %>>€ (EUR)</option>
+                <option value="£" <%= settings.currency_symbol === '£' ? 'selected' : '' %>>£ (GBP)</option>
+                <option value="₦" <%= settings.currency_symbol === '₦' ? 'selected' : '' %>>₦ (NGN)</option>
+                <option value="KSh" <%= settings.currency_symbol === 'KSh' ? 'selected' : '' %>>KSh (KES)</option>
+                <option value="R" <%= settings.currency_symbol === 'R' ? 'selected' : '' %>>R (ZAR)</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="invoice_prefix">Invoice Prefix</label>
+              <input type="text" id="invoice_prefix" name="invoice_prefix" value="<%= settings.invoice_prefix || 'INV-' %>" placeholder="INV-">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="address">Business Address</label>
+            <input type="text" id="address" name="address" value="<%= settings.address || '' %>" placeholder="123 Business St, Suite 400, New York, NY">
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="phone">Phone Number</label>
+              <input type="text" id="phone" name="phone" value="<%= settings.phone || '' %>" placeholder="+1 (555) 000-1234">
+            </div>
+
+            <div class="field">
+              <label for="tax_id">Tax / VAT ID (Optional)</label>
+              <input type="text" id="tax_id" name="tax_id" value="<%= settings.tax_id || '' %>" placeholder="US123456789">
+            </div>
+          </div>
+
+          <div class="actions-bar">
+            <a href="/" class="btn btn-ghost">Skip Setup</a>
+            <button type="submit" class="btn">Save & Continue &rarr;</button>
+          </div>
+        </form>
+
+      <!-- Step 2: Clients & Services -->
+      <% } else if (step === 2) { %>
+        <div>
+          <h3 style="margin-bottom:6px;">Add Clients & Products</h3>
+          <p class="text-soft" style="font-size:0.88rem; margin-bottom:20px;">Populate your catalog to quickly generate invoices.</p>
+
+          <div class="action-box">
+            <div>
+              <strong style="font-size:0.95rem;">Client Directory</strong>
+              <div class="text-soft" style="font-size:0.8rem;"><%= clientCount %> client(s) added</div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline" data-modal-target="modal-client">+ Add Client</button>
+          </div>
+
+          <div class="action-box">
+            <div>
+              <strong style="font-size:0.95rem;">Products & Services Catalog</strong>
+              <div class="text-soft" style="font-size:0.8rem;"><%= productCount %> product(s) added</div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline" data-modal-target="modal-product">+ Add Product/Service</button>
+          </div>
+
+          <div class="actions-bar">
+            <a href="/onboarding?step=1" class="btn btn-ghost">&larr; Back</a>
+            <a href="/onboarding?step=3" class="btn">Next Step &rarr;</a>
+          </div>
+        </div>
+
+      <!-- Step 3: First Invoice -->
+      <% } else { %>
+        <div style="text-align:center; padding:16px 0;">
+          <h2 style="margin-bottom:8px;">Workspace Ready!</h2>
+          <p class="text-soft" style="font-size:0.92rem; margin-bottom:24px;">
+            Your business settings and preferences are saved. You can now issue your first invoice or explore your control dashboard.
+          </p>
+
+          <div style="display:flex; gap:12px; justify-content:center;">
+            <button type="button" class="btn" style="padding:10px 20px;" data-modal-target="modal-invoice">Create First Invoice &rarr;</button>
+            <a href="/" class="btn btn-outline" style="padding:10px 20px;">Go to Dashboard</a>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>

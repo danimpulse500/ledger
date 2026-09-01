@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <div class="app-shell">
+    <%- include('../partials/sidebar') %>
+    <div class="main">
+      <div class="topbar">
+        <h1>Expenses</h1>
+        <div class="actions">
+          <button type="button" class="btn" data-modal-target="modal-expense">+ New Expense</button>
+        </div>
+      </div>
+
+      <div class="grid grid-3" style="margin-bottom:16px;">
+        <div class="card stat-card-invoxa">
+          <div class="stat-top">
+            <div class="stat-icon-chip">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </div>
+            <div class="stat-number figure"><%= currencySymbol %><%= total.toFixed(2) %></div>
+          </div>
+          <div class="stat-bottom">Total shown</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <form method="GET" class="filter-bar">
+          <select name="category" onchange="this.form.submit()">
+            <option value="">All categories</option>
+            <% categories.forEach(c => { %>
+              <option value="<%= c %>" <%= category === c ? 'selected' : '' %>><%= c %></option>
+            <% }) %>
+          </select>
+        </form>
+        <hr class="divider">
+
+        <% if (expenses.length === 0) { %>
+          <div class="empty-state">
+            <h3>No expenses recorded</h3>
+            <p>Track business costs to see accurate profit &amp; loss in Reports.</p>
+            <button type="button" class="btn" data-modal-target="modal-expense">+ New Expense</button>
+          </div>
+        <% } else { %>
+          <table>
+            <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Vendor</th><th class="money">Amount</th><th></th></tr></thead>
+            <tbody>
+              <% expenses.forEach(e => { %>
+                <tr>
+                  <td><%= e.expense_date %></td>
+                  <td><%= e.description %></td>
+                  <td><span class="badge badge-draft"><%= e.category %></span></td>
+                  <td class="text-soft"><%= e.vendor %></td>
+                  <td class="money"><%= currencySymbol %><%= e.amount.toFixed(2) %></td>
+                  <td class="actions-cell" onclick="event.stopPropagation()">
+                    <div class="action-dropdown">
+                      <button type="button" class="action-dropdown-btn" onclick="toggleActionDropdown(event, this)" title="Actions">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="1.2"></circle>
+                          <circle cx="12" cy="5" r="1.2"></circle>
+                          <circle cx="12" cy="19" r="1.2"></circle>
+                        </svg>
+                      </button>
+                      <div class="action-dropdown-menu">
+                        <a href="/expenses/<%= e.id %>/edit">Edit Expense</a>
+                        <form method="POST" action="/expenses/<%= e.id %>?_method=DELETE" style="display:block;" onsubmit="return confirm('Delete this expense?');">
+                          <button type="submit" class="text-danger">Delete Expense</button>
+                        </form>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  <script>
+    function toggleActionDropdown(event, btn) {
+      event.stopPropagation();
+      const dropdown = btn.closest('.action-dropdown');
+      const wasActive = dropdown.classList.contains('active');
+      document.querySelectorAll('.action-dropdown.active').forEach(d => d.classList.remove('active'));
+      if (!wasActive) {
+        dropdown.classList.add('active');
+      }
+    }
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.action-dropdown')) {
+        document.querySelectorAll('.action-dropdown.active').forEach(d => d.classList.remove('active'));
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <div class="app-shell">
+    <%- include('../partials/sidebar') %>
+    <div class="main">
+      <h1><%= title %></h1>
+
+      <% if (errors) { %>
+        <div class="alert alert-error"><%= errors.join(' ') %></div>
+      <% } %>
+
+      <form method="POST" action="<%= invoice.id ? '/invoices/' + invoice.id + '?_method=PUT' : '/invoices' %>" id="invoice-form">
+        <div class="card">
+          <div class="field-row">
+            <div class="field">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                <label for="client_id" style="margin:0;">Client *</label>
+                <button type="button" class="btn btn-ghost btn-sm" data-modal-target="modal-client" style="padding:2px 8px; font-size:0.75rem;">+ Add New Client</button>
+              </div>
+              <select id="client_id" name="client_id" required>
+                <option value="">Select a client...</option>
+                <% clients.forEach(c => { %>
+                  <option value="<%= c.id %>" <%= (invoice.client_id == c.id || (typeof preselectClientId !== 'undefined' && preselectClientId == c.id)) ? 'selected' : '' %>><%= c.name %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="field">
+              <label for="status">Status</label>
+              <select id="status" name="status">
+                <% ['draft','sent','paid','overdue','cancelled'].forEach(s => { %>
+                  <option value="<%= s %>" <%= invoice.status === s ? 'selected' : '' %>><%= s.charAt(0).toUpperCase() + s.slice(1) %></option>
+                <% }) %>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="issue_date">Issue date *</label>
+              <input type="date" id="issue_date" name="issue_date" value="<%= invoice.issue_date || '' %>" required>
+            </div>
+            <div class="field">
+              <label for="due_date">Due date *</label>
+              <input type="date" id="due_date" name="due_date" value="<%= invoice.due_date || '' %>" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">
+            <h3>Line items</h3>
+            <div style="display:flex; gap:8px;">
+              <button type="button" class="btn btn-outline btn-sm" data-modal-target="modal-product">+ New Product</button>
+              <button type="button" class="btn btn-outline btn-sm" id="add-item">+ Add line</button>
+            </div>
+          </div>
+          <table id="items-table">
+            <thead>
+              <tr>
+                <th style="width:26%;">Product/Service</th>
+                <th style="width:26%;">Description</th>
+                <th style="width:10%;">Qty</th>
+                <th style="width:14%;">Unit Price</th>
+                <th style="width:10%;">Discount %</th>
+                <th style="width:12%;" class="money">Line Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="items-body"></tbody>
+          </table>
+
+          <div class="invoice-doc" style="border:none; padding:0; margin-top:10px;">
+            <div class="totals">
+              <div class="row"><span>Subtotal</span><span class="figure" id="disp-subtotal">$0.00</span></div>
+              <div class="row"><span>Discount</span><span class="figure" id="disp-tax">$0.00</span></div>
+              <div class="row grand"><span>Total</span><span class="figure" id="disp-total">$0.00</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="field">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" placeholder="Payment terms, thank-you note, etc."><%= invoice.notes || '' %></textarea>
+          </div>
+        </div>
+
+        <div class="actions" style="margin-bottom:40px;">
+          <button type="submit" class="btn">Save Invoice</button>
+          <a href="/invoices" class="btn btn-ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Row template -->
+  <template id="row-template">
+    <tr class="item-row">
+      <td>
+        <select class="f-product">
+          <option value="">Custom item...</option>
+          <% products.forEach(p => { %>
+            <option value="<%= p.id %>" data-desc="<%= p.description %>" data-price="<%= p.unit_price %>" data-discount="<%= p.tax_rate %>"><%= p.name %></option>
+          <% }) %>
+        </select>
+        <input type="hidden" class="f-product-id" name="">
+      </td>
+      <td><input type="text" class="f-description" required></td>
+      <td><input type="number" class="f-quantity" min="0" step="0.01" value="1"></td>
+      <td><input type="number" class="f-unit-price" min="0" step="0.01" value="0"></td>
+      <td><input type="number" class="f-tax-rate" min="0" step="0.01" value="<%= defaultDiscountRate || 0 %>"></td>
+      <td class="money line-total-cell">$0.00</td>
+      <td><button type="button" class="btn btn-ghost btn-sm remove-row">&times;</button></td>
+    </tr>
+  </template>
+
+  <script>
+    const CURRENCY = '<%= currencySymbol %>';
+    const itemsBody = document.getElementById('items-body');
+    const rowTemplate = document.getElementById('row-template');
+    let rowIndex = 0;
+
+    // Existing items passed from the server (for edit mode)
+    const existingItems = <%- JSON.stringify(items || []) %>;
+
+    function addRow(data) {
+      const clone = rowTemplate.content.cloneNode(true);
+      const tr = clone.querySelector('.item-row');
+      const idx = rowIndex++;
+
+      const productSel = clone.querySelector('.f-product');
+      const productIdInput = clone.querySelector('.f-product-id');
+      const descInput = clone.querySelector('.f-description');
+      const qtyInput = clone.querySelector('.f-quantity');
+      const priceInput = clone.querySelector('.f-unit-price');
+      const taxInput = clone.querySelector('.f-tax-rate');
+
+      productSel.name = `items[${idx}][product_id_select]`;
+      productIdInput.name = `items[${idx}][product_id]`;
+      descInput.name = `items[${idx}][description]`;
+      qtyInput.name = `items[${idx}][quantity]`;
+      priceInput.name = `items[${idx}][unit_price]`;
+      taxInput.name = `items[${idx}][tax_rate]`;
+
+      if (data) {
+        if (data.product_id) {
+          productSel.value = data.product_id;
+          productIdInput.value = data.product_id;
+        }
+        descInput.value = data.description || '';
+        qtyInput.value = data.quantity ?? 1;
+        priceInput.value = data.unit_price ?? 0;
+        taxInput.value = data.tax_rate ?? 0;
+      }
+
+      productSel.addEventListener('change', () => {
+        const opt = productSel.options[productSel.selectedIndex];
+        if (opt.value) {
+          productIdInput.value = opt.value;
+          if (!descInput.value) descInput.value = opt.textContent + (opt.dataset.desc ? ' — ' + opt.dataset.desc : '');
+          priceInput.value = opt.dataset.price || 0;
+          taxInput.value = opt.dataset.discount || 0;
+        } else {
+          productIdInput.value = '';
+        }
+        recalc();
+      });
+
+      [qtyInput, priceInput, taxInput].forEach(inp => inp.addEventListener('input', recalc));
+      clone.querySelector('.remove-row').addEventListener('click', () => { tr.remove(); recalc(); });
+
+      itemsBody.appendChild(clone);
+      recalc();
+    }
+
+    function recalc() {
+      let subtotal = 0, taxTotal = 0;
+      itemsBody.querySelectorAll('.item-row').forEach(row => {
+        const qty = parseFloat(row.querySelector('.f-quantity').value) || 0;
+        const price = parseFloat(row.querySelector('.f-unit-price').value) || 0;
+        const tax = parseFloat(row.querySelector('.f-tax-rate').value) || 0;
+        const lineSub = qty * price;
+        const lineDiscount = lineSub * (tax / 100);
+        row.querySelector('.line-total-cell').textContent = CURRENCY + (lineSub - lineDiscount).toFixed(2);
+        subtotal += lineSub;
+        taxTotal += lineDiscount;
+      });
+      document.getElementById('disp-subtotal').textContent = CURRENCY + subtotal.toFixed(2);
+      document.getElementById('disp-tax').textContent = CURRENCY + taxTotal.toFixed(2);
+      document.getElementById('disp-total').textContent = CURRENCY + (subtotal - taxTotal).toFixed(2);
+    }
+
+    document.getElementById('add-item').addEventListener('click', () => addRow());
+
+    if (existingItems.length > 0) {
+      existingItems.forEach(it => addRow(it));
+    } else {
+      addRow();
+    }
+  </script>
+</body>
+</html>
