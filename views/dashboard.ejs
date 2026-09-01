@@ -3,87 +3,77 @@
 <head>
   <%- include('partials/head') %>
 </head>
-<body>
-  <div class="app-shell">
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+  <div class="flex h-screen w-full overflow-hidden bg-slate-50">
     <%- include('partials/sidebar') %>
     
-    <div class="main">
+    <div class="flex-1 p-8 max-w-7xl h-screen overflow-y-auto">
 
       <!-- Top Navigation & Search Bar -->
-      <div class="topbar-invoxa">
-        <div class="search-box">
-          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <div class="flex justify-between items-center mb-6 gap-4 flex-wrap">
+        <div class="relative w-full max-w-sm">
+          <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input type="text" id="dashboard-search" placeholder="Search invoices, clients, products..." onkeyup="filterDashboardTables(this.value)">
+          <input type="text" id="dashboard-search" placeholder="Search invoices, clients, products..." onkeyup="filterDashboardTables(this.value)" class="w-full pl-10 pr-4 py-2 rounded-full border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:border-slate-400">
         </div>
 
-        <div class="header-actions">
-          <button type="button" class="btn btn-pill-primary" data-modal-target="modal-invoice">
+        <div class="flex items-center gap-3">
+          <button type="button" class="inline-flex items-center gap-1.5 bg-slate-900 text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-slate-800 transition-colors border-0 cursor-pointer" data-modal-target="<%= (typeof isBillingActive !== 'undefined' && isBillingActive) ? 'modal-invoice' : 'modal-paystack-billing' %>">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
             New Invoice
           </button>
+          
           <!-- Quick Add Dropdown -->
-          <div class="action-dropdown p-3 py-3 text-15" onclick="event.stopPropagation()">
-            <button type="button" class="btn btn-pill-outline" onclick="toggleActionDropdown(event, this)">
+          <div class="relative inline-block" onclick="event.stopPropagation()">
+            <button type="button" class="inline-flex items-center gap-1.5 bg-white text-slate-700 border border-slate-200 rounded-full px-4 py-2 text-sm font-semibold hover:bg-slate-50 transition-colors cursor-pointer" onclick="toggleActionDropdown(event, this)">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
               Quick Add
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left:2px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="ml-0.5">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </button>
-            <div class="action-dropdown-menu">
-              <button type="button" class="dropdown-item" onclick="closeAllDropdowns(); openModal('modal-client');">
-                <!-- <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;flex-shrink:0;">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="8.5" cy="7" r="4"></circle>
-                  <line x1="20" y1="8" x2="20" y2="14"></line>
-                  <line x1="17" y1="11" x2="23" y2="11"></line>
-                </svg> -->
-                 Client
-              </button>
-              <button type="button" class="dropdown-item" onclick="closeAllDropdowns(); openModal('modal-product');">
-                <!-- <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;flex-shrink:0;">
-                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                  <line x1="8" y1="21" x2="16" y2="21"></line>
-                  <line x1="12" y1="17" x2="12" y2="21"></line>
-                </svg> -->
-                 Product
-              </button>
-              <button type="button" class="dropdown-item" onclick="closeAllDropdowns(); openModal('modal-expense');">
-                <!-- <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;flex-shrink:0;">
-                  <line x1="12" y1="1" x2="12" y2="23"></line>
-                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                </svg> -->
-                 Expense
-              </button>
+            <div class="action-dropdown-menu absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 min-w-[160px] py-1">
+              <button type="button" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors bg-transparent border-0 cursor-pointer" onclick="closeAllDropdowns(); openModal('modal-client');">Client</button>
+              <button type="button" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors bg-transparent border-0 cursor-pointer" onclick="closeAllDropdowns(); openModal('modal-product');">Product</button>
+              <button type="button" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors bg-transparent border-0 cursor-pointer" onclick="closeAllDropdowns(); openModal('modal-expense');">Expense</button>
             </div>
           </div>
-          <!-- <button class="icon-btn-pill" title="Notifications">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+
+          <!-- Dark Mode Toggle Button -->
+          <button type="button" onclick="toggleDarkMode()" class="w-9 h-9 rounded-full border border-slate-200 bg-white text-slate-700 flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors shadow-xs" title="Toggle dark mode" aria-label="Toggle dark mode">
+            <!-- Sun icon (shown when in dark mode) -->
+            <svg class="theme-icon-sun hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
             </svg>
-            <% if (stats.overdue_count > 0) { %><span class="notification-dot"></span><% } %>
+            <!-- Moon icon (shown when in light mode) -->
+            <svg class="theme-icon-moon block" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
           </button>
-          <div class="user-chip">
-            <div class="chip-avatar"><%= currentUser.name.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase() %></div>
-          </div> -->
         </div>
       </div>
 
       <!-- 4 Stat Cards Row -->
-      <div class="grid grid-4 stat-grid">
-        <div class="card stat-card-invoxa">
-          <div class="stat-top">
-            <div class="stat-icon-chip">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+          <div class="flex justify-between items-start mb-3">
+            <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
@@ -91,14 +81,14 @@
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
               </svg>
             </div>
-            <div class="stat-number figure"><%= stats.client_count || 0 %></div>
+            <div class="text-2xl font-bold font-mono tracking-tight text-slate-900"><%= stats.client_count || 0 %></div>
           </div>
-          <div class="stat-bottom">Total Clients</div>
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Total Clients</div>
         </div>
 
-        <div class="card stat-card-invoxa">
-          <div class="stat-top">
-            <div class="stat-icon-chip">
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+          <div class="flex justify-between items-start mb-3">
+            <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
                 <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
@@ -106,44 +96,44 @@
                 <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
               </svg>
             </div>
-            <div class="stat-number figure"><%= stats.active_count || 0 %></div>
+            <div class="text-2xl font-bold font-mono tracking-tight text-slate-900"><%= stats.active_count || 0 %></div>
           </div>
-          <div class="stat-bottom">Active Invoices</div>
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Active Invoices</div>
         </div>
 
-        <div class="card stat-card-invoxa">
-          <div class="stat-top">
-            <div class="stat-icon-chip">
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+          <div class="flex justify-between items-start mb-3">
+            <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>
               </svg>
             </div>
-            <div class="stat-number figure"><%= currencySymbol %><%= stats.revenue_this_month.toFixed(2) %></div>
+            <div class="text-2xl font-bold font-mono tracking-tight text-slate-900"><%= currencySymbol %><%= stats.revenue_this_month.toFixed(2) %></div>
           </div>
-          <div class="stat-bottom">Revenue This Month</div>
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Revenue This Month</div>
         </div>
 
-        <div class="card stat-card-invoxa">
-          <div class="stat-top">
-            <div class="stat-icon-chip">
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+          <div class="flex justify-between items-start mb-3">
+            <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="8" x2="12" y2="12"></line>
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
               </svg>
             </div>
-            <div class="stat-number figure <%= stats.overdue_count > 0 ? 'text-danger' : '' %>"><%= stats.overdue_count || 0 %></div>
+            <div class="text-2xl font-bold font-mono tracking-tight <%= stats.overdue_count > 0 ? 'text-red-500' : 'text-slate-900' %>"><%= stats.overdue_count || 0 %></div>
           </div>
-          <div class="stat-bottom">Pending Reviews</div>
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Pending Reviews</div>
         </div>
       </div>
 
       <!-- Section: Continue Working (Outstanding) -->
-      <div class="card invoxa-section-card">
-        <div class="section-title">
-          <h3>Continue Working</h3>
-          <a href="/invoices?status=overdue" class="section-link">
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold text-slate-900 m-0">Continue Working</h3>
+          <a href="/invoices?status=overdue" class="inline-flex items-center gap-1 text-sm font-semibold text-slate-700 hover:text-slate-900 no-underline">
             View overdue
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -153,40 +143,40 @@
         </div>
 
         <% if (outstanding.length === 0) { %>
-          <div class="empty-notice">
-            <div class="empty-icon">
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <div class="flex flex-col items-center justify-center py-8 text-center gap-2">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-1">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                 <polyline points="9 12 11 14 15 10"/>
               </svg>
             </div>
-            <p class="text-soft">No outstanding invoices requiring immediate action. Nice work!</p>
+            <p class="text-slate-500 text-sm m-0">No outstanding invoices requiring immediate action. Nice work!</p>
           </div>
         <% } else { %>
-          <table class="invoxa-table" id="table-outstanding">
+          <table class="w-full border-collapse text-sm" id="table-outstanding">
             <thead>
-              <tr>
-                <th style="width: 50px;">No</th>
-                <th>Invoice</th>
-                <th>Client</th>
-                <th>Due Date</th>
-                <th>Status</th>
-                <th class="money">Balance</th>
+              <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
+                <th class="py-2.5 px-3 w-[50px]">No</th>
+                <th class="py-2.5 px-3">Invoice</th>
+                <th class="py-2.5 px-3">Client</th>
+                <th class="py-2.5 px-3">Due Date</th>
+                <th class="py-2.5 px-3">Status</th>
+                <th class="py-2.5 px-3 font-mono text-right">Balance</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-slate-100">
               <% outstanding.forEach((inv, index) => { %>
-                <tr class="clickable-row" onclick="window.location='/invoices/<%= inv.id %>'">
-                  <td class="num-col"><%= String(index + 1).padStart(2, '0') %></td>
-                  <td><strong class="figure"><%= inv.invoice_number %></strong></td>
-                  <td><%= inv.client_name %></td>
-                  <td class="text-soft"><%= inv.due_date %></td>
-                  <td>
+                <tr class="hover:bg-slate-50 cursor-pointer transition-colors" onclick="window.location='/invoices/<%= inv.id %>'">
+                  <td class="py-3 px-3 text-slate-400 font-mono text-xs"><%= String(index + 1).padStart(2, '0') %></td>
+                  <td class="py-3 px-3 font-semibold font-mono text-slate-900"><%= inv.invoice_number %></td>
+                  <td class="py-3 px-3 text-slate-800"><%= inv.client_name %></td>
+                  <td class="py-3 px-3 text-slate-500"><%= inv.due_date %></td>
+                  <td class="py-3 px-3">
                     <span class="status-pill status-<%= inv.status %>">
                       <%= inv.status %>
                     </span>
                   </td>
-                  <td class="money"><%= currencySymbol %><%= (inv.total - inv.amount_paid).toFixed(2) %></td>
+                  <td class="py-3 px-3 font-mono text-right font-semibold text-slate-900"><%= currencySymbol %><%= (inv.total - inv.amount_paid).toFixed(2) %></td>
                 </tr>
               <% }) %>
             </tbody>
@@ -195,10 +185,10 @@
       </div>
 
       <!-- Section: Recent Invoices -->
-      <div class="card invoxa-section-card" style="margin-top:20px;">
-        <div class="section-title">
-          <h3>Recent Invoices</h3>
-          <a href="/invoices" class="section-link">
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold text-slate-900 m-0">Recent Invoices</h3>
+          <a href="/invoices" class="inline-flex items-center gap-1 text-sm font-semibold text-slate-700 hover:text-slate-900 no-underline">
             View all
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -208,42 +198,42 @@
         </div>
 
         <% if (recentInvoices.length === 0) { %>
-          <div class="empty-notice">
-            <div class="empty-icon">
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <div class="flex flex-col items-center justify-center py-8 text-center gap-2">
+            <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mb-1">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                 <polyline points="14 2 14 8 20 8"/>
                 <line x1="12" y1="18" x2="12" y2="12"/>
                 <line x1="9" y1="15" x2="15" y2="15"/>
               </svg>
             </div>
-            <p class="text-soft">No invoices created yet. <a href="#" data-modal-target="modal-invoice">Create your first invoice</a>.</p>
+            <p class="text-slate-500 text-sm m-0">No invoices created yet. <a href="#" data-modal-target="modal-invoice" class="text-slate-900 font-semibold underline">Create your first invoice</a>.</p>
           </div>
         <% } else { %>
-          <table class="invoxa-table" id="table-recent">
+          <table class="w-full border-collapse text-sm" id="table-recent">
             <thead>
-              <tr>
-                <th style="width: 50px;">No</th>
-                <th>Invoice</th>
-                <th>Client</th>
-                <th>Issued Date</th>
-                <th>Status</th>
-                <th class="money">Total Amount</th>
+              <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
+                <th class="py-2.5 px-3 w-[50px]">No</th>
+                <th class="py-2.5 px-3">Invoice</th>
+                <th class="py-2.5 px-3">Client</th>
+                <th class="py-2.5 px-3">Issued Date</th>
+                <th class="py-2.5 px-3">Status</th>
+                <th class="py-2.5 px-3 font-mono text-right">Total Amount</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-slate-100">
               <% recentInvoices.forEach((inv, index) => { %>
-                <tr class="clickable-row" onclick="window.location='/invoices/<%= inv.id %>'">
-                  <td class="num-col"><%= String(index + 1).padStart(2, '0') %></td>
-                  <td><strong class="figure"><%= inv.invoice_number %></strong></td>
-                  <td><%= inv.client_name %></td>
-                  <td class="text-soft"><%= inv.issue_date %></td>
-                  <td>
+                <tr class="hover:bg-slate-50 cursor-pointer transition-colors" onclick="window.location='/invoices/<%= inv.id %>'">
+                  <td class="py-3 px-3 text-slate-400 font-mono text-xs"><%= String(index + 1).padStart(2, '0') %></td>
+                  <td class="py-3 px-3 font-semibold font-mono text-slate-900"><%= inv.invoice_number %></td>
+                  <td class="py-3 px-3 text-slate-800"><%= inv.client_name %></td>
+                  <td class="py-3 px-3 text-slate-500"><%= inv.issue_date %></td>
+                  <td class="py-3 px-3">
                     <span class="status-pill status-<%= inv.status %>">
                       <%= inv.status %>
                     </span>
                   </td>
-                  <td class="money"><%= currencySymbol %><%= inv.total.toFixed(2) %></td>
+                  <td class="py-3 px-3 font-mono text-right font-semibold text-slate-900"><%= currencySymbol %><%= inv.total.toFixed(2) %></td>
                 </tr>
               <% }) %>
             </tbody>
@@ -257,7 +247,7 @@
   <script>
     function filterDashboardTables(query) {
       const q = query.toLowerCase().trim();
-      const rows = document.querySelectorAll('.invoxa-table tbody tr');
+      const rows = document.querySelectorAll('table tbody tr');
       rows.forEach(r => {
         const text = r.innerText.toLowerCase();
         r.style.display = text.includes(q) ? '' : 'none';

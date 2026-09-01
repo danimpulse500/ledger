@@ -2,22 +2,23 @@ const express = require('express');
 const db = require('../db');
 const { generateInvoicePDF } = require('../utils/pdf-generator');
 const { sendInvoiceEmail } = require('../utils/mailer');
+const { requireActiveBilling } = require('../middleware/billing');
 
 const router = express.Router();
 
-function getSettings(orgId) {
-  let settings = db.prepare('SELECT * FROM company_settings WHERE org_id = ?').get(orgId);
+async function getSettings(orgId) {
+  let settings = await db.prepare('SELECT * FROM company_settings WHERE org_id = ?').get(orgId);
   if (!settings) {
-    db.prepare(`INSERT INTO company_settings (org_id, company_name) VALUES (?, 'My Company')`).run(orgId);
-    settings = db.prepare('SELECT * FROM company_settings WHERE org_id = ?').get(orgId);
+    await db.prepare(`INSERT INTO company_settings (org_id, company_name) VALUES (?, 'My Company')`).run(orgId);
+    settings = await db.prepare('SELECT * FROM company_settings WHERE org_id = ?').get(orgId);
   }
   return settings;
 }
 
-function nextInvoiceNumber(orgId) {
-  const settings = getSettings(orgId);
+async function nextInvoiceNumber(orgId) {
+  const settings = await getSettings(orgId);
   const number = `${settings.invoice_prefix || 'INV-'}${settings.next_invoice_number || 1001}`;
-  db.prepare('UPDATE company_settings SET next_invoice_number = next_invoice_number + 1 WHERE org_id = ?').run(orgId);
+  await db.prepare('UPDATE company_settings SET next_invoice_number = next_invoice_number + 1 WHERE org_id = ?').run(orgId);
   return number;
 }
 
@@ -44,19 +45,19 @@ function parseItems(body) {
     });
 }
 
-function recalcInvoiceTotals(invoiceId, orgId) {
-  const items = db.prepare('SELECT * FROM invoice_items WHERE invoice_id = ?').all(invoiceId);
-  const subtotal = items.reduce((s, it) => s + it.quantity * it.unit_price, 0);
-  const discount_total = items.reduce((s, it) => s + it.quantity * it.unit_price * (it.tax_rate / 100), 0);
+async function recalcInvoiceTotals(invoiceId, orgId) {
+  const items = (await db.prepare('SELECT * FROM invoice_items WHERE invoice_id = ?').all(invoiceId)) || [];
+  const subtotal = items.reduce((s, it) => s + parseFloat(it.quantity || 0) * parseFloat(it.unit_price || 0), 0);
+  const discount_total = items.reduce((s, it) => s + parseFloat(it.quantity || 0) * parseFloat(it.unit_price || 0) * (parseFloat(it.tax_rate || 0) / 100), 0);
   const total = subtotal - discount_total;
-  db.prepare('UPDATE invoices SET subtotal=?, tax_total=?, total=? WHERE id=? AND org_id=?').run(subtotal, discount_total, total, invoiceId, orgId);
+  await db.prepare('UPDATE invoices SET subtotal=?, tax_total=?, total=? WHERE id=? AND org_id=?').run(subtotal, discount_total, total, invoiceId, orgId);
 }
 
-function refreshPaidStatus(invoiceId, orgId) {
-  const invoice = db.prepare('SELECT * FROM invoices WHERE id = ? AND org_id = ?').get(invoiceId, orgId);
+async function refreshPaidStatus(invoiceId, orgId) {
+  const invoice = await db.prepare('SELECT * FROM invoices WHERE id = ? AND org_id = ?').get(invoiceId, orgId);
   if (!invoice) return;
-  const paidRow = db.prepare('SELECT COALESCE(SUM(amount),0) AS paid FROM payments WHERE invoice_id = ?').get(invoiceId);
-  const amount_paid = paidRow.paid;
+  const paidRow = await db.prepare('SELECT COALESCE(SUM(amount),0) AS paid FROM payments WHERE invoice_id = ?').get(invoiceId);
+  const amount_paid = paidRow ? parseFloat(paidRow.paid || 0) : 0;
   let status = invoice.status;
   if (status !== 'cancelled' && status !== 'draft') {
     if (amount_paid >= invoice.total && invoice.total > 0) {
@@ -67,107 +68,125 @@ function refreshPaidStatus(invoiceId, orgId) {
       status = 'sent';
     }
   }
-  db.prepare('UPDATE invoices SET amount_paid=?, status=? WHERE id=? AND org_id=?').run(amount_paid, status, invoiceId, orgId);
+  await db.prepare('UPDATE invoices SET amount_paid=?, status=? WHERE id=? AND org_id=?').run(amount_paid, status, invoiceId, orgId);
 }
 
 // List
-router.get('/', (req, res) => {
-  const orgId = req.session.user.org_id;
-  const { status, q } = req.query;
-  let sql = `SELECT invoices.*, clients.name AS client_name FROM invoices
-             JOIN clients ON clients.id = invoices.client_id WHERE invoices.org_id = ?`;
-  const params = [orgId];
-  if (status) { sql += ' AND invoices.status = ?'; params.push(status); }
-  if (q) { sql += ' AND (invoices.invoice_number LIKE ? OR clients.name LIKE ?)'; params.push(`%${q}%`, `%${q}%`); }
-  sql += ' ORDER BY invoices.issue_date DESC, invoices.id DESC';
-  const invoices = db.prepare(sql).all(...params);
-  const settings = getSettings(orgId);
-  res.render('invoices/list', { title: 'Invoices', invoices, status: status || '', q: q || '', settings });
+router.get('/', async (req, res, next) => {
+  try {
+    const orgId = req.session.user.org_id;
+    const { status, q } = req.query;
+    let sql = `SELECT invoices.*, clients.name AS client_name FROM invoices
+               JOIN clients ON clients.id = invoices.client_id WHERE invoices.org_id = ?`;
+    const params = [orgId];
+    if (status) { sql += ' AND invoices.status = ?'; params.push(status); }
+    if (q) { sql += ' AND (invoices.invoice_number LIKE ? OR clients.name LIKE ?)'; params.push(`%${q}%`, `%${q}%`); }
+    sql += ' ORDER BY invoices.issue_date DESC, invoices.id DESC';
+    const invoices = (await db.prepare(sql).all(...params)) || [];
+    const settings = await getSettings(orgId);
+    res.render('invoices/list', { title: 'Invoices', invoices, status: status || '', q: q || '', settings });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // New form
-router.get('/new', (req, res) => {
-  const orgId = req.session.user.org_id;
-  const clients = db.prepare('SELECT * FROM clients WHERE org_id = ? ORDER BY name').all(orgId);
-  const products = db.prepare('SELECT * FROM products WHERE org_id = ? ORDER BY name').all(orgId);
-  const settings = getSettings(orgId);
-  const today = new Date().toISOString().slice(0, 10);
-  const dueDate = new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString().slice(0, 10);
-  res.render('invoices/form', {
-    title: 'New Invoice', invoice: { issue_date: today, due_date: dueDate, status: 'draft' },
-    items: [], clients, products, settings, errors: null,
-    preselectClientId: req.query.client_id || null,
-  });
+router.get('/new', requireActiveBilling, async (req, res, next) => {
+  try {
+    const orgId = req.session.user.org_id;
+    const clients = (await db.prepare('SELECT * FROM clients WHERE org_id = ? ORDER BY name').all(orgId)) || [];
+    const products = (await db.prepare('SELECT * FROM products WHERE org_id = ? ORDER BY name').all(orgId)) || [];
+    const settings = await getSettings(orgId);
+    const today = new Date().toISOString().slice(0, 10);
+    const dueDate = new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString().slice(0, 10);
+    res.render('invoices/form', {
+      title: 'New Invoice', invoice: { issue_date: today, due_date: dueDate, status: 'draft' },
+      items: [], clients, products, settings, errors: null,
+      preselectClientId: req.query.client_id || null,
+      msg: req.query.msg || null
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Create
-router.post('/', (req, res) => {
-  const orgId = req.session.user.org_id;
-  const { client_id, issue_date, due_date, status, notes } = req.body;
-  const items = parseItems(req.body);
+router.post('/', requireActiveBilling, async (req, res, next) => {
+  try {
+    const orgId = req.session.user.org_id;
+    const { client_id, issue_date, due_date, status, notes } = req.body;
+    const items = parseItems(req.body);
 
-  if (!client_id || !issue_date || !due_date || items.length === 0) {
-    const clients = db.prepare('SELECT * FROM clients WHERE org_id = ? ORDER BY name').all(orgId);
-    const products = db.prepare('SELECT * FROM products WHERE org_id = ? ORDER BY name').all(orgId);
-    return res.render('invoices/form', {
-      title: 'New Invoice', invoice: req.body, items, clients, products, settings: getSettings(orgId),
-      errors: ['Client, issue date, due date, and at least one line item are required.'],
-    });
+    if (!client_id || !issue_date || !due_date || items.length === 0) {
+      const clients = (await db.prepare('SELECT * FROM clients WHERE org_id = ? ORDER BY name').all(orgId)) || [];
+      const products = (await db.prepare('SELECT * FROM products WHERE org_id = ? ORDER BY name').all(orgId)) || [];
+      const settings = await getSettings(orgId);
+      return res.render('invoices/form', {
+        title: 'New Invoice', invoice: req.body, items, clients, products, settings,
+        errors: ['Client, issue date, due date, and at least one line item are required.'],
+      });
+    }
+
+    const invoice_number = await nextInvoiceNumber(orgId);
+    const subtotal = items.reduce((s, it) => s + it.quantity * it.unit_price, 0);
+    const discount_total = items.reduce((s, it) => s + it.quantity * it.unit_price * (it.tax_rate / 100), 0);
+    const total = subtotal - discount_total;
+
+    const info = await db.prepare(`INSERT INTO invoices
+      (org_id, invoice_number, client_id, issue_date, due_date, status, notes, subtotal, tax_total, total, created_by)
+      VALUES (?,?,?,?,?,?,?,?,?,?,?)`)
+      .run(orgId, invoice_number, client_id, issue_date, due_date, status || 'draft', notes || '', subtotal, discount_total, total, req.session.user.id);
+
+    const invoiceId = info.lastInsertRowid;
+    for (const it of items) {
+      await db.prepare(`INSERT INTO invoice_items
+        (invoice_id, product_id, description, quantity, unit_price, tax_rate, line_total) VALUES (?,?,?,?,?,?,?)`)
+        .run(invoiceId, it.product_id, it.description, it.quantity, it.unit_price, it.tax_rate, it.line_total);
+    }
+
+    res.redirect(`/invoices/${invoiceId}`);
+  } catch (err) {
+    next(err);
   }
-
-  const invoice_number = nextInvoiceNumber(orgId);
-  const subtotal = items.reduce((s, it) => s + it.quantity * it.unit_price, 0);
-  const discount_total = items.reduce((s, it) => s + it.quantity * it.unit_price * (it.tax_rate / 100), 0);
-  const total = subtotal - discount_total;
-
-  const info = db.prepare(`INSERT INTO invoices
-    (org_id, invoice_number, client_id, issue_date, due_date, status, notes, subtotal, tax_total, total, created_by)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?)`)
-    .run(orgId, invoice_number, client_id, issue_date, due_date, status || 'draft', notes || '', subtotal, discount_total, total, req.session.user.id);
-
-  const invoiceId = info.lastInsertRowid;
-  const insertItem = db.prepare(`INSERT INTO invoice_items
-    (invoice_id, product_id, description, quantity, unit_price, tax_rate, line_total) VALUES (?,?,?,?,?,?,?)`);
-  for (const it of items) {
-    insertItem.run(invoiceId, it.product_id, it.description, it.quantity, it.unit_price, it.tax_rate, it.line_total);
-  }
-
-  res.redirect(`/invoices/${invoiceId}`);
 });
 
 // Show (printable invoice view)
-router.get('/:id', (req, res) => {
-  const orgId = req.session.user.org_id;
-  const invoice = db.prepare(`SELECT invoices.*, clients.name AS client_name, clients.email AS client_email,
-    clients.address AS client_address, clients.tax_id AS client_tax_id
-    FROM invoices JOIN clients ON clients.id = invoices.client_id WHERE invoices.id = ? AND invoices.org_id = ?`).get(req.params.id, orgId);
-  if (!invoice) return res.status(404).render('error', { title: 'Not Found', message: 'Invoice not found.' });
-  const items = db.prepare('SELECT * FROM invoice_items WHERE invoice_id = ?').all(req.params.id);
-  const payments = db.prepare('SELECT * FROM payments WHERE invoice_id = ? ORDER BY payment_date').all(req.params.id);
-  const settings = getSettings(orgId);
-  res.render('invoices/show', {
-    title: invoice.invoice_number,
-    invoice,
-    items,
-    payments,
-    settings,
-    emailSent: req.query.emailSent === '1',
-    emailError: req.query.emailError || null,
-    msg: req.query.msg || null,
-  });
+router.get('/:id', async (req, res, next) => {
+  try {
+    const orgId = req.session.user.org_id;
+    const invoice = await db.prepare(`SELECT invoices.*, clients.name AS client_name, clients.email AS client_email,
+      clients.address AS client_address, clients.tax_id AS client_tax_id
+      FROM invoices JOIN clients ON clients.id = invoices.client_id WHERE invoices.id = ? AND invoices.org_id = ?`).get(req.params.id, orgId);
+    if (!invoice) return res.status(404).render('error', { title: 'Not Found', message: 'Invoice not found.' });
+    const items = (await db.prepare('SELECT * FROM invoice_items WHERE invoice_id = ?').all(req.params.id)) || [];
+    const payments = (await db.prepare('SELECT * FROM payments WHERE invoice_id = ? ORDER BY payment_date').all(req.params.id)) || [];
+    const settings = await getSettings(orgId);
+    res.render('invoices/show', {
+      title: invoice.invoice_number,
+      invoice,
+      items,
+      payments,
+      settings,
+      emailSent: req.query.emailSent === '1',
+      emailError: req.query.emailError || null,
+      msg: req.query.msg || null,
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Download / View PDF
 router.get('/:id/pdf', async (req, res, next) => {
   try {
     const orgId = req.session.user.org_id;
-    const invoice = db.prepare(`SELECT invoices.*, clients.name AS client_name, clients.email AS client_email,
+    const invoice = await db.prepare(`SELECT invoices.*, clients.name AS client_name, clients.email AS client_email,
       clients.address AS client_address, clients.tax_id AS client_tax_id
       FROM invoices JOIN clients ON clients.id = invoices.client_id WHERE invoices.id = ? AND invoices.org_id = ?`).get(req.params.id, orgId);
     if (!invoice) return res.status(404).render('error', { title: 'Not Found', message: 'Invoice not found.' });
 
-    const items = db.prepare('SELECT * FROM invoice_items WHERE invoice_id = ?').all(req.params.id);
-    const settings = getSettings(orgId);
+    const items = (await db.prepare('SELECT * FROM invoice_items WHERE invoice_id = ?').all(req.params.id)) || [];
+    const settings = await getSettings(orgId);
 
     const pdfBuffer = await generateInvoicePDF(invoice, items, settings);
 
@@ -184,7 +203,7 @@ router.get('/:id/pdf', async (req, res, next) => {
 router.post('/:id/send', async (req, res, next) => {
   try {
     const orgId = req.session.user.org_id;
-    const invoice = db.prepare(`SELECT invoices.*, clients.name AS client_name, clients.email AS client_email,
+    const invoice = await db.prepare(`SELECT invoices.*, clients.name AS client_name, clients.email AS client_email,
       clients.address AS client_address, clients.tax_id AS client_tax_id
       FROM invoices JOIN clients ON clients.id = invoices.client_id WHERE invoices.id = ? AND invoices.org_id = ?`).get(req.params.id, orgId);
     if (!invoice) return res.status(404).render('error', { title: 'Not Found', message: 'Invoice not found.' });
@@ -194,8 +213,8 @@ router.post('/:id/send', async (req, res, next) => {
       return res.redirect(`/invoices/${req.params.id}?emailError=Recipient email address is required.`);
     }
 
-    const items = db.prepare('SELECT * FROM invoice_items WHERE invoice_id = ?').all(req.params.id);
-    const settings = getSettings(orgId);
+    const items = (await db.prepare('SELECT * FROM invoice_items WHERE invoice_id = ?').all(req.params.id)) || [];
+    const settings = await getSettings(orgId);
 
     const pdfBuffer = await generateInvoicePDF(invoice, items, settings);
 
@@ -210,7 +229,7 @@ router.post('/:id/send', async (req, res, next) => {
 
     // Auto-update status to 'sent' if currently 'draft'
     if (invoice.status === 'draft') {
-      db.prepare("UPDATE invoices SET status = 'sent' WHERE id = ? AND org_id = ?").run(req.params.id, orgId);
+      await db.prepare("UPDATE invoices SET status = 'sent' WHERE id = ? AND org_id = ?").run(req.params.id, orgId);
     }
 
     const msg = encodeURIComponent(result.message);
@@ -222,93 +241,119 @@ router.post('/:id/send', async (req, res, next) => {
 });
 
 // Edit form
-router.get('/:id/edit', (req, res) => {
-  const orgId = req.session.user.org_id;
-  const invoice = db.prepare('SELECT * FROM invoices WHERE id = ? AND org_id = ?').get(req.params.id, orgId);
-  if (!invoice) return res.status(404).render('error', { title: 'Not Found', message: 'Invoice not found.' });
-  const items = db.prepare('SELECT * FROM invoice_items WHERE invoice_id = ?').all(req.params.id);
-  const clients = db.prepare('SELECT * FROM clients WHERE org_id = ? ORDER BY name').all(orgId);
-  const products = db.prepare('SELECT * FROM products WHERE org_id = ? ORDER BY name').all(orgId);
-  res.render('invoices/form', { title: `Edit ${invoice.invoice_number}`, invoice, items, clients, products, settings: getSettings(orgId), errors: null });
+router.get('/:id/edit', async (req, res, next) => {
+  try {
+    const orgId = req.session.user.org_id;
+    const invoice = await db.prepare('SELECT * FROM invoices WHERE id = ? AND org_id = ?').get(req.params.id, orgId);
+    if (!invoice) return res.status(404).render('error', { title: 'Not Found', message: 'Invoice not found.' });
+    const items = (await db.prepare('SELECT * FROM invoice_items WHERE invoice_id = ?').all(req.params.id)) || [];
+    const clients = (await db.prepare('SELECT * FROM clients WHERE org_id = ? ORDER BY name').all(orgId)) || [];
+    const products = (await db.prepare('SELECT * FROM products WHERE org_id = ? ORDER BY name').all(orgId)) || [];
+    const settings = await getSettings(orgId);
+    res.render('invoices/form', { title: `Edit ${invoice.invoice_number}`, invoice, items, clients, products, settings, errors: null });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Update
-router.put('/:id', (req, res) => {
-  const orgId = req.session.user.org_id;
-  const { client_id, issue_date, due_date, status, notes } = req.body;
-  const items = parseItems(req.body);
-  const invoiceId = req.params.id;
+router.put('/:id', async (req, res, next) => {
+  try {
+    const orgId = req.session.user.org_id;
+    const { client_id, issue_date, due_date, status, notes } = req.body;
+    const items = parseItems(req.body);
+    const invoiceId = req.params.id;
 
-  const existing = db.prepare('SELECT * FROM invoices WHERE id = ? AND org_id = ?').get(invoiceId, orgId);
-  if (!existing) return res.status(404).render('error', { title: 'Not Found', message: 'Invoice not found.' });
+    const existing = await db.prepare('SELECT * FROM invoices WHERE id = ? AND org_id = ?').get(invoiceId, orgId);
+    if (!existing) return res.status(404).render('error', { title: 'Not Found', message: 'Invoice not found.' });
 
-  if (!client_id || !issue_date || !due_date || items.length === 0) {
-    const clients = db.prepare('SELECT * FROM clients WHERE org_id = ? ORDER BY name').all(orgId);
-    const products = db.prepare('SELECT * FROM products WHERE org_id = ? ORDER BY name').all(orgId);
-    return res.render('invoices/form', {
-      title: 'Edit Invoice', invoice: { ...req.body, id: invoiceId }, items, clients, products, settings: getSettings(orgId),
-      errors: ['Client, issue date, due date, and at least one line item are required.'],
-    });
+    if (!client_id || !issue_date || !due_date || items.length === 0) {
+      const clients = (await db.prepare('SELECT * FROM clients WHERE org_id = ? ORDER BY name').all(orgId)) || [];
+      const products = (await db.prepare('SELECT * FROM products WHERE org_id = ? ORDER BY name').all(orgId)) || [];
+      const settings = await getSettings(orgId);
+      return res.render('invoices/form', {
+        title: 'Edit Invoice', invoice: { ...req.body, id: invoiceId }, items, clients, products, settings,
+        errors: ['Client, issue date, due date, and at least one line item are required.'],
+      });
+    }
+
+    await db.prepare(`UPDATE invoices SET client_id=?, issue_date=?, due_date=?, status=?, notes=? WHERE id=? AND org_id=?`)
+      .run(client_id, issue_date, due_date, status || 'draft', notes || '', invoiceId, orgId);
+
+    await db.prepare('DELETE FROM invoice_items WHERE invoice_id = ?').run(invoiceId);
+    for (const it of items) {
+      await db.prepare(`INSERT INTO invoice_items
+        (invoice_id, product_id, description, quantity, unit_price, tax_rate, line_total) VALUES (?,?,?,?,?,?,?)`)
+        .run(invoiceId, it.product_id, it.description, it.quantity, it.unit_price, it.tax_rate, it.line_total);
+    }
+    await recalcInvoiceTotals(invoiceId, orgId);
+    await refreshPaidStatus(invoiceId, orgId);
+
+    res.redirect(`/invoices/${invoiceId}`);
+  } catch (err) {
+    next(err);
   }
-
-  db.prepare(`UPDATE invoices SET client_id=?, issue_date=?, due_date=?, status=?, notes=? WHERE id=? AND org_id=?`)
-    .run(client_id, issue_date, due_date, status || 'draft', notes || '', invoiceId, orgId);
-
-  db.prepare('DELETE FROM invoice_items WHERE invoice_id = ?').run(invoiceId);
-  const insertItem = db.prepare(`INSERT INTO invoice_items
-    (invoice_id, product_id, description, quantity, unit_price, tax_rate, line_total) VALUES (?,?,?,?,?,?,?)`);
-  for (const it of items) {
-    insertItem.run(invoiceId, it.product_id, it.description, it.quantity, it.unit_price, it.tax_rate, it.line_total);
-  }
-  recalcInvoiceTotals(invoiceId, orgId);
-  refreshPaidStatus(invoiceId, orgId);
-
-  res.redirect(`/invoices/${invoiceId}`);
 });
 
 // Quick status change
-router.post('/:id/status', (req, res) => {
-  const orgId = req.session.user.org_id;
-  const { status, redirect } = req.body;
-  const allowed = ['draft', 'sent', 'paid', 'overdue', 'cancelled'];
-  if (allowed.includes(status)) {
-    db.prepare('UPDATE invoices SET status=? WHERE id=? AND org_id=?').run(status, req.params.id, orgId);
+router.post('/:id/status', async (req, res, next) => {
+  try {
+    const orgId = req.session.user.org_id;
+    const { status, redirect } = req.body;
+    const allowed = ['draft', 'sent', 'paid', 'overdue', 'cancelled'];
+    if (allowed.includes(status)) {
+      await db.prepare('UPDATE invoices SET status=? WHERE id=? AND org_id=?').run(status, req.params.id, orgId);
+    }
+    res.redirect(redirect || `/invoices/${req.params.id}`);
+  } catch (err) {
+    next(err);
   }
-  res.redirect(redirect || `/invoices/${req.params.id}`);
 });
 
 // Record a payment
-router.post('/:id/payments', (req, res) => {
-  const orgId = req.session.user.org_id;
-  const invoice = db.prepare('SELECT id FROM invoices WHERE id = ? AND org_id = ?').get(req.params.id, orgId);
-  if (!invoice) return res.status(404).render('error', { title: 'Not Found', message: 'Invoice not found.' });
+router.post('/:id/payments', async (req, res, next) => {
+  try {
+    const orgId = req.session.user.org_id;
+    const invoice = await db.prepare('SELECT id FROM invoices WHERE id = ? AND org_id = ?').get(req.params.id, orgId);
+    if (!invoice) return res.status(404).render('error', { title: 'Not Found', message: 'Invoice not found.' });
 
-  const { amount, payment_date, method, notes } = req.body;
-  const amt = parseFloat(amount);
-  if (amt && amt > 0) {
-    db.prepare(`INSERT INTO payments (invoice_id, amount, payment_date, method, notes) VALUES (?,?,?,?,?)`)
-      .run(req.params.id, amt, payment_date || new Date().toISOString().slice(0, 10), method || '', notes || '');
-    refreshPaidStatus(req.params.id, orgId);
+    const { amount, payment_date, method, notes } = req.body;
+    const amt = parseFloat(amount);
+    if (amt && amt > 0) {
+      await db.prepare(`INSERT INTO payments (invoice_id, amount, payment_date, method, notes) VALUES (?,?,?,?,?)`)
+        .run(req.params.id, amt, payment_date || new Date().toISOString().slice(0, 10), method || '', notes || '');
+      await refreshPaidStatus(req.params.id, orgId);
+    }
+    res.redirect(`/invoices/${req.params.id}`);
+  } catch (err) {
+    next(err);
   }
-  res.redirect(`/invoices/${req.params.id}`);
 });
 
 // Delete a payment
-router.delete('/:id/payments/:paymentId', (req, res) => {
-  const orgId = req.session.user.org_id;
-  const invoice = db.prepare('SELECT id FROM invoices WHERE id = ? AND org_id = ?').get(req.params.id, orgId);
-  if (!invoice) return res.status(404).render('error', { title: 'Not Found', message: 'Invoice not found.' });
+router.delete('/:id/payments/:paymentId', async (req, res, next) => {
+  try {
+    const orgId = req.session.user.org_id;
+    const invoice = await db.prepare('SELECT id FROM invoices WHERE id = ? AND org_id = ?').get(req.params.id, orgId);
+    if (!invoice) return res.status(404).render('error', { title: 'Not Found', message: 'Invoice not found.' });
 
-  db.prepare('DELETE FROM payments WHERE id = ? AND invoice_id = ?').run(req.params.paymentId, req.params.id);
-  refreshPaidStatus(req.params.id, orgId);
-  res.redirect(`/invoices/${req.params.id}`);
+    await db.prepare('DELETE FROM payments WHERE id = ? AND invoice_id = ?').run(req.params.paymentId, req.params.id);
+    await refreshPaidStatus(req.params.id, orgId);
+    res.redirect(`/invoices/${req.params.id}`);
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Delete invoice
-router.delete('/:id', (req, res) => {
-  const orgId = req.session.user.org_id;
-  db.prepare('DELETE FROM invoices WHERE id = ? AND org_id = ?').run(req.params.id, orgId);
-  res.redirect('/invoices');
+router.delete('/:id', async (req, res, next) => {
+  try {
+    const orgId = req.session.user.org_id;
+    await db.prepare('DELETE FROM invoices WHERE id = ? AND org_id = ?').run(req.params.id, orgId);
+    res.redirect('/invoices');
+  } catch (err) {
+    next(err);
+  }
 });
 
 module.exports = router;

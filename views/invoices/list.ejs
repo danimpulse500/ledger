@@ -3,78 +3,78 @@
 <head>
   <%- include('../partials/head') %>
 </head>
-<body>
-  <div class="app-shell">
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+  <div class="flex h-screen w-full overflow-hidden bg-slate-50">
     <%- include('../partials/sidebar') %>
-    <div class="main">
-      <div class="topbar">
-        <h1>Invoices</h1>
-        <div class="actions">
-          <button type="button" class="btn" data-modal-target="modal-invoice">+ New Invoice</button>
+    <div class="flex-1 p-8 max-w-7xl h-screen overflow-y-auto">
+      <div class="flex justify-between items-center mb-6 gap-4 flex-wrap">
+        <h1 class="text-2xl font-bold text-slate-900 m-0">Invoices</h1>
+        <div class="flex gap-2.5">
+          <button type="button" class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-5 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-colors border-0" data-modal-target="<%= (typeof isBillingActive !== 'undefined' && isBillingActive) ? 'modal-invoice' : 'modal-paystack-billing' %>">+ New Invoice</button>
         </div>
       </div>
 
-      <div class="card">
-        <form method="GET" class="filter-bar">
-          <input type="text" name="q" placeholder="Search invoice # or client..." value="<%= q %>">
-          <select name="status" onchange="this.form.submit()">
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+        <form method="GET" class="flex gap-2.5 mb-5 flex-wrap items-center">
+          <input type="text" name="q" placeholder="Search invoice # or client..." value="<%= q %>" class="px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 w-auto">
+          <select name="status" onchange="this.form.submit()" class="px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 w-auto">
             <option value="">All statuses</option>
             <% ['draft','sent','paid','overdue','cancelled'].forEach(s => { %>
               <option value="<%= s %>" <%= status === s ? 'selected' : '' %>><%= s.charAt(0).toUpperCase() + s.slice(1) %></option>
             <% }) %>
           </select>
-          <button class="btn btn-outline btn-sm" type="submit">Filter</button>
+          <button class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-4 py-2 text-xs font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all cursor-pointer" type="submit">Filter</button>
         </form>
-        <hr class="divider">
+        <hr class="border-t border-slate-200 my-5">
 
         <% if (invoices.length === 0) { %>
-          <div class="empty-state">
-            <h3>No invoices found</h3>
-            <p>Create your first invoice to get started.</p>
-            <button type="button" class="btn" data-modal-target="modal-invoice">+ New Invoice</button>
+          <div class="py-12 text-center text-slate-500">
+            <h3 class="text-lg font-bold text-slate-900 mb-1">No invoices found</h3>
+            <p class="text-sm mb-4">Create your first invoice to get started.</p>
+            <button type="button" class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-5 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-colors border-0" data-modal-target="modal-invoice">+ New Invoice</button>
           </div>
         <% } else { %>
-          <table>
+          <table class="w-full border-collapse text-sm">
             <thead>
-              <tr>
-                <th>Invoice #</th>
-                <th>Client</th>
-                <th>Issued</th>
-                <th>Due</th>
-                <th>Status</th>
-                <th class="money">Total</th>
-                <th class="money">Balance</th>
-                <th style="text-align:right;">Actions</th>
+              <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
+                <th class="py-2.5 px-3">Invoice #</th>
+                <th class="py-2.5 px-3">Client</th>
+                <th class="py-2.5 px-3">Issued</th>
+                <th class="py-2.5 px-3">Due</th>
+                <th class="py-2.5 px-3">Status</th>
+                <th class="py-2.5 px-3 font-mono text-right">Total</th>
+                <th class="py-2.5 px-3 font-mono text-right">Balance</th>
+                <th class="py-2.5 px-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-slate-100">
               <% invoices.forEach(inv => { %>
-                <tr class="clickable-row" onclick="window.location='/invoices/<%= inv.id %>'">
-                  <td><a href="/invoices/<%= inv.id %>" onclick="event.stopPropagation()"><strong class="figure"><%= inv.invoice_number %></strong></a></td>
-                  <td><%= inv.client_name %></td>
-                  <td><%= inv.issue_date %></td>
-                  <td><%= inv.due_date %></td>
-                  <td><span class="badge badge-<%= inv.status %>"><%= inv.status %></span></td>
-                  <td class="money"><%= currencySymbol %><%= inv.total.toFixed(2) %></td>
-                  <td class="money"><%= (inv.total - inv.amount_paid) > 0 ? currencySymbol + (inv.total - inv.amount_paid).toFixed(2) : '—' %></td>
-                  <td class="actions-cell" onclick="event.stopPropagation()">
-                    <div class="action-dropdown">
-                      <button type="button" class="action-dropdown-btn" onclick="toggleActionDropdown(event, this)" title="Actions">
+                <tr class="hover:bg-slate-50 cursor-pointer transition-colors" onclick="window.location='/invoices/<%= inv.id %>'">
+                  <td class="py-3 px-3"><a href="/invoices/<%= inv.id %>" onclick="event.stopPropagation()" class="font-mono font-semibold text-slate-900 no-underline hover:underline"><%= inv.invoice_number %></a></td>
+                  <td class="py-3 px-3 text-slate-800"><%= inv.client_name %></td>
+                  <td class="py-3 px-3 text-slate-500"><%= inv.issue_date %></td>
+                  <td class="py-3 px-3 text-slate-500"><%= inv.due_date %></td>
+                  <td class="py-3 px-3"><span class="badge badge-<%= inv.status %>"><%= inv.status %></span></td>
+                  <td class="py-3 px-3 font-mono text-right font-semibold text-slate-900"><%= currencySymbol %><%= inv.total.toFixed(2) %></td>
+                  <td class="py-3 px-3 font-mono text-right font-semibold text-slate-900"><%= (inv.total - inv.amount_paid) > 0 ? currencySymbol + (inv.total - inv.amount_paid).toFixed(2) : '—' %></td>
+                  <td class="py-3 px-3 text-right" onclick="event.stopPropagation()">
+                    <div class="action-dropdown relative inline-block text-left">
+                      <button type="button" class="w-8 h-8 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 inline-flex items-center justify-center border-0 bg-transparent cursor-pointer" onclick="toggleActionDropdown(event, this)" title="Actions">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                           <circle cx="12" cy="12" r="1.2"></circle>
                           <circle cx="12" cy="5" r="1.2"></circle>
                           <circle cx="12" cy="19" r="1.2"></circle>
                         </svg>
                       </button>
-                      <div class="action-dropdown-menu">
-                        <a href="/invoices/<%= inv.id %>">View Details</a>
-                        <a href="/invoices/<%= inv.id %>/edit">Edit Invoice</a>
-                        <a href="/invoices/<%= inv.id %>/pdf" target="_blank">Download PDF</a>
+                      <div class="action-dropdown-menu absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 min-w-[160px] py-1 text-left">
+                        <a href="/invoices/<%= inv.id %>" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 no-underline">View Details</a>
+                        <a href="/invoices/<%= inv.id %>/edit" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 no-underline">Edit Invoice</a>
+                        <a href="/invoices/<%= inv.id %>/pdf" target="_blank" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 no-underline">Download PDF</a>
                         <% if (inv.status === 'draft') { %>
-                          <form method="POST" action="/invoices/<%= inv.id %>/status" style="display:block;">
+                          <form method="POST" action="/invoices/<%= inv.id %>/status" class="block">
                             <input type="hidden" name="status" value="sent">
                             <input type="hidden" name="redirect" value="/invoices">
-                            <button type="submit">Publish & Mark Sent</button>
+                            <button type="submit" class="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 bg-transparent border-0 cursor-pointer">Publish & Mark Sent</button>
                           </form>
                         <% } %>
                       </div>
@@ -87,6 +87,7 @@
         <% } %>
       </div>
     </div>
+  </div>
   <script>
     function toggleActionDropdown(event, btn) {
       event.stopPropagation();

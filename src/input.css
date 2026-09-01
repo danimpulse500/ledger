@@ -1,0 +1,203 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+  --font-serif: 'Source Serif 4', Georgia, serif;
+
+  --color-ink: #0f172a;
+  --color-ink-soft: #64748b;
+  --color-ink-faint: #94a3b8;
+  --color-brand-accent: #000000;
+  --color-brand-dark: #18181b;
+  --color-surface: #ffffff;
+  --color-app-bg: #f8fafc;
+  --color-border-subtle: #e2e8f0;
+}
+
+/* Custom interactive modal active state hook for modals.js */
+.modal-overlay {
+  display: none;
+}
+.modal-overlay.active {
+  display: flex !important;
+}
+
+/* Custom inset scrollbar for modals so scroll thumb lives cleanly inside card padding */
+.modal-scrollable {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+.modal-scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-scrollable::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 1rem;
+}
+.modal-scrollable::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+}
+.dark .modal-scrollable::-webkit-scrollbar-thumb {
+  background-color: #475569;
+}
+
+/* Action dropdown menu open state */
+.action-dropdown-menu {
+  display: none;
+}
+.action-dropdown-menu.open,
+.action-dropdown.active .action-dropdown-menu {
+  display: block !important;
+}
+
+/* Plan box selection state */
+.plan-box.selected {
+  border-color: #0f172a !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 2px #0f172a !important;
+}
+
+/* Tabular figures helper for currency values */
+.money, .figure {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Custom Expandable Hover Button transition helper */
+.btn-expandable {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-expandable .btn-label {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: 0;
+}
+.btn-expandable:hover {
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+.btn-expandable:hover .btn-label {
+  max-width: 140px;
+  opacity: 1;
+  margin-left: 0.44rem;
+}
+
+/* Status pill styling */
+.status-pill, .badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.status-draft, .badge-draft { background-color: #f1f5f9; color: #64748b; }
+.status-sent, .badge-sent { background-color: #eff6ff; color: #2563eb; }
+.status-paid, .badge-paid { background-color: #ecfdf5; color: #10b981; }
+.status-overdue, .badge-overdue { background-color: #fef2f2; color: #ef4444; }
+.status-cancelled, .badge-cancelled { background-color: #f1f5f9; color: #94a3b8; text-decoration: line-through; }
+
+/* Dark mode theme toggle icons */
+.dark .theme-icon-sun {
+  display: block !important;
+}
+.dark .theme-icon-moon {
+  display: none !important;
+}
+
+/* Professional Dark Mode Palette Overrides */
+.dark body,
+.dark .bg-slate-50,
+.dark .app-shell {
+  background-color: #121212 !important;
+  color: #E0E0E0 !important;
+}
+
+.dark .sidebar,
+.dark .bg-white,
+.dark .modal-card,
+.dark .action-dropdown-menu,
+.dark .invoice-doc,
+.dark .card {
+  background-color: #1E1E1E !important;
+  border-color: #444444 !important;
+  color: #E0E0E0 !important;
+}
+
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark h1, .dark h2, .dark h3, .dark h4 {
+  color: #E0E0E0 !important;
+}
+
+.dark .text-slate-700,
+.dark .text-slate-600 {
+  color: #B0B0B0 !important;
+}
+
+.dark .text-slate-500,
+.dark .text-slate-400 {
+  color: #888888 !important;
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #121212 !important;
+  border-color: #444444 !important;
+  color: #E0E0E0 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #666666 !important;
+}
+
+.dark tr:hover,
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover {
+  background-color: #282828 !important;
+}
+
+.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .border-slate-300,
+.dark .border-slate-800,
+.dark .divide-slate-100 > :not(:last-child) {
+  border-color: #444444 !important;
+}
+
+.dark .bg-slate-100 {
+  background-color: #282828 !important;
+  color: #B0B0B0 !important;
+}
+
+.dark .bg-slate-900 {
+  background-color: #3B82F6 !important;
+  color: #ffffff !important;
+}
+
+.dark .hover\:bg-slate-800:hover {
+  background-color: #2563EB !important;
+}
+
+.dark .status-draft, .dark .badge-draft {
+  background-color: #282828 !important;
+  color: #B0B0B0 !important;
+}
+
+/* Print Invoice rules */
+@media print {
+  .no-print { display: none !important; }
+  .sidebar { display: none !important; }
+  .main { padding: 0 !important; max-width: none !important; }
+  body { background: #ffffff !important; }
+  .invoice-doc { border: none !important; box-shadow: none !important; padding: 0 !important; }
+}

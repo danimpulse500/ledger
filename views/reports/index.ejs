@@ -3,18 +3,17 @@
 <head>
   <%- include('../partials/head') %>
 </head>
-<body>
-  <div class="app-shell">
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+  <div class="flex h-screen w-full overflow-hidden bg-slate-50">
     <%- include('../partials/sidebar') %>
-    <div class="main">
-      <h1>Reports</h1>
+    <div class="flex-1 p-8 max-w-7xl h-screen overflow-y-auto">
+      <h1 class="text-2xl font-bold text-slate-900 mb-6">Reports</h1>
 
-      <div class="grid grid-4 stat-grid" style="margin-bottom:20px;">
-
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <!-- Total Invoiced -->
-        <div class="card stat-card-invoxa">
-          <div class="stat-top">
-            <div class="stat-icon-chip">
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+          <div class="flex justify-between items-start mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                 <polyline points="14 2 14 8 20 8"/>
@@ -23,43 +22,43 @@
                 <polyline points="10 9 9 9 8 9"/>
               </svg>
             </div>
-            <div class="stat-number figure"><%= currencySymbol %><%= totals.total_invoiced.toFixed(2) %></div>
+            <div class="text-2xl font-bold font-mono tracking-tight text-slate-900"><%= currencySymbol %><%= totals.total_invoiced.toFixed(2) %></div>
           </div>
-          <div class="stat-bottom">Total Invoiced</div>
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Total Invoiced</div>
         </div>
 
         <!-- Total Collected -->
-        <div class="card stat-card-invoxa">
-          <div class="stat-top">
-            <div class="stat-icon-chip">
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+          <div class="flex justify-between items-start mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="1" x2="12" y2="23"/>
                 <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
               </svg>
             </div>
-            <div class="stat-number figure"><%= currencySymbol %><%= totals.total_collected.toFixed(2) %></div>
+            <div class="text-2xl font-bold font-mono tracking-tight text-slate-900"><%= currencySymbol %><%= totals.total_collected.toFixed(2) %></div>
           </div>
-          <div class="stat-bottom">Total Collected</div>
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Total Collected</div>
         </div>
 
         <!-- Net Profit -->
-        <div class="card stat-card-invoxa">
-          <div class="stat-top">
-            <div class="stat-icon-chip">
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+          <div class="flex justify-between items-start mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
                 <polyline points="17 6 23 6 23 12"/>
               </svg>
             </div>
-            <div class="stat-number figure <%= netProfit >= 0 ? '' : 'text-danger' %>"><%= currencySymbol %><%= netProfit.toFixed(2) %></div>
+            <div class="text-2xl font-bold font-mono tracking-tight <%= netProfit >= 0 ? 'text-slate-900' : 'text-red-500' %>"><%= currencySymbol %><%= netProfit.toFixed(2) %></div>
           </div>
-          <div class="stat-bottom">Net Profit <span class="text-faint">(collected − expenses)</span></div>
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Net Profit <span class="text-slate-400 font-normal lowercase">(collected − expenses)</span></div>
         </div>
 
         <!-- Client Count -->
-        <div class="card stat-card-invoxa">
-          <div class="stat-top">
-            <div class="stat-icon-chip">
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+          <div class="flex justify-between items-start mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                 <circle cx="9" cy="7" r="4"/>
@@ -67,28 +66,33 @@
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
             </div>
-            <div class="stat-number figure"><%= clientCount %></div>
+            <div class="text-2xl font-bold font-mono tracking-tight text-slate-900"><%= clientCount %></div>
           </div>
-          <div class="stat-bottom">Total Clients</div>
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Total Clients</div>
         </div>
-
       </div>
 
-
-      <div class="card">
-        <h3>Revenue vs. expenses by month</h3>
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs mb-6">
+        <h3 class="text-base font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 m-0">Revenue vs. expenses by month</h3>
         <% if (combined.length === 0) { %>
-          <p class="text-soft">Not enough data yet.</p>
+          <p class="text-slate-500 text-sm m-0">Not enough data yet.</p>
         <% } else { %>
-          <table>
-            <thead><tr><th>Month</th><th class="money">Revenue</th><th class="money">Expenses</th><th class="money">Net</th></tr></thead>
-            <tbody>
+          <table class="w-full border-collapse text-sm">
+            <thead>
+              <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
+                <th class="py-2.5 px-3">Month</th>
+                <th class="py-2.5 px-3 font-mono text-right">Revenue</th>
+                <th class="py-2.5 px-3 font-mono text-right">Expenses</th>
+                <th class="py-2.5 px-3 font-mono text-right">Net</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
               <% combined.forEach(m => { %>
-                <tr>
-                  <td class="figure"><%= m.month %></td>
-                  <td class="money"><%= currencySymbol %><%= m.revenue.toFixed(2) %></td>
-                  <td class="money"><%= currencySymbol %><%= m.expenses.toFixed(2) %></td>
-                  <td class="money <%= (m.revenue - m.expenses) >= 0 ? '' : 'text-soft' %>"><%= currencySymbol %><%= (m.revenue - m.expenses).toFixed(2) %></td>
+                <tr class="hover:bg-slate-50 transition-colors">
+                  <td class="py-3 px-3 font-mono text-slate-800"><%= m.month %></td>
+                  <td class="py-3 px-3 font-mono text-right text-slate-900"><%= currencySymbol %><%= m.revenue.toFixed(2) %></td>
+                  <td class="py-3 px-3 font-mono text-right text-slate-900"><%= currencySymbol %><%= m.expenses.toFixed(2) %></td>
+                  <td class="py-3 px-3 font-mono text-right font-semibold <%= (m.revenue - m.expenses) >= 0 ? 'text-slate-900' : 'text-slate-400' %>"><%= currencySymbol %><%= (m.revenue - m.expenses).toFixed(2) %></td>
                 </tr>
               <% }) %>
             </tbody>
@@ -96,21 +100,30 @@
         <% } %>
       </div>
 
-      <div class="grid grid-2" style="margin-top:16px; align-items:start;">
-        <div class="card">
-          <h3>Outstanding invoices <span class="text-faint">(<%= currencySymbol %><%= outstandingTotal.toFixed(2) %> total)</span></h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+          <h3 class="text-base font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 m-0">
+            Outstanding invoices <span class="text-slate-400 font-normal text-xs">(<%= currencySymbol %><%= outstandingTotal.toFixed(2) %> total)</span>
+          </h3>
           <% if (outstanding.length === 0) { %>
-            <p class="text-soft">Nothing outstanding. All caught up.</p>
+            <p class="text-slate-500 text-sm m-0">Nothing outstanding. All caught up.</p>
           <% } else { %>
-            <table class="compact">
-              <thead><tr><th>Invoice</th><th>Client</th><th>Due</th><th class="money">Balance</th></tr></thead>
-              <tbody>
+            <table class="w-full border-collapse text-sm">
+              <thead>
+                <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
+                  <th class="py-2 px-2.5">Invoice</th>
+                  <th class="py-2 px-2.5">Client</th>
+                  <th class="py-2 px-2.5">Due</th>
+                  <th class="py-2 px-2.5 font-mono text-right">Balance</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
                 <% outstanding.forEach(inv => { %>
-                  <tr>
-                    <td><a href="/invoices/<%= inv.id %>"><%= inv.invoice_number %></a></td>
-                    <td><%= inv.client_name %></td>
-                    <td><%= inv.due_date %></td>
-                    <td class="money"><%= currencySymbol %><%= (inv.total - inv.amount_paid).toFixed(2) %></td>
+                  <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="py-2.5 px-2.5"><a href="/invoices/<%= inv.id %>" class="font-mono font-semibold text-slate-900 no-underline hover:underline"><%= inv.invoice_number %></a></td>
+                    <td class="py-2.5 px-2.5 text-slate-700"><%= inv.client_name %></td>
+                    <td class="py-2.5 px-2.5 text-slate-500"><%= inv.due_date %></td>
+                    <td class="py-2.5 px-2.5 font-mono text-right font-semibold text-slate-900"><%= currencySymbol %><%= (inv.total - inv.amount_paid).toFixed(2) %></td>
                   </tr>
                 <% }) %>
               </tbody>
@@ -118,16 +131,24 @@
           <% } %>
         </div>
 
-        <div class="card">
-          <h3>Expenses by category</h3>
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+          <h3 class="text-base font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 m-0">Expenses by category</h3>
           <% if (expensesByCategory.length === 0) { %>
-            <p class="text-soft">No expenses recorded yet.</p>
+            <p class="text-slate-500 text-sm m-0">No expenses recorded yet.</p>
           <% } else { %>
-            <table class="compact">
-              <thead><tr><th>Category</th><th class="money">Total</th></tr></thead>
-              <tbody>
+            <table class="w-full border-collapse text-sm">
+              <thead>
+                <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
+                  <th class="py-2 px-2.5">Category</th>
+                  <th class="py-2 px-2.5 font-mono text-right">Total</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
                 <% expensesByCategory.forEach(c => { %>
-                  <tr><td><%= c.category %></td><td class="money"><%= currencySymbol %><%= c.total.toFixed(2) %></td></tr>
+                  <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="py-2.5 px-2.5 text-slate-800"><%= c.category %></td>
+                    <td class="py-2.5 px-2.5 font-mono text-right font-semibold text-slate-900"><%= currencySymbol %><%= c.total.toFixed(2) %></td>
+                  </tr>
                 <% }) %>
               </tbody>
             </table>

@@ -3,45 +3,45 @@
 <head>
   <%- include('../partials/head') %>
 </head>
-<body>
-  <div class="app-shell">
-    <div class="sidebar no-print">
-      <div class="brand">Ledger
-        <span class="co-name">Platform Control</span>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+  <div class="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div class="w-[240px] shrink-0 bg-white border-r border-slate-200 p-4 flex flex-col h-screen overflow-y-auto no-print">
+      <div class="flex flex-col gap-0.5 pb-5 border-b border-slate-100 mb-5">
+        <span class="text-base font-black text-slate-900 uppercase tracking-tight">Ledger</span>
+        <span class="text-xs text-slate-500 font-medium">Platform Control</span>
       </div>
-      <nav>
-        <a href="/platform">Overview</a>
-        <a href="/platform/organizations" class="active">Organizations</a>
+      <nav class="flex flex-col gap-1">
+        <a href="/platform" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all">Overview</a>
+        <a href="/platform/organizations" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white">Organizations</a>
       </nav>
-      <div class="spacer"></div>
-      <div class="user-box">
-        <div class="u-name"><%= currentPlatformAdmin ? currentPlatformAdmin.name : 'Operator' %></div>
-        <div class="u-role">Super Admin</div>
-        <form method="POST" action="/platform/logout">
-          <button type="submit">Log out</button>
+      <div class="mt-auto p-3 bg-slate-50 rounded-2xl border border-slate-100">
+        <div class="text-[0.83rem] font-semibold text-slate-900 truncate"><%= currentPlatformAdmin ? currentPlatformAdmin.name : 'Operator' %></div>
+        <div class="text-[0.72rem] text-slate-500">Super Admin</div>
+        <form method="POST" action="/platform/logout" class="mt-2">
+          <button type="submit" class="w-full text-xs font-semibold text-red-600 bg-transparent border border-red-200 rounded-lg py-1 hover:bg-red-50 cursor-pointer">Log out</button>
         </form>
       </div>
     </div>
 
-    <div class="main">
-      <div style="margin-bottom:12px;">
-        <a href="/platform/organizations" class="text-faint">&larr; Back to Organizations</a>
+    <div class="flex-1 p-8 max-w-7xl h-screen overflow-y-auto">
+      <div class="mb-3">
+        <a href="/platform/organizations" class="text-xs text-slate-500 hover:text-slate-900 font-semibold no-underline">&larr; Back to Organizations</a>
       </div>
 
-      <div class="topbar">
+      <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
         <div>
-          <h1><%= org.name %></h1>
-          <p class="text-soft">
-            slug: <code><%= org.slug %></code> &bull; 
+          <h1 class="text-2xl font-bold text-slate-900 m-0"><%= org.name %></h1>
+          <p class="text-slate-500 text-sm mt-1 m-0">
+            slug: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-800"><%= org.slug %></code> &bull; 
             <span class="badge badge-sent"><%= org.plan %> plan</span> &bull; 
             <span class="badge <%= org.status === 'active' ? 'badge-paid' : 'badge-overdue' %>"><%= org.status %></span>
           </p>
         </div>
 
-        <div class="actions" style="align-items:center;">
+        <div class="flex items-center gap-3">
           <!-- Plan Form -->
-          <form action="/platform/organizations/<%= org.id %>/plan" method="POST" style="margin:0;">
-            <select name="plan" onchange="this.form.submit()" style="padding:6px 10px; width:auto;">
+          <form action="/platform/organizations/<%= org.id %>/plan" method="POST" class="m-0">
+            <select name="plan" onchange="this.form.submit()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
               <option value="starter" <%= org.plan === 'starter' ? 'selected' : '' %>>Starter Plan</option>
               <option value="pro" <%= org.plan === 'pro' ? 'selected' : '' %>>Pro Plan</option>
               <option value="enterprise" <%= org.plan === 'enterprise' ? 'selected' : '' %>>Enterprise Plan</option>
@@ -49,64 +49,64 @@
           </form>
 
           <!-- Toggle Status Form -->
-          <form action="/platform/organizations/<%= org.id %>/status" method="POST" style="margin:0;">
+          <form action="/platform/organizations/<%= org.id %>/status" method="POST" class="m-0">
             <% if (org.status === 'active') { %>
               <input type="hidden" name="status" value="suspended">
-              <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Suspend this organization?')">Suspend Access</button>
+              <button type="submit" class="inline-flex items-center bg-red-600 text-white font-semibold text-xs px-4 py-2 rounded-full cursor-pointer hover:bg-red-700 transition-colors border-0" onclick="return confirm('Suspend this organization?')">Suspend Access</button>
             <% } else { %>
               <input type="hidden" name="status" value="active">
-              <button type="submit" class="btn btn-sm" style="background:var(--success)">Re-activate Account</button>
+              <button type="submit" class="inline-flex items-center bg-emerald-600 text-white font-semibold text-xs px-4 py-2 rounded-full cursor-pointer hover:bg-emerald-700 transition-colors border-0">Re-activate Account</button>
             <% } %>
           </form>
         </div>
       </div>
 
       <% if (success) { %>
-        <div class="alert alert-success"><%= success %></div>
+        <div class="p-3 rounded-lg text-sm mb-4 bg-emerald-50 text-emerald-600 border border-emerald-200"><%= success %></div>
       <% } %>
 
-      <div class="grid grid-4" style="margin-bottom:20px;">
-        <div class="card stat-card">
-          <div class="label">Invoices Count</div>
-          <div class="value figure"><%= stats.invoice_count %></div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider mb-2">Invoices Count</div>
+          <div class="text-2xl font-bold font-mono tracking-tight text-slate-900"><%= stats.invoice_count %></div>
         </div>
-        <div class="card stat-card">
-          <div class="label">Total Invoiced Volume</div>
-          <div class="value figure ok">$<%= Number(stats.total_volume).toFixed(2) %></div>
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider mb-2">Total Invoiced Volume</div>
+          <div class="text-2xl font-bold font-mono tracking-tight text-slate-900">$<%= Number(stats.total_volume).toFixed(2) %></div>
         </div>
-        <div class="card stat-card">
-          <div class="label">Clients Count</div>
-          <div class="value figure"><%= stats.client_count %></div>
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider mb-2">Clients Count</div>
+          <div class="text-2xl font-bold font-mono tracking-tight text-slate-900"><%= stats.client_count %></div>
         </div>
-        <div class="card stat-card">
-          <div class="label">Products & Services</div>
-          <div class="value figure"><%= stats.product_count %></div>
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider mb-2">Products & Services</div>
+          <div class="text-2xl font-bold font-mono tracking-tight text-slate-900"><%= stats.product_count %></div>
         </div>
       </div>
 
       <!-- Members Card -->
-      <div class="card" style="margin-bottom:20px;">
-        <div class="section-title">
-          <h2>Organization Members (<%= members.length %>)</h2>
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs mb-6">
+        <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+          <h2 class="text-base font-bold text-slate-900 m-0">Organization Members (<%= members.length %>)</h2>
         </div>
-        <table>
+        <table class="w-full border-collapse text-sm">
           <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Joined</th>
+            <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
+              <th class="py-2.5 px-3">ID</th>
+              <th class="py-2.5 px-3">Name</th>
+              <th class="py-2.5 px-3">Email</th>
+              <th class="py-2.5 px-3">Role</th>
+              <th class="py-2.5 px-3">Joined</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="divide-y divide-slate-100">
             <% members.forEach(m => { %>
-              <tr>
-                <td>#<%= m.id %></td>
-                <td><strong><%= m.name %></strong></td>
-                <td><%= m.email %></td>
-                <td><span style="text-transform:capitalize; font-weight:600; color:var(--ink-soft);"><%= m.role %></span></td>
-                <td class="text-faint"><%= m.created_at.slice(0, 10) %></td>
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3 px-3 font-mono text-slate-400">#<%= m.id %></td>
+                <td class="py-3 px-3 font-semibold text-slate-900"><%= m.name %></td>
+                <td class="py-3 px-3 text-slate-600"><%= m.email %></td>
+                <td class="py-3 px-3"><span class="capitalize font-semibold text-slate-600"><%= m.role %></span></td>
+                <td class="py-3 px-3 text-xs font-mono text-slate-400"><%= m.created_at.slice(0, 10) %></td>
               </tr>
             <% }) %>
           </tbody>
@@ -114,17 +114,17 @@
       </div>
 
       <!-- Settings Summary -->
-      <div class="card">
-        <div class="section-title">
-          <h2>Company Settings Summary</h2>
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+        <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+          <h2 class="text-base font-bold text-slate-900 m-0">Company Settings Summary</h2>
         </div>
-        <div class="grid grid-3 text-soft" style="font-size:0.9rem;">
-          <div><strong>Company Name:</strong> <%= settings ? settings.company_name : 'N/A' %></div>
-          <div><strong>Currency Symbol:</strong> <%= settings ? settings.currency_symbol : '$' %></div>
-          <div><strong>Invoice Prefix:</strong> <%= settings ? settings.invoice_prefix : 'INV-' %></div>
-          <div><strong>Default Discount:</strong> <%= settings ? settings.default_tax_rate : 0 %>%</div>
-          <div><strong>Tax / VAT ID:</strong> <%= (settings && settings.tax_id) ? settings.tax_id : 'None' %></div>
-          <div><strong>Email Contact:</strong> <%= (settings && settings.email) ? settings.email : 'None' %></div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-slate-600">
+          <div><strong class="text-slate-900">Company Name:</strong> <%= settings ? settings.company_name : 'N/A' %></div>
+          <div><strong class="text-slate-900">Currency Symbol:</strong> <%= settings ? settings.currency_symbol : '$' %></div>
+          <div><strong class="text-slate-900">Invoice Prefix:</strong> <%= settings ? settings.invoice_prefix : 'INV-' %></div>
+          <div><strong class="text-slate-900">Default Discount:</strong> <%= settings ? settings.default_tax_rate : 0 %>%</div>
+          <div><strong class="text-slate-900">Tax / VAT ID:</strong> <%= (settings && settings.tax_id) ? settings.tax_id : 'None' %></div>
+          <div><strong class="text-slate-900">Email Contact:</strong> <%= (settings && settings.email) ? settings.email : 'None' %></div>
         </div>
       </div>
     </div>

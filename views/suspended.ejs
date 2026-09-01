@@ -2,38 +2,18 @@
 <html lang="en">
 <head>
   <%- include('partials/head') %>
-  <style>
-    .suspended-wrap {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg);
-      padding: 32px 16px;
-    }
-    .suspended-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 40px 36px;
-      width: 480px;
-      max-width: 100%;
-      text-align: center;
-      box-shadow: var(--shadow);
-    }
-  </style>
 </head>
-<body>
-  <div class="suspended-wrap">
-    <div class="suspended-card">
-      <div style="font-size:2.5rem; margin-bottom:12px;">⚠️</div>
-      <h1 style="margin-bottom:8px;">Account Suspended</h1>
-      <p class="text-soft" style="line-height:1.6; margin-bottom:24px;">
-        The organization workspace for <strong><%= orgName %></strong> has been temporarily suspended.
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+  <div class="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+    <div class="bg-white border border-slate-200 rounded-2xl p-10 max-w-md w-full text-center shadow-xs">
+      <div class="text-4xl mb-3">⚠️</div>
+      <h1 class="text-2xl font-bold text-slate-900 mb-2">Account Suspended</h1>
+      <p class="text-slate-500 text-sm leading-relaxed mb-6">
+        The organization workspace for <strong class="text-slate-900"><%= orgName %></strong> has been temporarily suspended.
         <br><br>
         Please contact your account administrator or platform billing support to restore active status.
       </p>
-      <a href="mailto:support@platform.com" class="btn">Contact Support</a>
+      <a href="mailto:support@platform.com" class="inline-flex items-center justify-center bg-slate-900 text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-slate-800 transition-colors no-underline">Contact Support</a>
     </div>
   </div>
 </body>

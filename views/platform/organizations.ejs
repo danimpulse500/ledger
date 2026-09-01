@@ -3,140 +3,140 @@
 <head>
   <%- include('../partials/head') %>
 </head>
-<body>
-  <div class="app-shell">
-    <div class="sidebar no-print">
-      <div class="brand">Ledger
-        <span class="co-name">Platform Control</span>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+  <div class="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div class="w-[240px] shrink-0 bg-white border-r border-slate-200 p-4 flex flex-col h-screen overflow-y-auto no-print">
+      <div class="flex flex-col gap-0.5 pb-5 border-b border-slate-100 mb-5">
+        <span class="text-base font-black text-slate-900 uppercase tracking-tight">Ledger</span>
+        <span class="text-xs text-slate-500 font-medium">Platform Control</span>
       </div>
-      <nav>
-        <a href="/platform">Overview</a>
-        <a href="/platform/organizations" class="active">Organizations</a>
+      <nav class="flex flex-col gap-1">
+        <a href="/platform" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all">Overview</a>
+        <a href="/platform/organizations" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white">Organizations</a>
       </nav>
-      <div class="spacer"></div>
-      <div class="user-box">
-        <div class="u-name"><%= currentPlatformAdmin ? currentPlatformAdmin.name : 'Operator' %></div>
-        <div class="u-role">Super Admin</div>
-        <form method="POST" action="/platform/logout">
-          <button type="submit">Log out</button>
+      <div class="mt-auto p-3 bg-slate-50 rounded-2xl border border-slate-100">
+        <div class="text-[0.83rem] font-semibold text-slate-900 truncate"><%= currentPlatformAdmin ? currentPlatformAdmin.name : 'Operator' %></div>
+        <div class="text-[0.72rem] text-slate-500">Super Admin</div>
+        <form method="POST" action="/platform/logout" class="mt-2">
+          <button type="submit" class="w-full text-xs font-semibold text-red-600 bg-transparent border border-red-200 rounded-lg py-1 hover:bg-red-50 cursor-pointer">Log out</button>
         </form>
       </div>
     </div>
 
-    <div class="main">
-      <div class="topbar">
+    <div class="flex-1 p-8 max-w-7xl h-screen overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
         <div>
-          <h1>Organizations Directory</h1>
-          <p class="text-soft">Manage tenant accounts, subscription plans, and access status.</p>
+          <h1 class="text-2xl font-bold text-slate-900 m-0">Organizations Directory</h1>
+          <p class="text-slate-500 text-sm mt-1 m-0">Manage tenant accounts, subscription plans, and access status.</p>
         </div>
-        <div class="actions">
-          <button onclick="document.getElementById('createOrgCard').style.display='block'" class="btn">+ Provision Organization</button>
+        <div class="flex gap-2.5">
+          <button onclick="document.getElementById('createOrgCard').style.display='block'" class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-5 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-colors border-0">+ Provision Organization</button>
         </div>
       </div>
 
       <% if (error) { %>
-        <div class="alert alert-error"><%= error %></div>
+        <div class="p-3 rounded-lg text-sm mb-4 bg-red-50 text-red-600 border border-red-200"><%= error %></div>
       <% } %>
 
       <!-- Provision Form Card -->
-      <div id="createOrgCard" class="card" style="display:<%= error ? 'block' : 'none' %>; margin-bottom:20px;">
-        <div class="section-title">
-          <h2>Provision New Organization</h2>
-          <button type="button" onclick="document.getElementById('createOrgCard').style.display='none'" class="btn btn-sm btn-ghost">Cancel</button>
+      <div id="createOrgCard" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs mb-6" style="display:<%= error ? 'block' : 'none' %>;">
+        <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+          <h2 class="text-base font-bold text-slate-900 m-0">Provision New Organization</h2>
+          <button type="button" onclick="document.getElementById('createOrgCard').style.display='none'" class="inline-flex items-center bg-transparent text-slate-600 border border-slate-200 px-3 py-1 text-xs font-semibold rounded-full hover:bg-slate-100 cursor-pointer">Cancel</button>
         </div>
-        <form action="/platform/organizations" method="POST">
-          <div class="field-row">
-            <div class="field">
-              <label>Organization Name</label>
-              <input type="text" name="name" required placeholder="Acme Logistics">
+        <form action="/platform/organizations" method="POST" class="space-y-4">
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Organization Name</label>
+              <input type="text" name="name" required placeholder="Acme Logistics" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
             </div>
-            <div class="field">
-              <label>URL Slug</label>
-              <input type="text" name="slug" required placeholder="acme-logistics">
+            <div class="flex-1">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">URL Slug</label>
+              <input type="text" name="slug" required placeholder="acme-logistics" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
             </div>
-            <div class="field">
-              <label>Plan</label>
-              <select name="plan">
+            <div class="flex-1">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Plan</label>
+              <select name="plan" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
                 <option value="starter">Starter</option>
                 <option value="pro">Pro</option>
                 <option value="enterprise">Enterprise</option>
               </select>
             </div>
           </div>
-          <div class="field-row">
-            <div class="field">
-              <label>Tenant Admin Name</label>
-              <input type="text" name="admin_name" required placeholder="Jane Doe">
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Tenant Admin Name</label>
+              <input type="text" name="admin_name" required placeholder="Jane Doe" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
             </div>
-            <div class="field">
-              <label>Tenant Admin Email</label>
-              <input type="email" name="admin_email" required placeholder="jane@acme.com">
+            <div class="flex-1">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Tenant Admin Email</label>
+              <input type="email" name="admin_email" required placeholder="jane@acme.com" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
             </div>
-            <div class="field">
-              <label>Admin Password</label>
-              <input type="password" name="admin_password" required placeholder="••••••••">
+            <div class="flex-1">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Admin Password</label>
+              <input type="password" name="admin_password" required placeholder="••••••••" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
             </div>
           </div>
-          <button type="submit" class="btn" style="margin-top:8px;">Provision Account &rarr;</button>
+          <button type="submit" class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-6 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-colors border-0 mt-2">Provision Account &rarr;</button>
         </form>
       </div>
 
       <!-- Filter Bar -->
-      <form action="/platform/organizations" method="GET" class="filter-bar">
-        <input type="text" name="q" value="<%= q %>" placeholder="Search by name or slug..." style="width:240px;">
-        <select name="status" onchange="this.form.submit()">
+      <form action="/platform/organizations" method="GET" class="flex gap-2.5 mb-5 items-center flex-wrap">
+        <input type="text" name="q" value="<%= q %>" placeholder="Search by name or slug..." class="px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 w-60">
+        <select name="status" onchange="this.form.submit()" class="px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 w-auto">
           <option value="">All Statuses</option>
           <option value="active" <%= status === 'active' ? 'selected' : '' %>>Active</option>
           <option value="suspended" <%= status === 'suspended' ? 'selected' : '' %>>Suspended</option>
         </select>
-        <select name="plan" onchange="this.form.submit()">
+        <select name="plan" onchange="this.form.submit()" class="px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 w-auto">
           <option value="">All Plans</option>
           <option value="starter" <%= plan === 'starter' ? 'selected' : '' %>>Starter</option>
           <option value="pro" <%= plan === 'pro' ? 'selected' : '' %>>Pro</option>
           <option value="enterprise" <%= plan === 'enterprise' ? 'selected' : '' %>>Enterprise</option>
         </select>
-        <button type="submit" class="btn btn-sm btn-ghost">Filter</button>
+        <button type="submit" class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-4 py-2 text-xs font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all cursor-pointer">Filter</button>
         <% if (q || status || plan) { %>
-          <a href="/platform/organizations" class="text-faint" style="font-size:0.85rem;">Clear</a>
+          <a href="/platform/organizations" class="text-xs font-semibold text-slate-500 hover:text-slate-900 no-underline">Clear</a>
         <% } %>
       </form>
 
       <!-- Organizations Table -->
-      <div class="card" style="padding:0; overflow:hidden;">
-        <table>
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs overflow-hidden">
+        <table class="w-full border-collapse text-sm">
           <thead>
-            <tr>
-              <th>Organization</th>
-              <th>Plan</th>
-              <th>Status</th>
-              <th>Members</th>
-              <th>Invoices</th>
-              <th class="money">Total Volume</th>
-              <th>Created</th>
-              <th>Action</th>
+            <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
+              <th class="py-2.5 px-3">Organization</th>
+              <th class="py-2.5 px-3">Plan</th>
+              <th class="py-2.5 px-3">Status</th>
+              <th class="py-2.5 px-3 font-mono">Members</th>
+              <th class="py-2.5 px-3 font-mono">Invoices</th>
+              <th class="py-2.5 px-3 font-mono text-right">Total Volume</th>
+              <th class="py-2.5 px-3">Created</th>
+              <th class="py-2.5 px-3 text-right">Action</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="divide-y divide-slate-100">
             <% if (organizations.length === 0) { %>
-              <tr><td colspan="8" class="empty-state">No matching organizations found.</td></tr>
+              <tr><td colspan="8" class="py-8 text-center text-slate-500">No matching organizations found.</td></tr>
             <% } else { %>
               <% organizations.forEach(org => { %>
-                <tr>
-                  <td>
-                    <strong><%= org.name %></strong>
-                    <div class="text-faint"><%= org.slug %></div>
+                <tr class="hover:bg-slate-50 transition-colors">
+                  <td class="py-3 px-3">
+                    <strong class="text-slate-900 block"><%= org.name %></strong>
+                    <div class="text-xs text-slate-400 font-mono"><%= org.slug %></div>
                   </td>
-                  <td><span class="badge badge-sent"><%= org.plan %></span></td>
-                  <td>
+                  <td class="py-3 px-3"><span class="badge badge-sent"><%= org.plan %></span></td>
+                  <td class="py-3 px-3">
                     <span class="badge <%= org.status === 'active' ? 'badge-paid' : 'badge-overdue' %>">
                       <%= org.status %>
                     </span>
                   </td>
-                  <td><%= org.member_count %></td>
-                  <td><%= org.invoice_count %></td>
-                  <td class="money">$<%= Number(org.total_volume || 0).toFixed(2) %></td>
-                  <td class="text-faint"><%= org.created_at.slice(0, 10) %></td>
-                  <td><a href="/platform/organizations/<%= org.id %>" class="btn btn-sm btn-ghost">Manage &rarr;</a></td>
+                  <td class="py-3 px-3 font-mono text-slate-700"><%= org.member_count %></td>
+                  <td class="py-3 px-3 font-mono text-slate-700"><%= org.invoice_count %></td>
+                  <td class="py-3 px-3 font-mono text-right font-semibold text-slate-900">$<%= Number(org.total_volume || 0).toFixed(2) %></td>
+                  <td class="py-3 px-3 text-xs text-slate-400 font-mono"><%= org.created_at.slice(0, 10) %></td>
+                  <td class="py-3 px-3 text-right"><a href="/platform/organizations/<%= org.id %>" class="inline-flex items-center bg-transparent text-slate-700 border border-slate-200 px-3 py-1 text-xs font-semibold rounded-full hover:bg-slate-100 no-underline">Manage &rarr;</a></td>
                 </tr>
               <% }) %>
             <% } %>

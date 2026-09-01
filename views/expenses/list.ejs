@@ -3,73 +3,82 @@
 <head>
   <%- include('../partials/head') %>
 </head>
-<body>
-  <div class="app-shell">
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+  <div class="flex h-screen w-full overflow-hidden bg-slate-50">
     <%- include('../partials/sidebar') %>
-    <div class="main">
-      <div class="topbar">
-        <h1>Expenses</h1>
-        <div class="actions">
-          <button type="button" class="btn" data-modal-target="modal-expense">+ New Expense</button>
+    <div class="flex-1 p-8 max-w-7xl h-screen overflow-y-auto">
+      <div class="flex justify-between items-center mb-6 gap-4 flex-wrap">
+        <h1 class="text-2xl font-bold text-slate-900 m-0">Expenses</h1>
+        <div class="flex gap-2.5">
+          <button type="button" class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-5 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-colors border-0" data-modal-target="modal-expense">+ New Expense</button>
         </div>
       </div>
 
-      <div class="grid grid-3" style="margin-bottom:16px;">
-        <div class="card stat-card-invoxa">
-          <div class="stat-top">
-            <div class="stat-icon-chip">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+          <div class="flex justify-between items-start mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="1" x2="12" y2="23"></line>
                 <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
               </svg>
             </div>
-            <div class="stat-number figure"><%= currencySymbol %><%= total.toFixed(2) %></div>
+            <div class="text-2xl font-bold font-mono tracking-tight text-slate-900"><%= currencySymbol %><%= total.toFixed(2) %></div>
           </div>
-          <div class="stat-bottom">Total shown</div>
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Total shown</div>
         </div>
       </div>
 
-      <div class="card">
-        <form method="GET" class="filter-bar">
-          <select name="category" onchange="this.form.submit()">
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+        <form method="GET" class="flex gap-2.5 mb-5 items-center">
+          <select name="category" onchange="this.form.submit()" class="px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 w-auto">
             <option value="">All categories</option>
             <% categories.forEach(c => { %>
               <option value="<%= c %>" <%= category === c ? 'selected' : '' %>><%= c %></option>
             <% }) %>
           </select>
         </form>
-        <hr class="divider">
+        <hr class="border-t border-slate-200 my-5">
 
         <% if (expenses.length === 0) { %>
-          <div class="empty-state">
-            <h3>No expenses recorded</h3>
-            <p>Track business costs to see accurate profit &amp; loss in Reports.</p>
-            <button type="button" class="btn" data-modal-target="modal-expense">+ New Expense</button>
+          <div class="py-12 text-center text-slate-500">
+            <h3 class="text-lg font-bold text-slate-900 mb-1">No expenses recorded</h3>
+            <p class="text-sm mb-4">Track business costs to see accurate profit &amp; loss in Reports.</p>
+            <button type="button" class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-5 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-colors border-0" data-modal-target="modal-expense">+ New Expense</button>
           </div>
         <% } else { %>
-          <table>
-            <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Vendor</th><th class="money">Amount</th><th></th></tr></thead>
-            <tbody>
+          <table class="w-full border-collapse text-sm">
+            <thead>
+              <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
+                <th class="py-2.5 px-3">Date</th>
+                <th class="py-2.5 px-3">Description</th>
+                <th class="py-2.5 px-3">Category</th>
+                <th class="py-2.5 px-3">Vendor</th>
+                <th class="py-2.5 px-3 font-mono text-right">Amount</th>
+                <th class="py-2.5 px-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
               <% expenses.forEach(e => { %>
-                <tr>
-                  <td><%= e.expense_date %></td>
-                  <td><%= e.description %></td>
-                  <td><span class="badge badge-draft"><%= e.category %></span></td>
-                  <td class="text-soft"><%= e.vendor %></td>
-                  <td class="money"><%= currencySymbol %><%= e.amount.toFixed(2) %></td>
-                  <td class="actions-cell" onclick="event.stopPropagation()">
-                    <div class="action-dropdown">
-                      <button type="button" class="action-dropdown-btn" onclick="toggleActionDropdown(event, this)" title="Actions">
+                <tr class="hover:bg-slate-50 transition-colors">
+                  <td class="py-3 px-3 text-slate-500 font-mono text-xs"><%= e.expense_date %></td>
+                  <td class="py-3 px-3 font-semibold text-slate-900"><%= e.description %></td>
+                  <td class="py-3 px-3"><span class="bg-slate-100 text-slate-600 font-semibold px-2.5 py-1 rounded-full text-xs uppercase"><%= e.category %></span></td>
+                  <td class="py-3 px-3 text-slate-500"><%= e.vendor %></td>
+                  <td class="py-3 px-3 font-mono text-right font-semibold text-slate-900"><%= currencySymbol %><%= e.amount.toFixed(2) %></td>
+                  <td class="py-3 px-3 text-right" onclick="event.stopPropagation()">
+                    <div class="action-dropdown relative inline-block text-left">
+                      <button type="button" class="w-8 h-8 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 inline-flex items-center justify-center border-0 bg-transparent cursor-pointer" onclick="toggleActionDropdown(event, this)" title="Actions">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                           <circle cx="12" cy="12" r="1.2"></circle>
                           <circle cx="12" cy="5" r="1.2"></circle>
                           <circle cx="12" cy="19" r="1.2"></circle>
                         </svg>
                       </button>
-                      <div class="action-dropdown-menu">
-                        <a href="/expenses/<%= e.id %>/edit">Edit Expense</a>
-                        <form method="POST" action="/expenses/<%= e.id %>?_method=DELETE" style="display:block;" onsubmit="return confirm('Delete this expense?');">
-                          <button type="submit" class="text-danger">Delete Expense</button>
+                      <div class="action-dropdown-menu absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 min-w-[140px] py-1 text-left">
+                        <a href="/expenses/<%= e.id %>/edit" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 no-underline">Edit Expense</a>
+                        <form method="POST" action="/expenses/<%= e.id %>?_method=DELETE" class="block" onsubmit="return confirm('Delete this expense?');">
+                          <button type="submit" class="w-full text-left px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 bg-transparent border-0 cursor-pointer">Delete Expense</button>
                         </form>
                       </div>
                     </div>

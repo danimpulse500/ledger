@@ -151,4 +151,91 @@ async function sendInvoiceEmail({ invoice, items, settings, recipientEmail, pdfB
   };
 }
 
-module.exports = { sendInvoiceEmail, createTransporter };
+/**
+ * Sends a subscription / payment confirmation email receipt.
+ */
+async function sendPaymentConfirmationEmail({ recipientEmail, orgName, plan, amount, reference, cardBrand, cardLast4, nextBillingDate }) {
+  const { transporter, configured, user } = createTransporter();
+
+  const formattedAmount = typeof amount === 'number' ? amount.toFixed(2) : amount;
+  const isTrial = amount === 0 || amount === '0' || amount === '0.00';
+  const planName = plan === 'pro_yearly' ? 'Ledger Pro (Yearly Plan)' : 'Ledger Pro (30-Day Free Trial)';
+
+  const htmlBody = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 20px; }
+        .container { max-width: 580px; margin: 0 auto; background: #ffffff; border-radius: 16px; padding: 32px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .badge { display: inline-block; background: #0f172a; color: #ffffff; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 10px; border-radius: 9999px; }
+        .receipt-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 24px 0; }
+        .receipt-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; color: #475569; border-bottom: 1px border #f1f5f9; }
+        .receipt-row.total { font-weight: 800; font-size: 18px; color: #0f172a; border-top: 2px solid #e2e8f0; border-bottom: none; padding-top: 12px; margin-top: 8px; }
+        .footer { font-size: 12px; color: #94a3b8; text-align: center; margin-top: 32px; border-top: 1px solid #e2e8f0; padding-top: 16px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 24px;">
+          <h2 style="margin:0; font-size: 22px; font-weight: 900; color: #0f172a;">Ledger Pro</h2>
+          <span class="badge">${isTrial ? '30-Day Free Trial' : 'Payment Received'}</span>
+        </div>
+
+        <p style="font-size: 15px; font-weight: 600; color: #0f172a;">Hi ${orgName || 'Valued Customer'},</p>
+        <p style="font-size: 14px; color: #475569; line-height: 1.6;">
+          ${isTrial 
+            ? 'Your <strong>30-Day Free Trial</strong> for Ledger Pro has been activated successfully! You now have full unlimited access to generate invoices and manage billing.'
+            : 'Thank you for your payment! Your subscription to <strong>Ledger Pro</strong> is active and up to date.'}
+        </p>
+
+        <div class="receipt-card">
+          <div class="receipt-row">
+            <span>Transaction Ref:</span>
+            <strong style="font-family: monospace; color: #0f172a;">${reference}</strong>
+          </div>
+          <div class="receipt-row">
+            <span>Selected Plan:</span>
+            <strong style="color: #0f172a;">${planName}</strong>
+          </div>
+          <div class="receipt-row">
+            <span>Payment Method:</span>
+            <span>${cardBrand || 'Card'} •••• ${cardLast4 || '4242'}</span>
+          </div>
+          <div class="receipt-row">
+            <span>Next Renewal Date:</span>
+            <span>${nextBillingDate || 'In 30 Days'}</span>
+          </div>
+          <div class="receipt-row total">
+            <span>Amount Charged Today:</span>
+            <span>₦${formattedAmount}</span>
+          </div>
+        </div>
+
+        <p style="font-size: 13px; color: #64748b;">
+          You can view and download your full payment receipt anytime directly from your <a href="/billing" style="color: #2563eb; font-weight: 600; text-decoration: none;">Billing Settings</a> page.
+        </p>
+
+        <div class="footer">
+          &copy; ${new Date().getFullYear()} Ledger Pro Invoicing Platform. All rights reserved.
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  try {
+    const info = await transporter.sendMail({
+      from: `"Ledger Pro Billing" <${user}>`,
+      to: recipientEmail,
+      subject: isTrial ? `30-Day Free Trial Confirmation - Ledger Pro` : `Payment Receipt [Ref: ${reference}] - Ledger Pro`,
+      html: htmlBody,
+    });
+    return { success: true, info, configured };
+  } catch (err) {
+    console.error('[Mailer Error]: Failed to send payment confirmation email:', err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+module.exports = { sendInvoiceEmail, sendPaymentConfirmationEmail, createTransporter };

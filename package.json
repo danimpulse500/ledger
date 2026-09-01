@@ -10,7 +10,9 @@
     "start": "node --watch server.js",
     "dev": "nodemon server.js",
     "seed": "node db/seed.js",
-    "seed:mock": "node db/seed-mock.js"
+    "seed:mock": "node db/seed-mock.js",
+    "build:css": "npx @tailwindcss/cli -i ./src/input.css -o ./public/css/style.css --minify",
+    "watch:css": "npx @tailwindcss/cli -i ./src/input.css -o ./public/css/style.css --watch"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -21,11 +23,14 @@
     "method-override": "^3.0.0",
     "multer": "^2.0.2",
     "nodemailer": "^9.0.5",
-    "pdfkit": "^0.19.1"
+    "pdfkit": "^0.19.1",
+    "pg": "^8.23.0"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
     "connect-livereload": "^0.6.1",
     "livereload": "^0.10.3",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "tailwindcss": "^4.3.3"
   }
 }

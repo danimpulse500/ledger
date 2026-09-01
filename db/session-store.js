@@ -1,64 +1,117 @@
-// A minimal express-session store backed by Node's built-in node:sqlite module.
-// Replaces connect-sqlite3, which depends on the native `sqlite3` package and
-// requires a C++ compiler toolchain to install on Windows. This has no native
-// dependencies at all - it uses the SQLite support built into Node itself.
 const session = require('express-session');
 const path = require('path');
 const fs = require('fs');
-const { DatabaseSync } = require('node:sqlite');
 
-class SqliteSessionStore extends session.Store {
-  constructor(dbPath) {
+class AppSessionStore extends session.Store {
+  constructor(options = {}) {
     super();
-    const dir = path.dirname(dbPath);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    this.isPostgres = Boolean(process.env.DATABASE_URL);
 
-    this.db = new DatabaseSync(dbPath);
-    this.db.exec('PRAGMA journal_mode = WAL;');
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS sessions (
-        sid TEXT PRIMARY KEY,
-        sess TEXT NOT NULL,
-        expires INTEGER
-      )
-    `);
+    if (this.isPostgres) {
+      const db = require('./index');
+      this.pool = db.pool;
+      this.initPg();
+    } else {
+      const { DatabaseSync } = require('node:sqlite');
+      const dbPath = options.dbPath || path.join(__dirname, '..', 'data', 'sessions.db');
+      const dir = path.dirname(dbPath);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+      this.sqliteDb = new DatabaseSync(dbPath);
+      this.sqliteDb.exec('PRAGMA journal_mode = WAL;');
+      this.sqliteDb.exec(`
+        CREATE TABLE IF NOT EXISTS sessions (
+          sid TEXT PRIMARY KEY,
+          sess TEXT NOT NULL,
+          expires INTEGER
+        )
+      `);
+    }
+  }
+
+  async initPg() {
+    try {
+      if (this.pool) {
+        await this.pool.query(`
+          CREATE TABLE IF NOT EXISTS sessions (
+            sid VARCHAR(255) PRIMARY KEY,
+            sess JSON NOT NULL,
+            expires TIMESTAMPTZ
+          );
+        `);
+      }
+    } catch (err) {
+      console.error('[Session Store] PG init notice:', err.message);
+    }
   }
 
   get(sid, cb) {
-    try {
-      const row = this.db.prepare('SELECT sess, expires FROM sessions WHERE sid = ?').get(sid);
-      if (!row) return cb(null, null);
-      if (row.expires && row.expires < Date.now()) {
-        this.destroy(sid, () => {});
-        return cb(null, null);
+    if (this.isPostgres) {
+      this.pool.query('SELECT sess, expires FROM sessions WHERE sid = $1', [sid])
+        .then((res) => {
+          const row = res.rows[0];
+          if (!row) return cb(null, null);
+          if (row.expires && new Date(row.expires).getTime() < Date.now()) {
+            this.destroy(sid, () => {});
+            return cb(null, null);
+          }
+          const sessData = typeof row.sess === 'string' ? JSON.parse(row.sess) : row.sess;
+          cb(null, sessData);
+        })
+        .catch((err) => cb(err));
+    } else {
+      try {
+        const row = this.sqliteDb.prepare('SELECT sess, expires FROM sessions WHERE sid = ?').get(sid);
+        if (!row) return cb(null, null);
+        if (row.expires && row.expires < Date.now()) {
+          this.destroy(sid, () => {});
+          return cb(null, null);
+        }
+        cb(null, JSON.parse(row.sess));
+      } catch (err) {
+        cb(err);
       }
-      cb(null, JSON.parse(row.sess));
-    } catch (err) {
-      cb(err);
     }
   }
 
   set(sid, sess, cb) {
-    try {
-      const expires = sess.cookie && sess.cookie.expires
-        ? new Date(sess.cookie.expires).getTime()
-        : Date.now() + 1000 * 60 * 60 * 24 * 7; // 1 week default
-      this.db.prepare(`
-        INSERT INTO sessions (sid, sess, expires) VALUES (?, ?, ?)
-        ON CONFLICT(sid) DO UPDATE SET sess = excluded.sess, expires = excluded.expires
-      `).run(sid, JSON.stringify(sess), expires);
-      cb && cb(null);
-    } catch (err) {
-      cb && cb(err);
+    const expiresMs = sess.cookie && sess.cookie.expires
+      ? new Date(sess.cookie.expires).getTime()
+      : Date.now() + 1000 * 60 * 60 * 24 * 7;
+
+    if (this.isPostgres) {
+      const expiresDate = new Date(expiresMs);
+      this.pool.query(`
+        INSERT INTO sessions (sid, sess, expires) VALUES ($1, $2, $3)
+        ON CONFLICT(sid) DO UPDATE SET sess = EXCLUDED.sess, expires = EXCLUDED.expires
+      `, [sid, JSON.stringify(sess), expiresDate])
+        .then(() => cb && cb(null))
+        .catch((err) => cb && cb(err));
+    } else {
+      try {
+        this.sqliteDb.prepare(`
+          INSERT INTO sessions (sid, sess, expires) VALUES (?, ?, ?)
+          ON CONFLICT(sid) DO UPDATE SET sess = excluded.sess, expires = excluded.expires
+        `).run(sid, JSON.stringify(sess), expiresMs);
+        cb && cb(null);
+      } catch (err) {
+        cb && cb(err);
+      }
     }
   }
 
   destroy(sid, cb) {
-    try {
-      this.db.prepare('DELETE FROM sessions WHERE sid = ?').run(sid);
-      cb && cb(null);
-    } catch (err) {
-      cb && cb(err);
+    if (this.isPostgres) {
+      this.pool.query('DELETE FROM sessions WHERE sid = $1', [sid])
+        .then(() => cb && cb(null))
+        .catch((err) => cb && cb(err));
+    } else {
+      try {
+        this.sqliteDb.prepare('DELETE FROM sessions WHERE sid = ?').run(sid);
+        cb && cb(null);
+      } catch (err) {
+        cb && cb(err);
+      }
     }
   }
 
@@ -67,4 +120,4 @@ class SqliteSessionStore extends session.Store {
   }
 }
 
-module.exports = SqliteSessionStore;
+module.exports = AppSessionStore;

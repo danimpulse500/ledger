@@ -1,9 +1,12 @@
 <!-- Modal: New Client -->
-<div class="modal-overlay" id="modal-client">
-  <div class="modal-container">
-    <div class="modal-header">
-      <h3>New Client</h3>
-      <button type="button" class="modal-close" onclick="closeModal('modal-client')">
+<div class="modal-overlay fixed inset-0 bg-slate-900/45 backdrop-blur-xs z-[1000] items-center justify-center p-4"
+  id="modal-client">
+  <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+      <h3 class="text-base font-bold text-slate-900 m-0">New Client</h3>
+      <button type="button"
+        class="bg-transparent border-0 text-slate-400 cursor-pointer p-1 rounded-md hover:text-slate-900 transition-colors"
+        onclick="closeModal('modal-client')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -11,50 +14,61 @@
       </button>
     </div>
     <form method="POST" action="/clients">
-      <div class="modal-body">
-        <div class="field">
-          <label for="mc-name">Client Name *</label>
-          <input type="text" id="mc-name" name="name" placeholder="Acme Corp or John Doe" required>
+      <div class="space-y-4">
+        <div>
+          <label for="mc-name" class="block text-xs font-semibold text-slate-600 mb-1">Client Name *</label>
+          <input type="text" id="mc-name" name="name" placeholder="Acme Corp or John Doe" required
+            class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label for="mc-email">Email</label>
-            <input type="email" id="mc-email" name="email" placeholder="billing@acme.com">
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label for="mc-email" class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
+            <input type="email" id="mc-email" name="email" placeholder="billing@acme.com"
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
           </div>
-          <div class="field">
-            <label for="mc-phone">Phone</label>
-            <input type="tel" id="mc-phone" name="phone" placeholder="+1 (555) 000-0000">
-          </div>
-        </div>
-        <div class="field">
-          <label for="mc-address">Address</label>
-          <textarea id="mc-address" name="address" rows="2" placeholder="Street, City, State, ZIP"></textarea>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label for="mc-tax_id">Tax / VAT ID</label>
-            <input type="text" id="mc-tax_id" name="tax_id" placeholder="US123456789">
+          <div class="flex-1">
+            <label for="mc-phone" class="block text-xs font-semibold text-slate-600 mb-1">Phone</label>
+            <input type="tel" id="mc-phone" name="phone" placeholder="+1 (555) 000-0000"
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
           </div>
         </div>
-        <div class="field">
-          <label for="mc-notes">Notes</label>
-          <textarea id="mc-notes" name="notes" rows="2" placeholder="Payment preferences, contacts..."></textarea>
+        <div>
+          <label for="mc-address" class="block text-xs font-semibold text-slate-600 mb-1">Address</label>
+          <textarea id="mc-address" name="address" rows="2" placeholder="Street, City, State, ZIP"
+            class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 resize-y min-h-[60px]"></textarea>
+        </div>
+        <div>
+          <label for="mc-tax_id" class="block text-xs font-semibold text-slate-600 mb-1">Tax / VAT ID</label>
+          <input type="text" id="mc-tax_id" name="tax_id" placeholder="US123456789"
+            class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
+        </div>
+        <div>
+          <label for="mc-notes" class="block text-xs font-semibold text-slate-600 mb-1">Notes</label>
+          <textarea id="mc-notes" name="notes" rows="2" placeholder="Payment preferences, contacts..."
+            class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 resize-y min-h-[60px]"></textarea>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-client')">Cancel</button>
-        <button type="submit" class="btn">Save Client</button>
+      <div class="flex justify-end gap-2.5 mt-6 pt-3 border-t border-slate-100">
+        <button type="button"
+          class="inline-flex items-center gap-1.5 bg-transparent text-slate-600 border border-slate-200 font-semibold text-sm px-4 h-9.5 rounded-full cursor-pointer hover:bg-slate-100 hover:text-slate-900 transition-all"
+          onclick="closeModal('modal-client')">Cancel</button>
+        <button type="submit"
+          class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-4 h-9.5 rounded-full cursor-pointer hover:bg-slate-800 transition-all border-0">Save
+          Client</button>
       </div>
     </form>
   </div>
 </div>
 
 <!-- Modal: New Product/Service -->
-<div class="modal-overlay" id="modal-product">
-  <div class="modal-container">
-    <div class="modal-header">
-      <h3>New Product or Service</h3>
-      <button type="button" class="modal-close" onclick="closeModal('modal-product')">
+<div class="modal-overlay fixed inset-0 bg-slate-900/45 backdrop-blur-xs z-[1000] items-center justify-center p-4"
+  id="modal-product">
+  <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+      <h3 class="text-base font-bold text-slate-900 m-0">New Product or Service</h3>
+      <button type="button"
+        class="bg-transparent border-0 text-slate-400 cursor-pointer p-1 rounded-md hover:text-slate-900 transition-colors"
+        onclick="closeModal('modal-product')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -62,40 +76,51 @@
       </button>
     </div>
     <form method="POST" action="/products">
-      <div class="modal-body">
-        <div class="field">
-          <label for="mp-name">Name *</label>
-          <input type="text" id="mp-name" name="name" placeholder="Web Design, Consulting, Widget A" required>
+      <div class="space-y-4">
+        <div>
+          <label for="mp-name" class="block text-xs font-semibold text-slate-600 mb-1">Name *</label>
+          <input type="text" id="mp-name" name="name" placeholder="Web Design, Consulting, Widget A" required
+            class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
         </div>
-        <div class="field">
-          <label for="mp-description">Description</label>
-          <textarea id="mp-description" name="description" rows="2" placeholder="Detailed service description..."></textarea>
+        <div>
+          <label for="mp-description" class="block text-xs font-semibold text-slate-600 mb-1">Description</label>
+          <textarea id="mp-description" name="description" rows="2" placeholder="Detailed service description..."
+            class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 resize-y min-h-[60px]"></textarea>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label for="mp-unit_price">Unit Price ($) *</label>
-            <input type="number" step="0.01" min="0" id="mp-unit_price" name="unit_price" placeholder="0.00" required>
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label for="mp-unit_price" class="block text-xs font-semibold text-slate-600 mb-1">Unit Price ($) *</label>
+            <input type="number" step="0.01" min="0" id="mp-unit_price" name="unit_price" placeholder="0.00" required
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
           </div>
-          <div class="field">
-            <label for="mp-tax_rate">Discount (%)</label>
-            <input type="number" step="0.01" min="0" id="mp-tax_rate" name="tax_rate" value="0" placeholder="0.00">
+          <div class="flex-1">
+            <label for="mp-tax_rate" class="block text-xs font-semibold text-slate-600 mb-1">Discount (%)</label>
+            <input type="number" step="0.01" min="0" id="mp-tax_rate" name="tax_rate" value="0" placeholder="0.00"
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-product')">Cancel</button>
-        <button type="submit" class="btn">Save Product</button>
+      <div class="flex justify-end gap-2.5 mt-6 pt-3 border-t border-slate-100">
+        <button type="button"
+          class="inline-flex items-center gap-1.5 bg-transparent text-slate-600 border border-slate-200 font-semibold text-sm px-4 h-9.5 rounded-full cursor-pointer hover:bg-slate-100 hover:text-slate-900 transition-all"
+          onclick="closeModal('modal-product')">Cancel</button>
+        <button type="submit"
+          class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-4 h-9.5 rounded-full cursor-pointer hover:bg-slate-800 transition-all border-0">Save
+          Product</button>
       </div>
     </form>
   </div>
 </div>
 
 <!-- Modal: New Expense -->
-<div class="modal-overlay" id="modal-expense">
-  <div class="modal-container">
-    <div class="modal-header">
-      <h3>New Expense</h3>
-      <button type="button" class="modal-close" onclick="closeModal('modal-expense')">
+<div class="modal-overlay fixed inset-0 bg-slate-900/45 backdrop-blur-xs z-[1000] items-center justify-center p-4"
+  id="modal-expense">
+  <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+      <h3 class="text-base font-bold text-slate-900 m-0">New Expense</h3>
+      <button type="button"
+        class="bg-transparent border-0 text-slate-400 cursor-pointer p-1 rounded-md hover:text-slate-900 transition-colors"
+        onclick="closeModal('modal-expense')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -103,50 +128,69 @@
       </button>
     </div>
     <form method="POST" action="/expenses">
-      <div class="modal-body">
-        <div class="field">
-          <label for="me-description">Description *</label>
-          <input type="text" id="me-description" name="description" placeholder="Domain Renewal, Office Supplies" required>
+      <div class="space-y-4">
+        <div>
+          <label for="me-description" class="block text-xs font-semibold text-slate-600 mb-1">Description *</label>
+          <input type="text" id="me-description" name="description" placeholder="Domain Renewal, Office Supplies"
+            required
+            class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label for="me-amount">Amount ($) *</label>
-            <input type="number" step="0.01" min="0.01" id="me-amount" name="amount" placeholder="0.00" required>
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label for="me-amount" class="block text-xs font-semibold text-slate-600 mb-1">Amount ($) *</label>
+            <input type="number" step="0.01" min="0.01" id="me-amount" name="amount" placeholder="0.00" required
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
           </div>
-          <div class="field">
-            <label for="me-expense_date">Date *</label>
-            <input type="date" id="me-expense_date" name="expense_date" value="<%= new Date().toISOString().slice(0, 10) %>" required>
+          <div class="flex-1">
+            <label for="me-expense_date" class="block text-xs font-semibold text-slate-600 mb-1">Date *</label>
+            <input type="date" id="me-expense_date" name="expense_date"
+              value="<%= new Date().toISOString().slice(0, 10) %>" required
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
           </div>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label for="me-category">Category</label>
-            <input type="text" id="me-category" name="category" value="General" list="modal-cat-list">
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label for="me-category" class="block text-xs font-semibold text-slate-600 mb-1">Category</label>
+            <input type="text" id="me-category" name="category" value="General" list="modal-cat-list"
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
             <datalist id="modal-cat-list">
-              <option value="General"><option value="Software"><option value="Travel">
-              <option value="Office Supplies"><option value="Marketing"><option value="Utilities">
+              <option value="General">
+              <option value="Software">
+              <option value="Travel">
+              <option value="Office Supplies">
+              <option value="Marketing">
+              <option value="Utilities">
             </datalist>
           </div>
-          <div class="field">
-            <label for="me-vendor">Vendor</label>
-            <input type="text" id="me-vendor" name="vendor" placeholder="AWS, Staples, Google">
+          <div class="flex-1">
+            <label for="me-vendor" class="block text-xs font-semibold text-slate-600 mb-1">Vendor</label>
+            <input type="text" id="me-vendor" name="vendor" placeholder="AWS, Staples, Google"
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-expense')">Cancel</button>
-        <button type="submit" class="btn">Save Expense</button>
+      <div class="flex justify-end gap-2.5 mt-6 pt-3 border-t border-slate-100">
+        <button type="button"
+          class="inline-flex items-center gap-1.5 bg-transparent text-slate-600 border border-slate-200 font-semibold text-sm px-4 h-9.5 rounded-full cursor-pointer hover:bg-slate-100 hover:text-slate-900 transition-all"
+          onclick="closeModal('modal-expense')">Cancel</button>
+        <button type="submit"
+          class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-4 h-9.5 rounded-full cursor-pointer hover:bg-slate-800 transition-all border-0">Save
+          Expense</button>
       </div>
     </form>
   </div>
 </div>
 
 <!-- Modal: New Invoice -->
-<div class="modal-overlay" id="modal-invoice">
-  <div class="modal-container modal-lg">
-    <div class="modal-header">
-      <h3>Create New Invoice</h3>
-      <button type="button" class="modal-close" onclick="closeModal('modal-invoice')">
+<div class="modal-overlay fixed inset-0 bg-slate-900/45 backdrop-blur-xs z-[1000] items-center justify-center p-4"
+  id="modal-invoice">
+  <div
+    class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+      <h3 class="text-base font-bold text-slate-900 m-0">Create New Invoice</h3>
+      <button type="button"
+        class="bg-transparent border-0 text-slate-400 cursor-pointer p-1 rounded-md hover:text-slate-900 transition-colors"
+        onclick="closeModal('modal-invoice')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -154,25 +198,31 @@
       </button>
     </div>
     <form method="POST" action="/invoices" id="modal-invoice-form">
-      <div class="modal-body">
-        <div class="field-row">
-          <div class="field">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-              <label for="mi-client" style="margin:0;">Client *</label>
-              <button type="button" class="btn btn-outline btn-sm" data-modal-target="modal-client" style="padding:2px 8px; font-size:0.75rem;">+ Add New Client</button>
+      <div class="space-y-4">
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <div class="flex justify-between items-center mb-1">
+              <label for="mi-client" class="block text-xs font-semibold text-slate-600 m-0">Client *</label>
+              <button type="button"
+                class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-2 py-0.5 text-[0.75rem] font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all"
+                data-modal-target="modal-client">+ Add New Client</button>
             </div>
-            <select id="mi-client" name="client_id" required>
+            <select id="mi-client" name="client_id" required
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
               <option value="">Select a client...</option>
-              <% if (typeof globalClients !== 'undefined' && globalClients.length) { %>
-                <% globalClients.forEach(c => { %>
-                  <option value="<%= c.id %>"><%= c.name %></option>
-                <% }) %>
-              <% } %>
+              <% if (typeof globalClients !=='undefined' && globalClients.length) { %>
+                <% globalClients.forEach(c=> { %>
+                  <option value="<%= c.id %>">
+                    <%= c.name %>
+                  </option>
+                  <% }) %>
+                    <% } %>
             </select>
           </div>
-          <div class="field">
-            <label for="mi-status">Status</label>
-            <select id="mi-status" name="status">
+          <div class="flex-1">
+            <label for="mi-status" class="block text-xs font-semibold text-slate-600 mb-1">Status</label>
+            <select id="mi-status" name="status"
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
               <option value="draft">Draft</option>
               <option value="sent">Sent</option>
               <option value="paid">Paid</option>
@@ -180,175 +230,504 @@
           </div>
         </div>
 
-        <div class="field-row">
-          <div class="field">
-            <label for="mi-issue_date">Issue Date *</label>
-            <input type="date" id="mi-issue_date" name="issue_date" value="<%= new Date().toISOString().slice(0, 10) %>" required>
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label for="mi-issue_date" class="block text-xs font-semibold text-slate-600 mb-1">Issue Date *</label>
+            <input type="date" id="mi-issue_date" name="issue_date" value="<%= new Date().toISOString().slice(0, 10) %>"
+              required
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
           </div>
-          <div class="field">
-            <label for="mi-due_date">Due Date *</label>
-            <input type="date" id="mi-due_date" name="due_date" value="<%= new Date(Date.now() + 14*24*60*60*1000).toISOString().slice(0, 10) %>" required>
+          <div class="flex-1">
+            <label for="mi-due_date" class="block text-xs font-semibold text-slate-600 mb-1">Due Date *</label>
+            <input type="date" id="mi-due_date" name="due_date"
+              value="<%= new Date(Date.now() + 14*24*60*60*1000).toISOString().slice(0, 10) %>" required
+              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
           </div>
         </div>
 
         <!-- Line Items -->
-        <div style="margin-top:16px;">
-          <div class="section-title" style="margin-bottom:10px;">
-            <h4 style="margin:0; font-size:0.95rem;">Line Items</h4>
-            <div style="display:flex; gap:8px;">
-              <button type="button" class="btn btn-outline btn-sm" data-modal-target="modal-product">+ New Product</button>
-              <button type="button" class="btn btn-outline btn-sm" id="mi-add-item">+ Add Line</button>
+        <div class="mt-4">
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="m-0 text-sm font-bold text-slate-900">Line Items</h4>
+            <div class="flex gap-2">
+              <button type="button"
+                class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-3 py-1 text-xs font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all"
+                data-modal-target="modal-product">+ New Product</button>
+              <button type="button"
+                class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-3 py-1 text-xs font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all"
+                id="mi-add-item">+ Add Line</button>
             </div>
           </div>
-          <table class="invoxa-table" style="width:100%;">
+          <table class="w-full border-collapse text-sm">
             <thead>
-              <tr>
-                <th style="width:30%;">Item</th>
-                <th>Description</th>
-                <th style="width:70px;">Qty</th>
-                <th style="width:100px;">Price</th>
-                <th style="width:90px;" class="money">Total</th>
-                <th style="width:30px;"></th>
+              <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase text-slate-500 font-semibold">
+                <th class="py-2 px-2.5 w-[30%]">Item</th>
+                <th class="py-2 px-2.5">Description</th>
+                <th class="py-2 px-2.5 w-[70px]">Qty</th>
+                <th class="py-2 px-2.5 w-[100px]">Price</th>
+                <th class="py-2 px-2.5 w-[90px] font-mono">Total</th>
+                <th class="py-2 px-2.5 w-[30px]"></th>
               </tr>
             </thead>
-            <tbody id="mi-items-body"></tbody>
+            <tbody id="mi-items-body" class="divide-y divide-slate-100"></tbody>
           </table>
-          <div class="totals" style="text-align:right; margin-top:12px; font-weight:700; font-size:1.05rem;">
-            Total: <span id="mi-disp-total" class="figure"><%= currencySymbol %>0.00</span>
+          <div class="text-right mt-3 font-bold text-base text-slate-900">
+            Total: <span id="mi-disp-total" class="font-mono tracking-tight">
+              <%= currencySymbol %>0.00
+            </span>
           </div>
         </div>
 
-        <div class="field" style="margin-top:16px;">
-          <label for="mi-notes">Notes</label>
-          <textarea id="mi-notes" name="notes" rows="2" placeholder="Payment instructions, notes..."></textarea>
+        <div class="mt-4">
+          <label for="mi-notes" class="block text-xs font-semibold text-slate-600 mb-1">Notes</label>
+          <textarea id="mi-notes" name="notes" rows="2" placeholder="Payment instructions, notes..."
+            class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 resize-y min-h-[60px]"></textarea>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-invoice')">Cancel</button>
-        <button type="submit" class="btn">Create Invoice</button>
+      <div class="flex justify-end gap-2.5 mt-6 pt-3 border-t border-slate-100">
+        <button type="button"
+          class="inline-flex items-center gap-1.5 bg-transparent text-slate-600 border border-slate-200 font-semibold text-sm px-4 h-9.5 rounded-full cursor-pointer hover:bg-slate-100 hover:text-slate-900 transition-all"
+          onclick="closeModal('modal-invoice')">Cancel</button>
+        <button type="submit"
+          class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-4 h-9.5 rounded-full cursor-pointer hover:bg-slate-800 transition-all border-0">Create
+          Invoice</button>
       </div>
     </form>
   </div>
 </div>
+<!-- Paystack Pop SDK -->
+<script src="https://js.paystack.co/v1/inline.js"></script>
+
+<!-- Modal: Paystack Card & 30-Day Free Trial Billing Gateway -->
+<div
+  class="modal-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[1000] flex items-center justify-center p-4 sm:p-6"
+  id="modal-paystack-billing">
+  <div
+    class="bg-white rounded-3xl w-full max-w-4xl shadow-2xl border border-slate-100 max-h-[92vh] overflow-hidden flex flex-col relative transition-all duration-300"
+    id="paystack-modal-card">
+
+    <div class="p-6 sm:p-8 modal-scrollable overflow-y-auto flex-1">
+      
+      <!-- Modal Top Header -->
+      <div class="flex justify-between items-center pb-4 mb-6 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <h2 class="text-2xl font-black text-slate-900 m-0 tracking-tight">Ledger Pro</h2>
+          <span class="bg-slate-900 text-white text-[0.68rem] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full">30 Days Free</span>
+        </div>
+        <button type="button"
+          class="bg-transparent border-0 text-slate-400 cursor-pointer p-2 rounded-full hover:bg-slate-100 hover:text-slate-900 transition-colors"
+          onclick="closeModal('modal-paystack-billing')" aria-label="Close modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- STEP 1: Plan Overview & Timeline -->
+      <div id="paystack-step-overview" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left Column: Choose Plan & Duration -->
+        <div class="lg:col-span-7 space-y-6">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900 m-0 tracking-tight">Choose plan</h2>
+            <p class="text-xs text-slate-500 mt-1">Select a plan to start your 30-day risk-free trial.</p>
+          </div>
+
+          <!-- Plan Type Toggle Pills -->
+          <div class="inline-flex p-1 bg-slate-100 rounded-full border border-slate-200 w-full sm:w-auto">
+            <button type="button" id="toggle-monthly-btn" onclick="selectPlanCycle('monthly')"
+              class="flex-1 sm:flex-initial px-5 py-2.5 rounded-full text-xs font-bold bg-slate-900 text-white shadow-xs transition-all cursor-pointer">
+              Monthly
+            </button>
+            <button type="button" id="toggle-yearly-btn" onclick="selectPlanCycle('yearly')"
+              class="flex-1 sm:flex-initial px-5 py-2.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all cursor-pointer flex items-center justify-center gap-1.5">
+              <span>Yearly</span>
+              <span class="bg-emerald-600 text-white text-[0.62rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">Save 20%</span>
+            </button>
+          </div>
+
+          <!-- Price Card -->
+          <div class="space-y-3 mt-4" id="plan-price-display">
+            <p class="text-3xl font-black text-slate-900 m-0"><%= currencySymbol %>5,500 <span class="text-xs font-medium text-slate-500">/ Month</span></p>
+          </div>
+
+          <!-- Value Proposition Bullet List -->
+          <ul class="space-y-3 m-0 p-0 list-none text-xs font-semibold text-slate-700">
+            <li class="flex items-center gap-2.5">
+              <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <span>Free 30-day trial, cancel anytime with one click</span>
+            </li>
+            <li class="flex items-center gap-2.5">
+              <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <span>We'll send a reminder email 7 days before your trial ends</span>
+            </li>
+            <li class="flex items-center gap-2.5">
+              <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <span>Unlimited invoicing and expenses analysis</span>
+            </li>
+          </ul>
+
+          <button type="button" onclick="showPaystackBillingForm()"
+            class="w-full sm:w-auto h-12 inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider px-6 rounded-xl cursor-pointer transition-all border-0 shadow-md mt-4">
+            <span>Start 30-Day Free Trial</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Right Column: Timeline Stepper -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-5">
+            <div class="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+              <div class="relative">
+                <span class="absolute -left-[1.5625rem] top-1 w-3 h-3 rounded-full bg-emerald-600 ring-4 ring-slate-50"></span>
+                <div class="text-xs font-bold text-slate-900">Today</div>
+                <div class="text-xs text-slate-500 mt-0.5">Instant unlimited access to all Ledger Pro features.</div>
+              </div>
+              <div class="relative">
+                <span class="absolute -left-[1.5625rem] top-1 w-3 h-3 rounded-full bg-slate-300 ring-4 ring-slate-50"></span>
+                <div class="text-xs font-bold text-slate-900">Day 23</div>
+                <div class="text-xs text-slate-500 mt-0.5">Trial reminder email sent with single-click cancellation.</div>
+              </div>
+              <div class="relative">
+                <span class="absolute -left-[1.5625rem] top-1 w-3 h-3 rounded-full bg-slate-300 ring-4 ring-slate-50"></span>
+                <div class="text-xs font-bold text-slate-900">Day 30</div>
+                <div class="text-xs text-slate-500 mt-0.5">First billing cycle starts unless canceled prior.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- STEP 2: Functional Billing & Card Details Form (Initially Hidden) -->
+      <div id="paystack-step-form" class="hidden w-full py-2">
+        <button type="button" onclick="showPaystackOverview()" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 bg-transparent border-0 cursor-pointer p-0 mb-4 transition-colors">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Plan Overview
+        </button>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+          <div class="mb-5 pb-3 border-b border-slate-100">
+            <h3 class="text-lg font-bold text-slate-900 m-0">Enter Billing Details</h3>
+            <p class="text-xs text-slate-500 mt-1 m-0">Verify your card to activate your 30-day trial. $0.00 due today.</p>
+          </div>
+
+          <form id="paystack-card-form" onsubmit="handlePaystackCheckout(event)" class="space-y-4">
+            <div>
+              <label for="paystack-email" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Billing Email Address *</label>
+              <input type="email" id="paystack-email" name="email" value="<%= currentUser ? currentUser.email : '' %>" placeholder="billing@company.com" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50/50 text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900 transition-all">
+            </div>
+
+            <div>
+              <div class="flex justify-between items-center mb-1.5">
+                <label for="paystack-card-num" class="block text-xs font-bold uppercase tracking-wider text-slate-600 m-0">Card Number *</label>
+                <span class="text-[0.65rem] font-bold text-slate-400">Visa / MasterCard / Verve</span>
+              </div>
+              <input type="text" id="paystack-card-num" placeholder="4532 •••• •••• 8892" maxlength="19" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs font-mono bg-slate-50/50 text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900 transition-all">
+            </div>
+
+            <div class="flex gap-3">
+              <div class="flex-1">
+                <label for="paystack-card-exp" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Expiry Date *</label>
+                <input type="text" id="paystack-card-exp" placeholder="MM / YY" maxlength="5" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs font-mono bg-slate-50/50 text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900 transition-all">
+              </div>
+              <div class="flex-1">
+                <label for="paystack-card-cvv" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">CVV / CVC *</label>
+                <input type="password" id="paystack-card-cvv" placeholder="•••" maxlength="4" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs font-mono bg-slate-50/50 text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900 transition-all">
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between py-2 px-3 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-500">
+              <span class="flex items-center gap-1.5 font-medium">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-600">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                Paystack PCI-DSS Secured
+              </span>
+              <span class="font-mono text-[0.68rem] text-slate-600 font-bold uppercase">$0.00 DUE TODAY</span>
+            </div>
+
+            <button type="submit" id="paystack-submit-btn" class="w-full h-12 inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider px-5 rounded-xl cursor-pointer transition-all border-0 shadow-md mt-2">
+              <span>Pay</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- Paystack Pop & Trial Activation Script -->
+<script>
+  let selectedPlanCycle = 'monthly';
+
+  function selectPlanCycle(cycle) {
+    selectedPlanCycle = cycle;
+    const btnMonthly = document.getElementById('toggle-monthly-btn');
+    const btnYearly = document.getElementById('toggle-yearly-btn');
+    const priceDisplay = document.getElementById('plan-price-display');
+
+    if (cycle === 'yearly') {
+      if (btnMonthly) {
+        btnMonthly.className = 'flex-1 sm:flex-initial px-5 py-2.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all cursor-pointer bg-transparent';
+      }
+      if (btnYearly) {
+        btnYearly.className = 'flex-1 sm:flex-initial px-5 py-2.5 rounded-full text-xs font-bold bg-slate-900 text-white shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5';
+      }
+      if (priceDisplay) {
+        priceDisplay.innerHTML = `<p class="text-3xl font-black text-slate-900 m-0"><%= currencySymbol %>44,000 <span class="text-xs font-medium text-slate-500">/ Year</span> <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full ml-1">(Save 20% / <%= currencySymbol %>11,000)</span></p>`;
+      }
+    } else {
+      if (btnYearly) {
+        btnYearly.className = 'flex-1 sm:flex-initial px-5 py-2.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all cursor-pointer bg-transparent flex items-center justify-center gap-1.5';
+      }
+      if (btnMonthly) {
+        btnMonthly.className = 'flex-1 sm:flex-initial px-5 py-2.5 rounded-full text-xs font-bold bg-slate-900 text-white shadow-xs transition-all cursor-pointer';
+      }
+      if (priceDisplay) {
+        priceDisplay.innerHTML = `<p class="text-3xl font-black text-slate-900 m-0"><%= currencySymbol %>5,500 <span class="text-xs font-medium text-slate-500">/ Month</span></p>`;
+      }
+    }
+  }
+
+  function triggerPaystackBillingModal() {
+    showPaystackOverview();
+    openModal('modal-paystack-billing');
+  }
+
+  function showPaystackBillingForm() {
+    const card = document.getElementById('paystack-modal-card');
+    const step1 = document.getElementById('paystack-step-overview');
+    const step2 = document.getElementById('paystack-step-form');
+    if (card) {
+      card.classList.remove('max-w-4xl');
+      card.classList.add('max-w-md');
+    }
+    if (step1 && step2) {
+      step1.classList.add('hidden');
+      step2.classList.remove('hidden');
+    }
+  }
+
+  function showPaystackOverview() {
+    const card = document.getElementById('paystack-modal-card');
+    const step1 = document.getElementById('paystack-step-overview');
+    const step2 = document.getElementById('paystack-step-form');
+    if (card) {
+      card.classList.remove('max-w-md');
+      card.classList.add('max-w-4xl');
+    }
+    if (step1 && step2) {
+      step2.classList.add('hidden');
+      step1.classList.remove('hidden');
+    }
+  }
+
+  async function handlePaystackCheckout(e) {
+    e.preventDefault();
+    const btn = document.getElementById('paystack-submit-btn');
+    const email = document.getElementById('paystack-email').value;
+    const cardNum = document.getElementById('paystack-card-num').value.replace(/\s+/g, '');
+    const expVal = document.getElementById('paystack-card-exp').value;
+    const cvv = document.getElementById('paystack-card-cvv').value;
+
+    btn.disabled = true;
+    btn.innerHTML = '<span>Processing Secure Verification...</span>';
+
+    const expParts = expVal.split('/');
+    const expMonth = expParts[0] ? expParts[0].trim() : '12';
+    const expYear = expParts[1] ? expParts[1].trim() : '28';
+    const last4 = cardNum.length >= 4 ? cardNum.slice(-4) : '4242';
+
+    try {
+      const res = await fetch('/billing/trial/activate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          email: email,
+          plan: selectedPlanCycle === 'yearly' ? 'pro_yearly' : 'starter',
+          card_brand: cardNum.startsWith('4') ? 'Visa' : 'MasterCard',
+          card_last4: last4,
+          card_exp_month: expMonth,
+          card_exp_year: expYear,
+          paystack_auth_code: 'AUTH_' + Math.random().toString(36).substring(2, 10).toUpperCase()
+        })
+      });
+
+      const data = await res.json();
+      if (data.status) {
+        window.location.href = data.redirectUrl || '/invoices/new';
+      } else {
+        alert(data.message || 'Failed to activate trial. Please try again.');
+        btn.disabled = false;
+        btn.innerHTML = '<span>Start 30-Day Free Trial</span>';
+      }
+    } catch (err) {
+      console.error('Paystack Trial Error:', err);
+      alert('An error occurred. Please try again.');
+      btn.disabled = false;
+      btn.innerHTML = '<span>Start 30-Day Free Trial</span>';
+    }
+  }
+
+  // Auto-open modal if URL query has ?billingModal=1
+  document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('billingModal') === '1') {
+      triggerPaystackBillingModal();
+    }
+  });
+</script>
 
 <!-- Hidden product selector options template -->
-<select id="mi-products-template" style="display:none;">
-  <option value="" data-name="" data-desc="" data-price="0.00" data-tax="<%= defaultDiscountRate || 0 %>">Custom Item...</option>
-  <% if (typeof globalProducts !== 'undefined' && globalProducts.length) { %>
-    <% globalProducts.forEach(p => { %>
-      <option value="<%= p.id %>" data-name="<%= p.name %>" data-desc="<%= p.description %>" data-price="<%= p.unit_price.toFixed(2) %>" data-tax="<%= p.tax_rate %>"><%= p.name %></option>
-    <% }) %>
-  <% } %>
+<select id="mi-products-template" class="hidden">
+  <option value="" data-name="" data-desc="" data-price="0.00" data-tax="<%= defaultDiscountRate || 0 %>">Custom Item...
+  </option>
+  <% if (typeof globalProducts !=='undefined' && globalProducts.length) { %>
+    <% globalProducts.forEach(p=> { %>
+      <option value="<%= p.id %>" data-name="<%= p.name %>" data-desc="<%= p.description %>"
+        data-price="<%= p.unit_price.toFixed(2) %>" data-tax="<%= p.tax_rate %>">
+        <%= p.name %>
+      </option>
+      <% }) %>
+        <% } %>
 </select>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const miBody = document.getElementById('mi-items-body');
-  const miBtn = document.getElementById('mi-add-item');
-  const miTotalDisp = document.getElementById('mi-disp-total');
+  document.addEventListener('DOMContentLoaded', () => {
+    const miBody = document.getElementById('mi-items-body');
+    const miBtn = document.getElementById('mi-add-item');
+    const miTotalDisp = document.getElementById('mi-disp-total');
 
-  function addModalInvoiceRow() {
-    if (!miBody) return;
-    const idx = miBody.children.length;
-    const tr = document.createElement('tr');
-    tr.className = 'item-row';
-    const productsHtml = document.getElementById('mi-products-template').innerHTML;
-    tr.innerHTML = `
-      <td>
-        <select name="items[${idx}][product_id]" class="mi-product-select" style="padding:6px 8px; width:100%;">
+    function addModalInvoiceRow() {
+      if (!miBody) return;
+      const idx = miBody.children.length;
+      const tr = document.createElement('tr');
+      tr.className = 'item-row border-b border-slate-100';
+      const productsHtml = document.getElementById('mi-products-template').innerHTML;
+      tr.innerHTML = `
+      <td class="py-2 px-2.5">
+        <select name="items[${idx}][product_id]" class="mi-product-select w-full py-1.5 px-2 text-xs border border-slate-200 rounded-md">
           ${productsHtml}
         </select>
         <input type="hidden" name="items[${idx}][description]" class="mi-product-name">
         <input type="hidden" name="items[${idx}][tax_rate]" class="mi-product-tax" value="0">
       </td>
-      <td>
-        <span class="mi-details-text">—</span>
+      <td class="py-2 px-2.5">
+        <span class="mi-details-text text-xs text-slate-500">—</span>
         <input type="hidden" name="items[${idx}][details]" class="mi-details">
       </td>
-      <td>
-        <input type="number" name="items[${idx}][quantity]" value="1" min="1" step="1" class="mi-qty" style="padding:4px 6px; width:60px;">
+      <td class="py-2 px-2.5">
+        <input type="number" name="items[${idx}][quantity]" value="1" min="1" step="1" class="mi-qty w-14 py-1 px-1.5 text-xs border border-slate-200 rounded-md">
       </td>
-      <td>
-        <span class="mi-price-text"><%= currencySymbol %>0.00</span>
+      <td class="py-2 px-2.5">
+        <span class="mi-price-text text-xs text-slate-700 font-mono"><%= currencySymbol %>0.00</span>
         <input type="hidden" name="items[${idx}][unit_price]" value="0.00" class="mi-price">
       </td>
-      <td class="money mi-line-total"><%= currencySymbol %>0.00</td>
-      <td>
-        <button type="button" class="mi-del-row" style="background:none; border:none; color:#64748b; cursor:pointer; font-weight:bold; font-size:1.25rem;">&minus;</button>
+      <td class="py-2 px-2.5 font-mono text-xs font-semibold text-slate-900 mi-line-total"><%= currencySymbol %>0.00</td>
+      <td class="py-2 px-2.5 text-right">
+        <button type="button" class="mi-del-row bg-transparent border-0 text-slate-400 cursor-pointer font-bold text-lg hover:text-red-500 p-0 line-height-none">&minus;</button>
       </td>
     `;
-    miBody.appendChild(tr);
+      miBody.appendChild(tr);
 
-    const select = tr.querySelector('.mi-product-select');
-    const nameInput = tr.querySelector('.mi-product-name');
-    const taxInput = tr.querySelector('.mi-product-tax');
-    const descInput = tr.querySelector('.mi-details');
-    const descText = tr.querySelector('.mi-details-text');
-    const qtyInput = tr.querySelector('.mi-qty');
-    const priceInput = tr.querySelector('.mi-price');
-    const priceText = tr.querySelector('.mi-price-text');
+      const select = tr.querySelector('.mi-product-select');
+      const nameInput = tr.querySelector('.mi-product-name');
+      const taxInput = tr.querySelector('.mi-product-tax');
+      const descInput = tr.querySelector('.mi-details');
+      const descText = tr.querySelector('.mi-details-text');
+      const qtyInput = tr.querySelector('.mi-qty');
+      const priceInput = tr.querySelector('.mi-price');
+      const priceText = tr.querySelector('.mi-price-text');
 
-    select.addEventListener('change', () => {
-      const opt = select.options[select.selectedIndex];
-      if (select.value === "") {
-        nameInput.value = "Custom Item";
-        descInput.value = "";
-        descText.textContent = "—";
-        qtyInput.value = "1";
-        priceInput.value = "0.00";
-        priceText.textContent = "<%= currencySymbol %>0.00";
-        taxInput.value = "<%= defaultDiscountRate || 0 %>";
-      } else {
-        const name = opt.getAttribute('data-name') || "";
-        const desc = opt.getAttribute('data-desc') || "";
-        const price = opt.getAttribute('data-price') || "0.00";
-        const tax = opt.getAttribute('data-tax') || "0";
+      select.addEventListener('change', () => {
+        const opt = select.options[select.selectedIndex];
+        if (select.value === "") {
+          nameInput.value = "Custom Item";
+          descInput.value = "";
+          descText.textContent = "—";
+          qtyInput.value = "1";
+          priceInput.value = "0.00";
+          priceText.textContent = "<%= currencySymbol %>0.00";
+          taxInput.value = "<%= defaultDiscountRate || 0 %>";
+        } else {
+          const name = opt.getAttribute('data-name') || "";
+          const desc = opt.getAttribute('data-desc') || "";
+          const price = opt.getAttribute('data-price') || "0.00";
+          const tax = opt.getAttribute('data-tax') || "0";
 
-        nameInput.value = name;
-        descInput.value = desc;
-        descText.textContent = desc || "—";
-        qtyInput.value = "1";
-        priceInput.value = price;
-        priceText.textContent = "<%= currencySymbol %>" + parseFloat(price).toFixed(2);
-        taxInput.value = tax;
-      }
-      calcModalInvoiceTotals();
-    });
-
-    select.dispatchEvent(new Event('change'));
-  }
-
-  function calcModalInvoiceTotals() {
-    if (!miBody) return;
-    let grand = 0;
-    miBody.querySelectorAll('tr').forEach(tr => {
-      const q = parseFloat(tr.querySelector('.mi-qty')?.value) || 0;
-      const p = parseFloat(tr.querySelector('.mi-price')?.value) || 0;
-      const discount = parseFloat(tr.querySelector('.mi-product-tax')?.value) || 0;
-      const tot = q * p * (1 - discount / 100);
-      grand += tot;
-      const totEl = tr.querySelector('.mi-line-total');
-      if (totEl) totEl.textContent = '<%= currencySymbol %>' + tot.toFixed(2);
-    });
-    if (miTotalDisp) miTotalDisp.textContent = '<%= currencySymbol %>' + grand.toFixed(2);
-  }
-
-  if (miBtn) {
-    miBtn.addEventListener('click', addModalInvoiceRow);
-    addModalInvoiceRow(); // Add default initial row
-  }
-
-  if (miBody) {
-    miBody.addEventListener('input', calcModalInvoiceTotals);
-    miBody.addEventListener('click', (e) => {
-      if (e.target.classList.contains('mi-del-row')) {
-        if (miBody.children.length > 1) {
-          e.target.closest('tr').remove();
-          calcModalInvoiceTotals();
+          nameInput.value = name;
+          descInput.value = desc;
+          descText.textContent = desc || "—";
+          qtyInput.value = "1";
+          priceInput.value = price;
+          priceText.textContent = "<%= currencySymbol %>" + parseFloat(price).toFixed(2);
+          taxInput.value = tax;
         }
-      }
-    });
-  }
-});
-</script>
+        calcModalInvoiceTotals();
+      });
 
+      select.dispatchEvent(new Event('change'));
+    }
+
+    function calcModalInvoiceTotals() {
+      if (!miBody) return;
+      let grand = 0;
+      miBody.querySelectorAll('tr').forEach(tr => {
+        const q = parseFloat(tr.querySelector('.mi-qty')?.value) || 0;
+        const p = parseFloat(tr.querySelector('.mi-price')?.value) || 0;
+        const discount = parseFloat(tr.querySelector('.mi-product-tax')?.value) || 0;
+        const tot = q * p * (1 - discount / 100);
+        grand += tot;
+        const totEl = tr.querySelector('.mi-line-total');
+        if (totEl) totEl.textContent = '<%= currencySymbol %>' + tot.toFixed(2);
+      });
+      if (miTotalDisp) miTotalDisp.textContent = '<%= currencySymbol %>' + grand.toFixed(2);
+    }
+
+    if (miBtn) {
+      miBtn.addEventListener('click', addModalInvoiceRow);
+      addModalInvoiceRow(); // Add default initial row
+    }
+
+    if (miBody) {
+      miBody.addEventListener('input', calcModalInvoiceTotals);
+      miBody.addEventListener('click', (e) => {
+        if (e.target.classList.contains('mi-del-row')) {
+          if (miBody.children.length > 1) {
+            e.target.closest('tr').remove();
+            calcModalInvoiceTotals();
+          }
+        }
+      });
+    }
+  });
+</script>

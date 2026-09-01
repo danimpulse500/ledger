@@ -2,59 +2,30 @@
 <html lang="en">
 <head>
   <%- include('../partials/head') %>
-  <style>
-    .platform-login-wrap {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--accent-dark);
-    }
-    .platform-login-card {
-      background: var(--surface);
-      padding: 40px 36px;
-      border-radius: 10px;
-      width: 380px;
-      max-width: 90%;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.25);
-    }
-    .platform-login-card h1 { text-align: center; margin-bottom: 2px; }
-    .platform-login-card .sub { text-align: center; color: var(--ink-soft); font-size: 0.85rem; margin-bottom: 24px; }
-    .operator-badge {
-      display: inline-block;
-      background: var(--accent);
-      color: #fff;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      padding: 3px 8px;
-      border-radius: 4px;
-      margin-bottom: 6px;
-    }
-  </style>
 </head>
-<body>
-  <div class="platform-login-wrap">
-    <div class="platform-login-card">
-      <div style="text-align:center;"><span class="operator-badge">Platform Operator</span></div>
-      <h1>Ledger</h1>
-      <div class="sub">Sign in to multi-tenant control center</div>
+<body class="bg-slate-900 font-sans antialiased">
+  <div class="min-h-screen flex items-center justify-center bg-slate-900 p-4">
+    <div class="bg-white p-10 rounded-2xl w-full max-w-sm shadow-2xl border border-slate-800">
+      <div class="text-center mb-2">
+        <span class="inline-block bg-slate-900 text-white text-[0.7rem] font-bold tracking-widest uppercase px-2.5 py-1 rounded-md">Platform Operator</span>
+      </div>
+      <h1 class="text-2xl font-black text-center text-slate-900 mb-1 uppercase tracking-tight">Ledger</h1>
+      <div class="text-center text-slate-500 text-sm mb-6">Sign in to multi-tenant control center</div>
 
       <% if (error) { %>
-        <div class="alert alert-error"><%= error %></div>
+        <div class="p-3 rounded-lg text-sm mb-4 bg-red-50 text-red-600 border border-red-200"><%= error %></div>
       <% } %>
 
-      <form method="POST" action="/platform/login">
-        <div class="field">
-          <label for="email">Platform Admin Email</label>
-          <input type="email" id="email" name="email" required autofocus placeholder="admin@platform.com">
+      <form method="POST" action="/platform/login" class="space-y-4">
+        <div>
+          <label for="email" class="block text-xs font-semibold text-slate-600 mb-1.5">Platform Admin Email</label>
+          <input type="email" id="email" name="email" required autofocus placeholder="admin@platform.com" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
         </div>
-        <div class="field">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" required placeholder="••••••••">
+        <div>
+          <label for="password" class="block text-xs font-semibold text-slate-600 mb-1.5">Password</label>
+          <input type="password" id="password" name="password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
         </div>
-        <button type="submit" class="btn" style="width:100%; justify-content:center; padding:11px;">Log in to Operator Portal</button>
+        <button type="submit" class="w-full inline-flex items-center justify-center bg-slate-900 text-white font-semibold text-sm px-4 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-colors border-0">Log in to Operator Portal</button>
       </form>
     </div>
   </div>

@@ -3,93 +3,93 @@
 <head>
   <%- include('../partials/head') %>
 </head>
-<body>
-  <div class="app-shell">
-    <div class="sidebar no-print">
-      <div class="brand">Ledger
-        <span class="co-name">Platform Control</span>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+  <div class="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div class="w-[240px] shrink-0 bg-white border-r border-slate-200 p-4 flex flex-col h-screen overflow-y-auto no-print">
+      <div class="flex flex-col gap-0.5 pb-5 border-b border-slate-100 mb-5">
+        <span class="text-base font-black text-slate-900 uppercase tracking-tight">Ledger</span>
+        <span class="text-xs text-slate-500 font-medium">Platform Control</span>
       </div>
-      <nav>
-        <a href="/platform" class="active">Overview</a>
-        <a href="/platform/organizations">Organizations</a>
+      <nav class="flex flex-col gap-1">
+        <a href="/platform" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white">Overview</a>
+        <a href="/platform/organizations" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all">Organizations</a>
       </nav>
-      <div class="spacer"></div>
-      <div class="user-box">
-        <div class="u-name"><%= currentPlatformAdmin ? currentPlatformAdmin.name : 'Operator' %></div>
-        <div class="u-role">Super Admin</div>
-        <form method="POST" action="/platform/logout">
-          <button type="submit">Log out</button>
+      <div class="mt-auto p-3 bg-slate-50 rounded-2xl border border-slate-100">
+        <div class="text-[0.83rem] font-semibold text-slate-900 truncate"><%= currentPlatformAdmin ? currentPlatformAdmin.name : 'Operator' %></div>
+        <div class="text-[0.72rem] text-slate-500">Super Admin</div>
+        <form method="POST" action="/platform/logout" class="mt-2">
+          <button type="submit" class="w-full text-xs font-semibold text-red-600 bg-transparent border border-red-200 rounded-lg py-1 hover:bg-red-50 cursor-pointer">Log out</button>
         </form>
       </div>
     </div>
 
-    <div class="main">
-      <div class="topbar">
+    <div class="flex-1 p-8 max-w-7xl h-screen overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
         <div>
-          <h1>Platform Dashboard</h1>
-          <p class="text-soft">Overview of all tenant organizations and multi-tenant system health.</p>
+          <h1 class="text-2xl font-bold text-slate-900 m-0">Platform Dashboard</h1>
+          <p class="text-slate-500 text-sm mt-1 m-0">Overview of all tenant organizations and multi-tenant system health.</p>
         </div>
       </div>
 
-      <div class="grid grid-4">
-        <div class="card stat-card">
-          <div class="label">Total Organizations</div>
-          <div class="value figure"><%= metrics.total_orgs %></div>
-          <div class="text-faint" style="margin-top:4px;">
-            <span style="color:var(--success)"><%= metrics.active_orgs %> Active</span> &bull; 
-            <span style="color:var(--danger)"><%= metrics.suspended_orgs %> Suspended</span>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider mb-2">Total Organizations</div>
+          <div class="text-2xl font-bold font-mono tracking-tight text-slate-900"><%= metrics.total_orgs %></div>
+          <div class="text-xs text-slate-400 mt-2">
+            <span class="text-emerald-600 font-semibold"><%= metrics.active_orgs %> Active</span> &bull; 
+            <span class="text-red-500 font-semibold"><%= metrics.suspended_orgs %> Suspended</span>
           </div>
         </div>
-        <div class="card stat-card">
-          <div class="label">Registered Users</div>
-          <div class="value figure"><%= metrics.total_users %></div>
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider mb-2">Registered Users</div>
+          <div class="text-2xl font-bold font-mono tracking-tight text-slate-900"><%= metrics.total_users %></div>
         </div>
-        <div class="card stat-card">
-          <div class="label">Total Invoices</div>
-          <div class="value figure"><%= metrics.total_invoices %></div>
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider mb-2">Total Invoices</div>
+          <div class="text-2xl font-bold font-mono tracking-tight text-slate-900"><%= metrics.total_invoices %></div>
         </div>
-        <div class="card stat-card">
-          <div class="label">Total Processed Volume</div>
-          <div class="value figure ok">$<%= Number(metrics.total_volume).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider mb-2">Total Processed Volume</div>
+          <div class="text-2xl font-bold font-mono tracking-tight text-slate-900">$<%= Number(metrics.total_volume).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
         </div>
       </div>
 
-      <div class="grid grid-2" style="margin-top:20px; align-items:start;">
-        <div class="card">
-          <div class="section-title">
-            <h2>Recent Organizations</h2>
-            <a href="/platform/organizations" class="text-faint">View all &rarr;</a>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+          <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+            <h2 class="text-base font-bold text-slate-900 m-0">Recent Organizations</h2>
+            <a href="/platform/organizations" class="text-xs text-slate-500 hover:text-slate-900 font-semibold no-underline">View all &rarr;</a>
           </div>
           <% if (recentOrgs.length === 0) { %>
-            <p class="text-soft">No organizations registered yet.</p>
+            <p class="text-slate-500 text-sm m-0">No organizations registered yet.</p>
           <% } else { %>
-            <table>
+            <table class="w-full border-collapse text-sm">
               <thead>
-                <tr>
-                  <th>Organization</th>
-                  <th>Plan</th>
-                  <th>Status</th>
-                  <th>Members</th>
-                  <th>Invoices</th>
-                  <th>Action</th>
+                <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
+                  <th class="py-2.5 px-3">Organization</th>
+                  <th class="py-2.5 px-3">Plan</th>
+                  <th class="py-2.5 px-3">Status</th>
+                  <th class="py-2.5 px-3 font-mono">Members</th>
+                  <th class="py-2.5 px-3 font-mono">Invoices</th>
+                  <th class="py-2.5 px-3 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="divide-y divide-slate-100">
                 <% recentOrgs.forEach(org => { %>
-                  <tr>
-                    <td>
-                      <strong><%= org.name %></strong>
-                      <div class="text-faint"><%= org.slug %></div>
+                  <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="py-3 px-3">
+                      <strong class="text-slate-900 block"><%= org.name %></strong>
+                      <div class="text-xs text-slate-400 font-mono"><%= org.slug %></div>
                     </td>
-                    <td><span class="badge badge-sent"><%= org.plan %></span></td>
-                    <td>
+                    <td class="py-3 px-3"><span class="badge badge-sent"><%= org.plan %></span></td>
+                    <td class="py-3 px-3">
                       <span class="badge <%= org.status === 'active' ? 'badge-paid' : 'badge-overdue' %>">
                         <%= org.status %>
                       </span>
                     </td>
-                    <td><%= org.member_count %></td>
-                    <td><%= org.invoice_count %></td>
-                    <td><a href="/platform/organizations/<%= org.id %>" class="btn btn-sm btn-ghost">Manage</a></td>
+                    <td class="py-3 px-3 font-mono text-slate-700"><%= org.member_count %></td>
+                    <td class="py-3 px-3 font-mono text-slate-700"><%= org.invoice_count %></td>
+                    <td class="py-3 px-3 text-right"><a href="/platform/organizations/<%= org.id %>" class="inline-flex items-center bg-transparent text-slate-700 border border-slate-200 px-3 py-1 text-xs font-semibold rounded-full hover:bg-slate-100 no-underline">Manage</a></td>
                   </tr>
                 <% }) %>
               </tbody>
@@ -97,17 +97,17 @@
           <% } %>
         </div>
 
-        <div class="card">
-          <div class="section-title">
-            <h2>Subscription Plans Breakdown</h2>
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+          <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+            <h2 class="text-base font-bold text-slate-900 m-0">Subscription Plans Breakdown</h2>
           </div>
-          <ul class="link-list">
+          <ul class="space-y-3 p-0 m-0 list-none text-sm">
             <% planStats.forEach(p => { %>
-              <li style="display:flex; justify-content:space-between; align-items:center;">
+              <li class="flex justify-between items-center py-2 border-b border-slate-100 last:border-0">
                 <div>
-                  <span class="badge badge-sent" style="text-transform:capitalize;"><%= p.plan %> Plan</span>
+                  <span class="badge badge-sent capitalize"><%= p.plan %> Plan</span>
                 </div>
-                <div class="figure" style="font-weight:700; font-size:1.1rem;"><%= p.count %> org(s)</div>
+                <div class="font-mono font-bold text-lg text-slate-900"><%= p.count %> org(s)</div>
               </li>
             <% }) %>
           </ul>

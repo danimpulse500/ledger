@@ -2,281 +2,184 @@
 <html lang="en">
 
 <head>
-    <%- include('partials/head') %>
+  <%- include('partials/head') %>
 </head>
 
-<body>
-    <div class="app-shell">
-        <%- include('partials/sidebar') %>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+  <div class="flex h-screen w-full overflow-hidden bg-slate-50">
+    <%- include('partials/sidebar') %>
 
-            <div class="main">
-                <!-- ====== PAGE HEADER ====== -->
-                <div class="page-heading">
-                    <div>
-                        <!-- <p class="eyebrow">Subscription & usage</p> -->
-                        <h1>Billing</h1>
-                        <p class="text-soft">Manage your plan, payment methods, and view past invoices.</p>
-                    </div>
-                    <a href="/billing/upgrade" class="btn btn-black">Upgrade plan</a>
-                </div>
+    <div class="flex-1 p-8 max-w-7xl h-screen overflow-y-auto">
+      <!-- ====== PAGE HEADER ====== -->
+      <div class="flex justify-between items-end gap-5 mb-7">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900 mb-1">Billing & Subscriptions</h1>
+          <p class="text-slate-500 text-sm m-0">Manage your active plan, payment methods, and download payment receipts.</p>
+        </div>
+        <button type="button" class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-5 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-colors border-0 no-underline shadow-xs" onclick="triggerPaystackBillingModal()">Manage Subscription</button>
+      </div>
 
-            <!-- ====== PLAN & USAGE SUMMARY ====== -->
-       
-                <!-- ====== PAYMENT METHODS ====== -->
-                <div class="card billing-payment-card mb-3">
-                    <div class="section-title">
-                        <div>
-                            <h3>Payment methods</h3>
-                            <p class="text-soft">Manage your credit cards and billing details.</p>
-                        </div>
-                        <button class="btn btn-ghost btn-sm" style="border: none !important;" onclick="addPaymentMethod()">+ Add method</button>
-                    </div>
+      <!-- Flash Notification Message -->
+      <% if (msg) { %>
+        <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm font-semibold flex items-center justify-between shadow-xs">
+          <div class="flex items-center gap-2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-600">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span><%= msg %></span>
+          </div>
+          <button type="button" class="bg-transparent border-0 text-emerald-700 hover:text-emerald-900 font-bold cursor-pointer" onclick="this.parentElement.remove()">✕</button>
+        </div>
+      <% } %>
 
-                    <% if (paymentMethods.length===0) { %>
-                        <div class="empty-notice">
-                            <p class="text-soft">No payment methods on file. <a href="/billing/payment">Add one</a> to
-                                avoid service interruption.</p>
-                        </div>
-                        <% } else { %>
-                            <div class="payment-methods-list">
-                                <% paymentMethods.forEach(method=> { %>
-                                    <div class="payment-method-item">
-                                        <div class="payment-method-icon">
-                                            <span class="card-icon <%= method.brand %>"></span>
-                                        </div>
-                                        <div class="payment-method-details">
-                                            <strong>
-                                                <%= method.brand %> ending in <%= method.last4 %>
-                                            </strong>
-                                            <span class="text-soft">Expires <%= method.expiry %></span>
-                                            <% if (method.isDefault) { %>
-                                                <span class="badge badge-default">Default</span>
-                                                <% } %>
-                                        </div>
-                                        <div class="payment-method-actions">
-                                            <button class="btn btn-ghost btn-sm"
-                                                onclick="editPaymentMethod('<%= method.id %>')">Edit</button>
-                                            <button class="btn btn-ghost btn-sm text-danger"
-                                                onclick="deletePaymentMethod('<%= method.id %>')">Remove</button>
-                                        </div>
-                                    </div>
-                                    <% }) %>
-                            </div>
-                            <% } %>
+      <% if (error) { %>
+        <div class="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-900 text-sm font-semibold flex items-center justify-between shadow-xs">
+          <div class="flex items-center gap-2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-red-600">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span><%= error %></span>
+          </div>
+          <button type="button" class="bg-transparent border-0 text-red-700 hover:text-red-900 font-bold cursor-pointer" onclick="this.parentElement.remove()">✕</button>
+        </div>
+      <% } %>
 
-                                <div class="billing-address">
-                                    <h4>Billing address</h4>
-                                    <p>
-                                        <%= billingAddress %>
-                                    </p>
-                                    <button class="btn" onclick="editBillingAddress()">Update
-                                        address</button>
-                                </div>
-                </div>
-
-                <!-- ====== INVOICE HISTORY ====== -->
-                <!-- <div class="card billing-invoice-history">
-                    <div class="section-title">
-                        <div>
-                            <h3>Invoice history</h3>
-                            <p class="text-soft">All past charges and receipts.</p>
-                        </div>
-                        <a href="/billing/invoices" class="btn btn-ghost btn-sm">View all</a>
-                    </div>
-
-                    <% if (invoiceHistory.length===0) { %>
-                        <div class="empty-notice">
-                            <p class="text-soft">No invoices yet.</p>
-                        </div>
-                        <% } else { %>
-                            <table class="invoxa-table">
-                                <thead>
-                                    <tr>
-                                        <th>Invoice</th>
-                                        <th>Date</th>
-                                        <th>Amount</th>
-                                        <th>Status</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% invoiceHistory.forEach(inv=> { %>
-                                        <tr>
-                                            <td><strong>
-                                                    <%= inv.number %>
-                                                </strong></td>
-                                            <td class="text-soft">
-                                                <%= inv.date %>
-                                            </td>
-                                            <td class="money">
-                                                <%= currencySymbol %>
-                                                    <%= inv.amount.toFixed(2) %>
-                                            </td>
-                                            <td><span class="status-pill status-<%= inv.status %>">
-                                                    <%= inv.status %>
-                                                </span></td>
-                                            <td style="text-align:right;">
-                                                <a href="/billing/invoices/<%= inv.id %>"
-                                                    class="btn btn-ghost btn-sm">Download PDF</a>
-                                            </td>
-                                        </tr>
-                                        <% }) %>
-                                </tbody>
-                            </table>
-                            <% } %>
-                </div> -->
-
-                <!-- ====== DANGER ZONE (optional) ====== -->
-                <div class="card" style="margin-top: 10px;">
-                    <div class="section-title">
-                        <div>
-                            <h3>Danger zone</h3>
-                            <p class="text-soft">Cancel your subscription and delete all billing data.</p>
-                        </div>
-                    </div>
-                    <button class="btn" style="background-color: #C53030; color: white;" onclick="confirmCancel()">Cancel subscription</button>
-                </div>
+      <!-- ====== ACTIVE PLAN SUMMARY CARD ====== -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs mb-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+          <div>
+            <div class="flex items-center gap-2.5">
+              <h3 class="text-lg font-bold text-slate-900 m-0"><%= plan.name %></h3>
+              <% if (org && org.subscription_status === 'trialing') { %>
+                <span class="bg-slate-900 text-white text-[0.68rem] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full">30-Day Free Trial</span>
+              <% } else if (org && org.subscription_status === 'active') { %>
+                <span class="bg-emerald-100 text-emerald-800 text-[0.68rem] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full">Active Subscription</span>
+              <% } else { %>
+                <span class="bg-amber-100 text-amber-800 text-[0.68rem] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full">Inactive</span>
+              <% } %>
             </div>
+            <p class="text-sm text-slate-500 mt-1 m-0"><%= plan.features %></p>
+          </div>
+          <div class="text-left md:text-right">
+            <div class="text-2xl font-black text-slate-900"><%= plan.price %></div>
+            <% if (org && org.trial_ends_at) { %>
+              <div class="text-xs text-slate-500 mt-1">Trial Expiration: <strong><%= new Date(org.trial_ends_at).toLocaleDateString() %></strong></div>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="pt-5 flex flex-wrap items-center justify-between gap-4">
+          <div class="text-xs text-slate-500 font-medium">
+            Next Renewal / Billing Date: <strong><%= org && org.trial_ends_at ? new Date(org.trial_ends_at).toLocaleDateString() : 'Active' %></strong>
+          </div>
+          <button type="button" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-full border-0 cursor-pointer transition-all shadow-xs" onclick="triggerPaystackBillingModal()">Update Billing Method</button>
+        </div>
+      </div>
+
+      <!-- ====== PAYMENT & TRANSACTION HISTORY ====== -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h3 class="text-base font-bold text-slate-900 m-0">Payment History & Receipts</h3>
+            <p class="text-slate-500 text-xs mt-0.5 m-0">View all past subscription charges and download tax receipts.</p>
+          </div>
+          <span class="text-xs font-semibold text-slate-400"><%= typeof transactions !== 'undefined' ? transactions.length : 0 %> Record(s)</span>
+        </div>
+
+        <% if (typeof transactions === 'undefined' || transactions.length === 0) { %>
+          <div class="py-8 text-center text-slate-500 text-sm bg-slate-50/50 rounded-xl border border-slate-100">
+            <p class="m-0 font-medium">No payment history recorded yet.</p>
+          </div>
+        <% } else { %>
+          <div class="overflow-x-auto">
+            <table class="w-full border-collapse text-left text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[0.68rem]">
+                  <th class="py-3 px-3">Date</th>
+                  <th class="py-3 px-3">Reference</th>
+                  <th class="py-3 px-3">Description</th>
+                  <th class="py-3 px-3">Payment Method</th>
+                  <th class="py-3 px-3 text-right">Amount</th>
+                  <th class="py-3 px-3 text-center">Status</th>
+                  <th class="py-3 px-3 text-right">Receipt</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                <% transactions.forEach(tx => { %>
+                  <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3.5 px-3 whitespace-nowrap"><%= new Date(tx.created_at).toLocaleDateString() %></td>
+                    <td class="py-3.5 px-3 font-mono font-semibold text-slate-900"><%= tx.reference %></td>
+                    <td class="py-3.5 px-3"><%= tx.description || 'Ledger Pro Plan' %></td>
+                    <td class="py-3.5 px-3"><%= tx.card_brand || 'Card' %> •••• <%= tx.card_last4 || '4242' %></td>
+                    <td class="py-3.5 px-3 text-right font-mono font-bold text-slate-900">
+                      <% if (tx.amount === 0) { %>
+                        <span class="text-emerald-700">₦0.00 (Trial)</span>
+                      <% } else { %>
+                        ₦<%= tx.amount.toFixed(2) %>
+                      <% } %>
+                    </td>
+                    <td class="py-3.5 px-3 text-center">
+                      <span class="bg-emerald-100 text-emerald-800 text-[0.65rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">Paid</span>
+                    </td>
+                    <td class="py-3.5 px-3 text-right">
+                      <a href="/billing/receipt/<%= tx.id %>/download" target="_blank" class="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-900 hover:text-white text-slate-700 font-semibold px-3 py-1.5 rounded-full text-[0.72rem] transition-all no-underline">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="7 10 12 15 17 10"></polyline>
+                          <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span>Receipt</span>
+                      </a>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- ====== PAYMENT METHODS ON FILE ====== -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h3 class="text-base font-bold text-slate-900 m-0">Payment methods</h3>
+            <p class="text-slate-500 text-xs mt-0.5 m-0">Credit card details connected for automated renewal.</p>
+          </div>
+          <button type="button" class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-3.5 py-1.5 text-xs font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all cursor-pointer" onclick="triggerPaystackBillingModal()">+ Add / Update Card</button>
+        </div>
+
+        <% if (paymentMethods.length === 0) { %>
+          <div class="py-6 text-center text-slate-500 text-sm bg-slate-50/50 rounded-xl border border-slate-100">
+            <p class="m-0 font-medium">No payment methods on file. <button type="button" onclick="triggerPaystackBillingModal()" class="text-slate-900 font-bold underline bg-transparent border-0 cursor-pointer">Add card details</button> to activate billing.</p>
+          </div>
+        <% } else { %>
+          <div class="my-2 divide-y divide-slate-100">
+            <% paymentMethods.forEach(method => { %>
+              <div class="flex items-center py-3.5">
+                <div class="w-10 h-7 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-[0.65rem] uppercase mr-3">
+                  <%= method.brand %>
+                </div>
+                <div class="flex-1">
+                  <strong class="block text-xs font-bold text-slate-900"><%= method.brand %> ending in <%= method.last4 %></strong>
+                  <span class="text-[0.7rem] text-slate-500">Expires <%= method.exp %></span>
+                  <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[0.62rem] font-bold uppercase tracking-wider ml-2">Default Card</span>
+                </div>
+                <div>
+                  <button type="button" class="bg-transparent text-slate-600 border border-slate-200 px-3 py-1 text-xs font-semibold rounded-full hover:bg-slate-100 hover:text-slate-900 cursor-pointer" onclick="triggerPaystackBillingModal()">Update Card</button>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+
     </div>
+  </div>
 
-    <script>
-        document.querySelectorAll('.usage-bar-fill').forEach(bar => {
-            bar.style.width = `${bar.dataset.usagePercentage}%`;
-        });
-
-        // Placeholder functions — replace with actual logic
-        function addPaymentMethod() {
-            alert('Add payment method flow');
-        }
-        function editPaymentMethod(id) {
-            alert('Edit payment method ' + id);
-        }
-        function deletePaymentMethod(id) {
-            if (confirm('Remove this payment method?')) {
-                alert('Deleted ' + id);
-            }
-        }
-        function editBillingAddress() {
-            alert('Edit billing address');
-        }
-        function confirmCancel() {
-            if (confirm('Are you sure you want to cancel your subscription? This action cannot be undone.')) {
-                alert('Subscription cancelled');
-            }
-        }
-    </script>
-
-    <style>
-        /* Quick inline styles for the new billing components – adjust to match your existing design system */
-        .billing-plan-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .billing-plan-card {
-            padding: 1.5rem;
-        }
-
-        .billing-plan-card-accent {
-            border-left: 4px solid #2563eb;
-            background: #f8fafc;
-        }
-
-        .billing-plan-details {
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
-            color: #4b5563;
-        }
-
-        .usage-bar {
-            background: #e5e7eb;
-            border-radius: 99px;
-            height: 6px;
-            margin-top: 0.5rem;
-            overflow: hidden;
-        }
-
-        .usage-bar-fill {
-            background: #2563eb;
-            height: 100%;
-            border-radius: 99px;
-        }
-
-        .payment-methods-list {
-            margin: 1rem 0;
-        }
-
-        .payment-method-item {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .payment-method-icon {
-            margin-right: 1rem;
-        }
-
-        .card-icon {
-            display: inline-block;
-            width: 40px;
-            height: 28px;
-            background: #d1d5db;
-            border-radius: 4px
-        }
-
-        .payment-method-details {
-            flex: 1;
-        }
-
-        .payment-method-details strong {
-            display: block;
-        }
-
-        .payment-method-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .badge-default {
-            background: #dbeafe;
-            color: #1e40af;
-            padding: 0.2rem 0.6rem;
-            border-radius: 99px;
-            font-size: 0.75rem;
-        }
-
-        .billing-address {
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .billing-danger-card {
-            border: 1px solid #fecaca;
-            background: #fef2f2;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            color: #fff;
-            border: none;
-            padding: 0.5rem 1.5rem;
-            border-radius: 6px;
-        }
-
-        .btn-danger:hover {
-            background: #b02a37;
-        }
-
-        .text-danger {
-            color: #dc3545;
-        }
-
-        /* reuse your existing .btn-ghost, .btn-sm, etc. */
-    </style>
+  <%- include('partials/modals') %>
 </body>
 
 </html>

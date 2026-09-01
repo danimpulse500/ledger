@@ -3,51 +3,59 @@
 <head>
   <%- include('../partials/head') %>
 </head>
-<body>
-  <div class="app-shell">
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+  <div class="flex h-screen w-full overflow-hidden bg-slate-50">
     <%- include('../partials/sidebar') %>
-    <div class="main">
-      <div class="topbar">
-        <h1>Products &amp; Services</h1>
-        <div class="actions">
-          <button type="button" class="btn" data-modal-target="modal-product">+ New Product/Service</button>
+    <div class="flex-1 p-8 max-w-7xl h-screen overflow-y-auto">
+      <div class="flex justify-between items-center mb-6 gap-4 flex-wrap">
+        <h1 class="text-2xl font-bold text-slate-900 m-0">Products &amp; Services</h1>
+        <div class="flex gap-2.5">
+          <button type="button" class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-5 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-colors border-0" data-modal-target="modal-product">+ New Product/Service</button>
         </div>
       </div>
 
       <% if (typeof error !== 'undefined' && error) { %>
-        <div class="alert alert-error"><%= error %></div>
+        <div class="p-3 rounded-lg text-sm mb-4 bg-red-50 text-red-600 border border-red-200"><%= error %></div>
       <% } %>
 
-      <div class="card">
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
         <% if (products.length === 0) { %>
-          <div class="empty-state">
-            <h3>No products or services yet</h3>
-            <p>Add items you regularly bill for to speed up invoice creation.</p>
-            <button type="button" class="btn" data-modal-target="modal-product">+ New Product/Service</button>
+          <div class="py-12 text-center text-slate-500">
+            <h3 class="text-lg font-bold text-slate-900 mb-1">No products or services yet</h3>
+            <p class="text-sm mb-4">Add items you regularly bill for to speed up invoice creation.</p>
+            <button type="button" class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-5 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-colors border-0" data-modal-target="modal-product">+ New Product/Service</button>
           </div>
         <% } else { %>
-          <table>
-            <thead><tr><th>Name</th><th>Description</th><th class="money">Unit Price</th><th>Discount %</th><th></th></tr></thead>
-            <tbody>
+          <table class="w-full border-collapse text-sm">
+            <thead>
+              <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
+                <th class="py-2.5 px-3">Name</th>
+                <th class="py-2.5 px-3">Description</th>
+                <th class="py-2.5 px-3 font-mono text-right">Unit Price</th>
+                <th class="py-2.5 px-3 font-mono">Discount %</th>
+                <th class="py-2.5 px-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
               <% products.forEach(p => { %>
-                <tr>
-                  <td><%= p.name %></td>
-                  <td class="text-soft"><%= p.description %></td>
-                  <td class="money"><%= currencySymbol %><%= p.unit_price.toFixed(2) %></td>
-                  <td class="figure"><%= p.tax_rate %>%</td>
-                  <td class="actions-cell" onclick="event.stopPropagation()">
-                    <div class="action-dropdown">
-                      <button type="button" class="action-dropdown-btn" onclick="toggleActionDropdown(event, this)" title="Actions">
+                <tr class="hover:bg-slate-50 transition-colors">
+                  <td class="py-3 px-3 font-semibold text-slate-900"><%= p.name %></td>
+                  <td class="py-3 px-3 text-slate-500"><%= p.description %></td>
+                  <td class="py-3 px-3 font-mono text-right font-semibold text-slate-900"><%= currencySymbol %><%= p.unit_price.toFixed(2) %></td>
+                  <td class="py-3 px-3 font-mono text-slate-600"><%= p.tax_rate %>%</td>
+                  <td class="py-3 px-3 text-right" onclick="event.stopPropagation()">
+                    <div class="action-dropdown relative inline-block text-left">
+                      <button type="button" class="w-8 h-8 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 inline-flex items-center justify-center border-0 bg-transparent cursor-pointer" onclick="toggleActionDropdown(event, this)" title="Actions">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                           <circle cx="12" cy="12" r="1.2"></circle>
                           <circle cx="12" cy="5" r="1.2"></circle>
                           <circle cx="12" cy="19" r="1.2"></circle>
                         </svg>
                       </button>
-                      <div class="action-dropdown-menu">
-                        <a href="/products/<%= p.id %>/edit">Edit Product</a>
-                        <form method="POST" action="/products/<%= p.id %>?_method=DELETE" style="display:block;" onsubmit="return confirm('Delete this product?');">
-                          <button type="submit" class="text-danger">Delete Product</button>
+                      <div class="action-dropdown-menu absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 min-w-[140px] py-1 text-left">
+                        <a href="/products/<%= p.id %>/edit" class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 no-underline">Edit Product</a>
+                        <form method="POST" action="/products/<%= p.id %>?_method=DELETE" class="block" onsubmit="return confirm('Delete this product?');">
+                          <button type="submit" class="w-full text-left px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 bg-transparent border-0 cursor-pointer">Delete Product</button>
                         </form>
                       </div>
                     </div>

@@ -3,16 +3,16 @@
 <head>
   <%- include('partials/head') %>
 </head>
-<body>
-  <div class="app-shell">
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+  <div class="flex h-screen w-full overflow-hidden bg-slate-50">
     <% if (typeof currentUser !== 'undefined' && currentUser) { %>
       <%- include('partials/sidebar') %>
     <% } %>
-    <div class="main">
-      <div class="empty-state card">
-        <h3><%= title %></h3>
-        <p><%= message %></p>
-        <a href="/" class="btn btn-outline">Back to dashboard</a>
+    <div class="flex-1 p-8 max-w-7xl h-screen overflow-y-auto flex items-center justify-center">
+      <div class="bg-white border border-slate-200 rounded-2xl p-10 shadow-xs text-center max-w-md w-full">
+        <h3 class="text-xl font-bold text-slate-900 mb-2"><%= title %></h3>
+        <p class="text-slate-500 text-sm mb-6"><%= message %></p>
+        <a href="/" class="inline-flex items-center gap-1.5 bg-transparent text-slate-900 border border-slate-900 font-semibold text-sm px-5 py-2 rounded-full cursor-pointer hover:bg-slate-900 hover:text-white transition-all no-underline">Back to dashboard</a>
       </div>
     </div>
   </div>
