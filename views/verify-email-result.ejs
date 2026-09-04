@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include('partials/head') %>
+</head>
+
+<body class="bg-white text-slate-900 font-sans antialiased">
+  <div
+    class="min-h-screen w-full flex flex-col lg:flex-row items-center justify-center p-6 lg:p-12 max-w-7xl mx-auto gap-8 lg:gap-12">
+
+    <!-- Left Column: Verification Result -->
+    <div class="w-full lg:w-1/2 max-w-lg px-2 sm:px-6 py-4 flex flex-col justify-center">
+
+      <% if (success) { %>
+        <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mb-6 shadow-sm">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-2">Email verified!</h1>
+        <p class="text-slate-500 text-sm mb-8 leading-relaxed">
+          Your email address has been successfully verified. Welcome to Ledger!
+        </p>
+
+        <div>
+          <a href="/onboarding"
+            class="inline-flex items-center justify-center bg-slate-900 text-white font-semibold text-sm px-8 py-3 rounded-full cursor-pointer hover:opacity-90 transition-all border-0 shadow-sm no-underline">
+            Continue to Workspace &rarr;
+          </a>
+        </div>
+      <% } else { %>
+        <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center mb-6 shadow-sm">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-2">Link invalid or expired</h1>
+        <p class="text-slate-500 text-sm mb-6 leading-relaxed">
+          <%= message || 'This verification link is invalid or has expired. Please request a new verification email.' %>
+        </p>
+
+        <% if (email) { %>
+          <form method="POST" action="/resend-verification" class="space-y-4">
+            <input type="hidden" name="email" value="<%= email %>">
+            <button type="submit"
+              class="inline-flex items-center justify-center bg-slate-900 text-white font-semibold text-sm px-8 py-3 rounded-full cursor-pointer hover:opacity-90 transition-all border-0 shadow-sm">
+              Resend Verification Email
+            </button>
+          </form>
+        <% } %>
+
+        <div class="mt-8 text-sm text-slate-500">
+          Already verified? <a href="/login" class="text-slate-900 font-bold no-underline hover:underline">Log in</a>
+        </div>
+      <% } %>
+
+    </div>
+
+    <!-- Right Column: Illustration Card -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-4">
+      <div
+        class="w-full h-full min-h-[420px] lg:min-h-[580px] bg-white border border-slate-200/80 rounded-3xl shadow-xs p-8 flex items-center justify-center relative overflow-hidden">
+        <img src="/signup-bg.png" alt="Invoice Illustration" class="max-w-md w-full h-auto object-contain">
+      </div>
+    </div>
+
+  </div>
+</body>
+
+</html>

@@ -1,6 +1,8 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const db = require('../db');
+const { sendVerificationEmail } = require('../utils/mailer');
 
 const router = express.Router();
 
@@ -23,10 +25,20 @@ router.get('/login', (req, res) => {
 router.post('/login', async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const user = await db.prepare('SELECT * FROM users WHERE email = ?').get((email || '').toLowerCase().trim());
+    const cleanEmail = (email || '').toLowerCase().trim();
+    const user = await db.prepare('SELECT * FROM users WHERE email = ?').get(cleanEmail);
 
     if (!user || !bcrypt.compareSync(password || '', user.password_hash)) {
       return res.render('login', { title: 'Log In', error: 'Invalid email or password.' });
+    }
+
+    if (user.is_verified === 0 || user.is_verified === false) {
+      return res.render('verify-email-pending', {
+        title: 'Verify Your Email',
+        email: user.email,
+        successMessage: null,
+        error: 'Please verify your email address before logging in. Check your inbox for the activation link.',
+      });
     }
 
     const org = await db.prepare('SELECT id, name, slug, status FROM organizations WHERE id = ?').get(user.org_id || 1);
@@ -101,25 +113,32 @@ router.post('/signup', async (req, res, next) => {
     // Default settings for new organization
     await db.prepare(`INSERT INTO company_settings (org_id, company_name) VALUES (?, ?)`).run(orgId, company_name.trim());
 
-    // Admin user for new organization
+    // Generate email verification token (valid for 24h)
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    // Admin user for new organization (unverified initially)
     const hash = bcrypt.hashSync(password, 10);
-    const userInfo = await db.prepare(`INSERT INTO users (org_id, name, email, password_hash, role) VALUES (?, ?, ?, ?, 'admin')`)
-      .run(orgId, name.trim(), cleanEmail, hash);
-    const userId = userInfo.lastInsertRowid;
+    await db.prepare(`INSERT INTO users (org_id, name, email, password_hash, role, is_verified, verification_token, verification_token_expires_at) VALUES (?, ?, ?, ?, 'admin', 0, ?, ?)`)
+      .run(orgId, name.trim(), cleanEmail, hash, token, expiresAt);
 
     await db.exec('COMMIT;');
 
-    req.session.user = {
-      id: userId,
+    // Send email verification message
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    await sendVerificationEmail({
+      recipientEmail: cleanEmail,
       name: name.trim(),
-      email: cleanEmail,
-      role: 'admin',
-      org_id: orgId,
-      org_name: company_name.trim(),
-      org_slug: slug,
-    };
+      token,
+      baseUrl,
+    });
 
-    res.redirect('/onboarding');
+    res.render('verify-email-pending', {
+      title: 'Verify Your Email',
+      email: cleanEmail,
+      successMessage: null,
+      error: null,
+    });
   } catch (err) {
     try { await db.exec('ROLLBACK;'); } catch (e) {}
     console.error('Signup error:', err);
@@ -131,6 +150,135 @@ router.post('/signup', async (req, res, next) => {
       email: cleanEmail,
       error: 'Could not complete registration. Please try again.',
     });
+  }
+});
+
+router.get('/verify-email-pending', (req, res) => {
+  const email = req.query.email || '';
+  res.render('verify-email-pending', {
+    title: 'Verify Your Email',
+    email,
+    successMessage: null,
+    error: null,
+  });
+});
+
+router.post('/resend-verification', async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const cleanEmail = (email || '').toLowerCase().trim();
+
+    if (!cleanEmail) {
+      return res.render('verify-email-pending', {
+        title: 'Verify Your Email',
+        email: '',
+        successMessage: null,
+        error: 'Please provide a valid email address.',
+      });
+    }
+
+    const user = await db.prepare('SELECT * FROM users WHERE email = ?').get(cleanEmail);
+
+    if (!user) {
+      return res.render('verify-email-pending', {
+        title: 'Verify Your Email',
+        email: cleanEmail,
+        successMessage: null,
+        error: 'No account found with that email address.',
+      });
+    }
+
+    if (user.is_verified === 1 || user.is_verified === true) {
+      return res.render('login', {
+        title: 'Log In',
+        error: 'Your email address is already verified. Please log in.',
+      });
+    }
+
+    // Generate new token and expiration
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    await db.prepare('UPDATE users SET verification_token = ?, verification_token_expires_at = ? WHERE id = ?')
+      .run(token, expiresAt, user.id);
+
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    await sendVerificationEmail({
+      recipientEmail: user.email,
+      name: user.name,
+      token,
+      baseUrl,
+    });
+
+    res.render('verify-email-pending', {
+      title: 'Verify Your Email',
+      email: user.email,
+      successMessage: 'A new verification link has been sent to your email inbox.',
+      error: null,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/verify-email', async (req, res, next) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.render('verify-email-result', {
+        title: 'Email Verification',
+        success: false,
+        message: 'Verification token is missing.',
+        email: null,
+      });
+    }
+
+    const user = await db.prepare('SELECT * FROM users WHERE verification_token = ?').get(token);
+
+    if (!user) {
+      return res.render('verify-email-result', {
+        title: 'Email Verification',
+        success: false,
+        message: 'This verification link is invalid or has already been used.',
+        email: null,
+      });
+    }
+
+    // Check token expiration
+    if (user.verification_token_expires_at && new Date(user.verification_token_expires_at) < new Date()) {
+      return res.render('verify-email-result', {
+        title: 'Email Verification',
+        success: false,
+        message: 'This verification link has expired. Please request a new verification link.',
+        email: user.email,
+      });
+    }
+
+    // Mark user as verified and clear verification tokens
+    await db.prepare('UPDATE users SET is_verified = 1, verification_token = NULL, verification_token_expires_at = NULL WHERE id = ?')
+      .run(user.id);
+
+    const org = await db.prepare('SELECT id, name, slug, status FROM organizations WHERE id = ?').get(user.org_id || 1);
+
+    // Auto log-in user
+    req.session.user = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      org_id: user.org_id || 1,
+      org_name: org ? org.name : 'Default Organization',
+      org_slug: org ? org.slug : 'default',
+    };
+
+    res.render('verify-email-result', {
+      title: 'Email Verification',
+      success: true,
+      email: user.email,
+    });
+  } catch (err) {
+    next(err);
   }
 });
 

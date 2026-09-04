@@ -238,4 +238,70 @@ async function sendPaymentConfirmationEmail({ recipientEmail, orgName, plan, amo
   }
 }
 
-module.exports = { sendInvoiceEmail, sendPaymentConfirmationEmail, createTransporter };
+/**
+ * Sends an email verification link to a newly registered user.
+ */
+async function sendVerificationEmail({ recipientEmail, name, token, baseUrl }) {
+  const { transporter, configured, user } = createTransporter();
+  const appBaseUrl = baseUrl || process.env.APP_BASE_URL || 'http://localhost:3000';
+  const verifyUrl = `${appBaseUrl}/verify-email?token=${token}`;
+
+  const htmlBody = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px; }
+        .container { max-width: 540px; margin: 0 auto; background: #ffffff; border-radius: 20px; padding: 40px; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
+        .brand { font-size: 20px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.025em; color: #0f172a; margin-bottom: 32px; display: inline-block; }
+        .title { font-size: 24px; font-weight: 800; color: #0f172a; margin-top: 0; margin-bottom: 12px; }
+        .text { font-size: 15px; color: #475569; line-height: 1.6; margin-bottom: 24px; }
+        .btn { display: inline-block; background-color: #0f172a; color: #ffffff !important; font-weight: 700; font-size: 14px; padding: 14px 32px; border-radius: 9999px; text-decoration: none; text-align: center; }
+        .btn-wrapper { margin: 32px 0; text-align: left; }
+        .subtext { font-size: 13px; color: #64748b; margin-top: 32px; padding-top: 20px; border-top: 1px solid #f1f5f9; word-break: break-all; }
+        .footer { font-size: 12px; color: #94a3b8; margin-top: 24px; text-align: center; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="brand">Ledger</div>
+        <h1 class="title">Verify your email address</h1>
+        <p class="text">Hi ${name || 'there'},</p>
+        <p class="text">Welcome to Ledger! Please verify your email address to complete your account registration and access your workspace.</p>
+        
+        <div class="btn-wrapper">
+          <a href="${verifyUrl}" class="btn">Verify Email Address</a>
+        </div>
+
+        <p class="text">This verification link will expire in 24 hours.</p>
+
+        <div class="subtext">
+          If the button above doesn't work, copy and paste this URL into your web browser:<br>
+          <a href="${verifyUrl}" style="color: #0f172a; text-decoration: underline;">${verifyUrl}</a>
+        </div>
+
+        <div class="footer">
+          If you didn't create an account with Ledger, you can safely ignore this email.
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  try {
+    const info = await transporter.sendMail({
+      from: `"Ledger" <${user}>`,
+      to: recipientEmail,
+      subject: `Verify your email address - Ledger`,
+      html: htmlBody,
+    });
+    return { success: true, info, configured, verifyUrl };
+  } catch (err) {
+    console.error('[Mailer Error]: Failed to send verification email:', err.message);
+    return { success: false, error: err.message, verifyUrl };
+  }
+}
+
+module.exports = { sendInvoiceEmail, sendPaymentConfirmationEmail, sendVerificationEmail, createTransporter };
+

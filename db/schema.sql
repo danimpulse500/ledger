@@ -8,6 +8,9 @@ CREATE TABLE IF NOT EXISTS users (
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'staff' CHECK (role IN ('admin','staff')),
+  is_verified INTEGER NOT NULL DEFAULT 0,
+  verification_token TEXT DEFAULT NULL,
+  verification_token_expires_at TEXT DEFAULT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

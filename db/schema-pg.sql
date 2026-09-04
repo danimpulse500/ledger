@@ -9,6 +9,9 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   role VARCHAR(50) NOT NULL DEFAULT 'staff' CHECK (role IN ('admin','staff')),
   org_id INTEGER NOT NULL DEFAULT 1,
+  is_verified INTEGER NOT NULL DEFAULT 0,
+  verification_token VARCHAR(255) DEFAULT NULL,
+  verification_token_expires_at TIMESTAMPTZ DEFAULT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

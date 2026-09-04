@@ -15,6 +15,14 @@ if (isPostgres) {
   const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.DATABASE_SSL === 'false' ? false : { rejectUnauthorized: false },
+    keepAlive: true,
+    connectionTimeoutMillis: 30000,
+    idleTimeoutMillis: 60000,
+    max: 20,
+  });
+
+  pool.on('error', (err) => {
+    console.error('[PostgreSQL Pool Notice]:', err.message);
   });
 
   // Helper to convert `?` placeholders to `$1, $2, ...` for PostgreSQL
@@ -25,28 +33,39 @@ if (isPostgres) {
     return formatted;
   }
 
+  async function queryWithRetry(sql, params = [], retries = 3) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        return await pool.query(sql, params);
+      } catch (err) {
+        const isNetworkErr = err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT' || (err.message && err.message.includes('ECONNRESET'));
+        if (isNetworkErr && attempt < retries) {
+          console.warn(`[PG Connection Retry] Attempt ${attempt} notice: ${err.message}. Retrying...`);
+          await new Promise((r) => setTimeout(r, 300));
+          continue;
+        }
+        throw err;
+      }
+    }
+  }
+
   db = {
     isPostgres: true,
     pool,
     exec: async (sql) => {
-      const client = await pool.connect();
-      try {
-        await client.query(sql);
-      } finally {
-        client.release();
-      }
+      return await queryWithRetry(sql);
     },
     prepare: (sql) => {
       const formattedSql = formatSql(sql);
       return {
         get: async (...params) => {
           const flatParams = params.flat();
-          const res = await pool.query(formattedSql, flatParams);
+          const res = await queryWithRetry(formattedSql, flatParams);
           return res.rows[0];
         },
         all: async (...params) => {
           const flatParams = params.flat();
-          const res = await pool.query(formattedSql, flatParams);
+          const res = await queryWithRetry(formattedSql, flatParams);
           return res.rows;
         },
         run: async (...params) => {
@@ -56,7 +75,7 @@ if (isPostgres) {
           if (isInsert && !/RETURNING/i.test(finalSql)) {
             finalSql += ' RETURNING id';
           }
-          const res = await pool.query(finalSql, flatParams);
+          const res = await queryWithRetry(finalSql, flatParams);
           const lastInsertRowid = res.rows[0] ? res.rows[0].id : null;
           return {
             lastInsertRowid,

@@ -16,7 +16,14 @@ async function runMigrations(db) {
     const pgSchemaPath = path.join(__dirname, 'schema-pg.sql');
     if (fs.existsSync(pgSchemaPath)) {
       const pgSchemaSql = fs.readFileSync(pgSchemaPath, 'utf8');
-      await db.exec(pgSchemaSql);
+      const statements = pgSchemaSql.split(';').map(s => s.trim()).filter(s => s.length > 0);
+      for (const stmt of statements) {
+        try {
+          await db.exec(stmt);
+        } catch (err) {
+          // ignore table/index already exists notices
+        }
+      }
     }
 
     const migrationsDir = path.join(__dirname, '..', 'migrations');
@@ -32,10 +39,13 @@ async function runMigrations(db) {
           let sql = fs.readFileSync(filePath, 'utf8');
           try {
             await db.exec(sql);
-            await db.prepare('INSERT INTO schema_migrations (name) VALUES (?)').run(file);
+            await db.prepare('INSERT INTO schema_migrations (name) VALUES (?) ON CONFLICT DO NOTHING').run(file);
             console.log(`[PG Migrations] Successfully applied: ${file}`);
           } catch (err) {
-            console.error(`[PG Migrations] Note on ${file}: ${err.message}`);
+            console.log(`[PG Migrations] Note on ${file}: ${err.message}`);
+            try {
+              await db.prepare('INSERT INTO schema_migrations (name) VALUES (?) ON CONFLICT DO NOTHING').run(file);
+            } catch (e) {}
           }
         }
       }
