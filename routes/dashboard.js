@@ -68,7 +68,13 @@ router.get('/', async (req, res, next) => {
       ORDER BY invoices.created_at DESC LIMIT 6
     `).all(orgId)) || [];
 
-    res.render('dashboard', { title: 'Dashboard', draftInvoices, stats, recentInvoices });
+    const recentExpenses = (await db.prepare(`
+      SELECT * FROM expenses
+      WHERE org_id = ?
+      ORDER BY expense_date DESC, created_at DESC LIMIT 8
+    `).all(orgId)) || [];
+
+    res.render('dashboard', { title: 'Dashboard', draftInvoices, stats, recentInvoices, recentExpenses });
   } catch (err) {
     next(err);
   }

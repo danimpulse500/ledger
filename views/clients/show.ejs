@@ -13,7 +13,7 @@
           <p class="text-slate-500 text-sm mt-1 m-0"><%= clientRecord.email %> <%= clientRecord.phone ? '· ' + clientRecord.phone : '' %></p>
         </div>
         <div class="flex items-center gap-2.5">
-          <button type="button" class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-5 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-colors border-0" data-modal-target="modal-invoice" data-client-id="<%= clientRecord.id %>">+ New Invoice</button>
+          <a href="/invoices/new?client_id=<%= clientRecord.id %>" class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-5 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-colors border-0 no-underline">+ New Invoice</a>
           
           <a href="/clients/<%= clientRecord.id %>/edit" class="btn-expandable inline-flex items-center justify-center gap-0 h-9.5 px-3 rounded-full bg-white text-slate-700 border border-slate-200 cursor-pointer hover:bg-slate-50 transition-all no-underline" aria-label="Edit Customer">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">

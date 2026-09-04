@@ -20,13 +20,13 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <button type="button" class="inline-flex items-center gap-1.5 bg-slate-900 text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-slate-800 transition-colors border-0 cursor-pointer" data-modal-target="<%= (typeof isBillingActive !== 'undefined' && isBillingActive) ? 'modal-invoice' : 'modal-paystack-billing' %>">
+          <a href="/invoices/new" class="inline-flex items-center gap-1.5 bg-slate-900 text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-slate-800 transition-colors no-underline cursor-pointer">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
             New Invoice
-          </button>
+          </a>
           
           <!-- Quick Add Dropdown -->
           <div class="relative inline-block" onclick="event.stopPropagation()">
@@ -131,65 +131,8 @@
         </div>
       </div>
 
-      <!-- Section: Draft Invoices -->
+      <!-- Section: Recent Invoices (full width) -->
       <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs mb-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-bold text-slate-900 m-0">Draft</h3>
-          <a href="/invoices?status=draft" class="inline-flex items-center gap-1 text-sm font-semibold text-slate-700 hover:text-slate-900 no-underline">
-            View drafts
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </a>
-        </div>
-
-        <% if (!draftInvoices || draftInvoices.length === 0) { %>
-          <div class="flex flex-col items-center justify-center py-8 text-center gap-2">
-            <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mb-1">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="12" y1="18" x2="12" y2="12"/>
-                <line x1="9" y1="15" x2="15" y2="15"/>
-              </svg>
-            </div>
-            <p class="text-slate-500 text-sm m-0">No draft invoices. <a href="#" data-modal-target="modal-invoice" class="text-slate-900 font-semibold underline">Create a new invoice</a>.</p>
-          </div>
-        <% } else { %>
-          <table class="w-full border-collapse text-sm" id="table-drafts">
-            <thead>
-              <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
-                <th class="py-2.5 px-3 w-[50px]">No</th>
-                <th class="py-2.5 px-3">Invoice</th>
-                <th class="py-2.5 px-3">Customer</th>
-                <th class="py-2.5 px-3">Issue Date</th>
-                <th class="py-2.5 px-3">Status</th>
-                <th class="py-2.5 px-3 text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              <% draftInvoices.forEach((inv, index) => { %>
-                <tr class="hover:bg-slate-50 cursor-pointer transition-colors" onclick="window.location='/invoices/<%= inv.id %>'">
-                  <td class="py-3 px-3 text-slate-400 text-xs"><%= String(index + 1).padStart(2, '0') %></td>
-                  <td class="py-3 px-3 font-semibold text-slate-900"><%= inv.invoice_number %></td>
-                  <td class="py-3 px-3 text-slate-800"><%= inv.client_name %></td>
-                  <td class="py-3 px-3 text-slate-500"><%= inv.issue_date %></td>
-                  <td class="py-3 px-3">
-                    <span class="status-pill status-<%= inv.status %>">
-                      <%= inv.status %>
-                    </span>
-                  </td>
-                  <td class="py-3 px-3 text-right font-semibold text-slate-900"><%= currencySymbol %><%= (Number(inv.total) || 0).toFixed(2) %></td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
-        <% } %>
-      </div>
-
-      <!-- Section: Recent Invoices -->
-      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-bold text-slate-900 m-0">Recent Invoices</h3>
           <a href="/invoices" class="inline-flex items-center gap-1 text-sm font-semibold text-slate-700 hover:text-slate-900 no-underline">
@@ -211,7 +154,7 @@
                 <line x1="9" y1="15" x2="15" y2="15"/>
               </svg>
             </div>
-            <p class="text-slate-500 text-sm m-0">No invoices created yet. <a href="#" data-modal-target="modal-invoice" class="text-slate-900 font-semibold underline">Create your first invoice</a>.</p>
+            <p class="text-slate-500 text-sm m-0">No invoices created yet. <a href="/invoices/new" class="text-slate-900 font-semibold underline">Create your first invoice</a>.</p>
           </div>
         <% } else { %>
           <table class="w-full border-collapse text-sm" id="table-recent">
@@ -243,6 +186,107 @@
             </tbody>
           </table>
         <% } %>
+      </div>
+
+      <!-- Section: Draft + Expenses (2-col grid) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Draft Invoices -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-slate-900 m-0">Draft</h3>
+            <a href="/invoices?status=draft" class="inline-flex items-center gap-1 text-sm font-semibold text-slate-700 hover:text-slate-900 no-underline">
+              View drafts
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+          </div>
+
+          <% if (!draftInvoices || draftInvoices.length === 0) { %>
+            <div class="flex flex-col items-center justify-center py-8 text-center gap-2">
+              <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mb-1">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="12" y1="18" x2="12" y2="12"/>
+                  <line x1="9" y1="15" x2="15" y2="15"/>
+                </svg>
+              </div>
+              <p class="text-slate-500 text-sm m-0">No draft invoices. <a href="/invoices/new" class="text-slate-900 font-semibold underline">Create one</a>.</p>
+            </div>
+          <% } else { %>
+            <table class="w-full border-collapse text-sm" id="table-drafts">
+              <thead>
+                <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
+                  <th class="py-2.5 px-3">Invoice</th>
+                  <th class="py-2.5 px-3">Customer</th>
+                  <th class="py-2.5 px-3">Date</th>
+                  <th class="py-2.5 px-3 text-right">Total</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <% draftInvoices.forEach((inv) => { %>
+                  <tr class="hover:bg-slate-50 cursor-pointer transition-colors" onclick="window.location='/invoices/<%= inv.id %>'">
+                    <td class="py-3 px-3 font-semibold text-slate-900"><%= inv.invoice_number %></td>
+                    <td class="py-3 px-3 text-slate-800"><%= inv.client_name %></td>
+                    <td class="py-3 px-3 text-slate-500"><%= inv.issue_date %></td>
+                    <td class="py-3 px-3 text-right font-semibold text-slate-900"><%= currencySymbol %><%= (Number(inv.total) || 0).toFixed(2) %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          <% } %>
+        </div>
+
+        <!-- Recent Expenses -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-slate-900 m-0">Expenses</h3>
+            <a href="/expenses" class="inline-flex items-center gap-1 text-sm font-semibold text-slate-700 hover:text-slate-900 no-underline">
+              View all
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+          </div>
+
+          <% if (!recentExpenses || recentExpenses.length === 0) { %>
+            <div class="flex flex-col items-center justify-center py-8 text-center gap-2">
+              <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mb-1">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="5" width="20" height="14" rx="2"/>
+                  <line x1="2" y1="10" x2="22" y2="10"/>
+                </svg>
+              </div>
+              <p class="text-slate-500 text-sm m-0">No expenses yet. <a href="#" data-modal-target="modal-expense" class="text-slate-900 font-semibold underline">Add one</a>.</p>
+            </div>
+          <% } else { %>
+            <table class="w-full border-collapse text-sm" id="table-expenses">
+              <thead>
+                <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
+                  <th class="py-2.5 px-3">Description</th>
+                  <th class="py-2.5 px-3">Category</th>
+                  <th class="py-2.5 px-3">Date</th>
+                  <th class="py-2.5 px-3 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <% recentExpenses.forEach((exp) => { %>
+                  <tr class="hover:bg-slate-50 cursor-pointer transition-colors" onclick="window.location='/expenses'">
+                    <td class="py-3 px-3 text-slate-900 font-medium max-w-[140px] truncate"><%= exp.description || '—' %></td>
+                    <td class="py-3 px-3 text-slate-500"><%= exp.category || '—' %></td>
+                    <td class="py-3 px-3 text-slate-500"><%= exp.expense_date %></td>
+                    <td class="py-3 px-3 text-right font-semibold text-slate-900"><%= currencySymbol %><%= (Number(exp.amount) || 0).toFixed(2) %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          <% } %>
+        </div>
+
       </div>
 
     </div>
