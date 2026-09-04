@@ -8,8 +8,8 @@ class AppSessionStore extends session.Store {
     this.isPostgres = Boolean(process.env.DATABASE_URL);
 
     if (this.isPostgres) {
-      const db = require('./index');
-      this.pool = db.pool;
+      this.db = require('./index');
+      this.pool = this.db.pool;
       this.initPg();
     } else {
       const { DatabaseSync } = require('node:sqlite');
@@ -31,8 +31,8 @@ class AppSessionStore extends session.Store {
 
   async initPg() {
     try {
-      if (this.pool) {
-        await this.pool.query(`
+      if (this.db) {
+        await this.db.query(`
           CREATE TABLE IF NOT EXISTS sessions (
             sid VARCHAR(255) PRIMARY KEY,
             sess JSON NOT NULL,
@@ -47,7 +47,7 @@ class AppSessionStore extends session.Store {
 
   get(sid, cb) {
     if (this.isPostgres) {
-      this.pool.query('SELECT sess, expires FROM sessions WHERE sid = $1', [sid])
+      this.db.query('SELECT sess, expires FROM sessions WHERE sid = $1', [sid])
         .then((res) => {
           const row = res.rows[0];
           if (!row) return cb(null, null);
@@ -58,7 +58,10 @@ class AppSessionStore extends session.Store {
           const sessData = typeof row.sess === 'string' ? JSON.parse(row.sess) : row.sess;
           cb(null, sessData);
         })
-        .catch((err) => cb(err));
+        .catch((err) => {
+          console.error('[Session Store Error] get session:', err.message);
+          cb(null, null);
+        });
     } else {
       try {
         const row = this.sqliteDb.prepare('SELECT sess, expires FROM sessions WHERE sid = ?').get(sid);
@@ -69,7 +72,7 @@ class AppSessionStore extends session.Store {
         }
         cb(null, JSON.parse(row.sess));
       } catch (err) {
-        cb(err);
+        cb(null, null);
       }
     }
   }
@@ -81,12 +84,15 @@ class AppSessionStore extends session.Store {
 
     if (this.isPostgres) {
       const expiresDate = new Date(expiresMs);
-      this.pool.query(`
+      this.db.query(`
         INSERT INTO sessions (sid, sess, expires) VALUES ($1, $2, $3)
         ON CONFLICT(sid) DO UPDATE SET sess = EXCLUDED.sess, expires = EXCLUDED.expires
       `, [sid, JSON.stringify(sess), expiresDate])
         .then(() => cb && cb(null))
-        .catch((err) => cb && cb(err));
+        .catch((err) => {
+          console.error('[Session Store Error] set session:', err.message);
+          cb && cb(null);
+        });
     } else {
       try {
         this.sqliteDb.prepare(`
@@ -95,22 +101,25 @@ class AppSessionStore extends session.Store {
         `).run(sid, JSON.stringify(sess), expiresMs);
         cb && cb(null);
       } catch (err) {
-        cb && cb(err);
+        cb && cb(null);
       }
     }
   }
 
   destroy(sid, cb) {
     if (this.isPostgres) {
-      this.pool.query('DELETE FROM sessions WHERE sid = $1', [sid])
+      this.db.query('DELETE FROM sessions WHERE sid = $1', [sid])
         .then(() => cb && cb(null))
-        .catch((err) => cb && cb(err));
+        .catch((err) => {
+          console.error('[Session Store Error] destroy session:', err.message);
+          cb && cb(null);
+        });
     } else {
       try {
         this.sqliteDb.prepare('DELETE FROM sessions WHERE sid = ?').run(sid);
         cb && cb(null);
       } catch (err) {
-        cb && cb(err);
+        cb && cb(null);
       }
     }
   }

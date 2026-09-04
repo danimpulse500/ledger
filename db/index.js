@@ -38,10 +38,19 @@ if (isPostgres) {
       try {
         return await pool.query(sql, params);
       } catch (err) {
-        const isNetworkErr = err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT' || (err.message && err.message.includes('ECONNRESET'));
+        const isNetworkErr =
+          err.code === 'ECONNRESET' ||
+          err.code === 'ETIMEDOUT' ||
+          err.code === '57P01' ||
+          (err.message && (
+            err.message.includes('ECONNRESET') ||
+            err.message.includes('Connection terminated') ||
+            err.message.includes('Client was closed') ||
+            err.message.includes('timeout')
+          ));
+
         if (isNetworkErr && attempt < retries) {
-          console.warn(`[PG Connection Retry] Attempt ${attempt} notice: ${err.message}. Retrying...`);
-          await new Promise((r) => setTimeout(r, 300));
+          await new Promise((r) => setTimeout(r, 400));
           continue;
         }
         throw err;
@@ -52,6 +61,7 @@ if (isPostgres) {
   db = {
     isPostgres: true,
     pool,
+    query: queryWithRetry,
     exec: async (sql) => {
       return await queryWithRetry(sql);
     },
