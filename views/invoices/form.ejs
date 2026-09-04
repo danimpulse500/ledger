@@ -162,6 +162,9 @@
         </tr>
       </template>
 
+      <!-- Server data bridge: keeps EJS tags out of <script> blocks -->
+      <div id="items-data" data-items='<%- JSON.stringify(items || []) %>' style="display:none"></div>
+
       <script>
         const CURRENCY = '<%= currencySymbol %>';
         const itemsBody = document.getElementById('items-body');
@@ -169,7 +172,7 @@
         let rowIndex = 0;
 
         // Existing items passed from the server (for edit mode)
-        const existingItems = <% - JSON.stringify(items || []) %>;
+        const existingItems = JSON.parse(document.getElementById('items-data').dataset.items || '[]');
 
         function addRow(data) {
           const clone = rowTemplate.content.cloneNode(true);
