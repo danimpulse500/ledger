@@ -1,205 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <%- include('../partials/head') %>
 </head>
+
 <body class="bg-slate-50 text-slate-900 font-sans antialiased">
   <div class="flex h-screen w-full overflow-hidden bg-slate-50">
     <%- include('../partials/sidebar') %>
-    <div class="flex-1 p-8 max-w-7xl h-screen overflow-y-auto">
-      <h1 class="text-2xl font-bold text-slate-900 mb-6"><%= title %></h1>
+      <div class="flex-1 p-8 max-w-7xl h-screen overflow-y-auto">
+        <h1 class="text-2xl font-bold text-slate-900 mb-6">
+          <%= title %>
+        </h1>
 
-      <% if (errors) { %>
-        <div class="p-3 rounded-lg text-sm mb-4 bg-red-50 text-red-600 border border-red-200"><%= errors.join(' ') %></div>
+        <% if (errors) { %>
+          <div class="p-3 rounded-lg text-sm mb-4 bg-red-50 text-red-600 border border-red-200">
+            <%= errors.join(' ') %></div>
       <% } %>
 
-      <form method="POST" action="<%= invoice.id ? '/invoices/' + invoice.id + '?_method=PUT' : '/invoices' %>" id="invoice-form" class="space-y-6">
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
-          <div class="flex gap-4">
-            <div class="flex-1">
-              <div class="flex justify-between items-center mb-1.5">
-                <label for="client_id" class="block text-xs font-semibold text-slate-600 m-0">Client *</label>
-                <button type="button" class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-2 py-0.5 text-[0.75rem] font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all cursor-pointer" data-modal-target="modal-client">+ Add New Client</button>
+      <form method="POST" action="<%= invoice.id ? ' /invoices/' + invoice.id + '?_method=PUT' : '/invoices' %>"
+              id="invoice-form" class="space-y-6">
+              <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+                <div class="flex gap-4">
+                  <div class="flex-1">
+                    <div class="flex justify-between items-center mb-1.5">
+                      <label for="client_id" class="block text-xs font-semibold text-slate-600 m-0">Customer *</label>
+                      <button type="button"
+                        class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-2 py-0.5 text-[0.75rem] font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all cursor-pointer"
+                        data-modal-target="modal-client">+ Add New Customer</button>
+                    </div>
+                    <select id="client_id" name="client_id" required
+                      class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
+                      <option value="">Select a customer...</option>
+                      <% clients.forEach(c=> { %>
+                        <option value="<%= c.id %>" <%=(invoice.client_id==c.id || (typeof preselectClientId
+                          !=='undefined' && preselectClientId==c.id)) ? 'selected' : '' %>><%= c.name %>
+                        </option>
+                        <% }) %>
+                    </select>
+                  </div>
+                  <div class="flex-1">
+                    <label for="status" class="block text-xs font-semibold text-slate-600 mb-1.5">Status</label>
+                    <select id="status" name="status"
+                      class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
+                      <% ['draft','sent','paid','overdue','cancelled'].forEach(s=> { %>
+                        <option value="<%= s %>" <%=invoice.status===s ? 'selected' : '' %>><%=
+                            s.charAt(0).toUpperCase() + s.slice(1) %>
+                        </option>
+                        <% }) %>
+                    </select>
+                  </div>
+                </div>
+                <div class="flex gap-4">
+                  <div class="flex-1">
+                    <label for="issue_date" class="block text-xs font-semibold text-slate-600 mb-1.5">Issue date
+                      *</label>
+                    <input type="date" id="issue_date" name="issue_date" value="<%= invoice.issue_date || '' %>"
+                      required
+                      class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
+                  </div>
+                  <div class="flex-1">
+                    <label for="due_date" class="block text-xs font-semibold text-slate-600 mb-1.5">Due date *</label>
+                    <input type="date" id="due_date" name="due_date" value="<%= invoice.due_date || '' %>" required
+                      class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
+                  </div>
+                </div>
               </div>
-              <select id="client_id" name="client_id" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
-                <option value="">Select a client...</option>
-                <% clients.forEach(c => { %>
-                  <option value="<%= c.id %>" <%= (invoice.client_id == c.id || (typeof preselectClientId !== 'undefined' && preselectClientId == c.id)) ? 'selected' : '' %>><%= c.name %></option>
+
+              <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+                <div class="flex justify-between items-center mb-4">
+                  <h3 class="text-base font-bold text-slate-900 m-0">Line items</h3>
+                  <div class="flex gap-2">
+                    <button type="button"
+                      class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-3 py-1.5 text-xs font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all cursor-pointer"
+                      data-modal-target="modal-product">+ New Product</button>
+                    <button type="button"
+                      class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-3 py-1.5 text-xs font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all cursor-pointer"
+                      id="add-item">+ Add Item</button>
+                  </div>
+                </div>
+                <table id="items-table" class="w-full border-collapse text-sm mb-4">
+                  <thead>
+                    <tr
+                      class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
+                      <th class="py-2.5 px-3 w-[26%]">Product/Service</th>
+                      <th class="py-2.5 px-3 w-[26%]">Description</th>
+                      <th class="py-2.5 px-3 w-[10%]">Qty</th>
+                      <th class="py-2.5 px-3 w-[14%]">Unit Price</th>
+                      <th class="py-2.5 px-3 w-[10%]">Discount %</th>
+                      <th class="py-2.5 px-3 w-[12%] text-right">Line Total</th>
+                      <th class="py-2.5 px-3 w-[40px]"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="items-body" class="divide-y divide-slate-100"></tbody>
+                </table>
+
+                <div class="flex justify-end pt-3 border-t border-slate-100">
+                  <div class="w-72 space-y-2 text-sm">
+                    <div class="flex justify-between text-slate-600"><span>Subtotal</span><span
+                        class="font-semibold text-slate-900" id="disp-subtotal">$0.00</span></div>
+                    <div class="flex justify-between text-slate-600"><span>Discount</span><span
+                        class="font-semibold text-slate-900" id="disp-tax">$0.00</span></div>
+                    <div
+                      class="flex justify-between pt-2 border-t-2 border-slate-900 font-bold text-base text-slate-900">
+                      <span>Total</span><span class="font-bold" id="disp-total">$0.00</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+                <div>
+                  <label for="notes" class="block text-xs font-semibold text-slate-600 mb-1.5">Notes</label>
+                  <textarea id="notes" name="notes" placeholder="Payment terms, thank-you note, etc."
+                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 min-h-[70px] resize-y"><%= invoice.notes || '' %></textarea>
+                </div>
+              </div>
+
+              <div class="flex gap-3 pb-8">
+                <button type="submit"
+                  class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-6 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-colors border-0">Save
+                  Invoice</button>
+                <a href="/invoices"
+                  class="inline-flex items-center gap-1.5 bg-transparent text-slate-600 border border-slate-200 font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-slate-100 hover:text-slate-900 transition-all no-underline">Cancel</a>
+              </div>
+              </form>
+          </div>
+      </div>
+
+      <!-- Row template -->
+      <template id="row-template">
+        <tr class="item-row border-b border-slate-100">
+          <td class="py-2.5 px-3">
+            <select
+              class="f-product w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
+              <option value="">Custom item...</option>
+              <% products.forEach(p=> { %>
+                <option value="<%= p.id %>" data-desc="<%= p.description %>" data-price="<%= p.unit_price %>"
+                  data-discount="<%= p.tax_rate %>">
+                  <%= p.name %>
+                </option>
                 <% }) %>
-              </select>
-            </div>
-            <div class="flex-1">
-              <label for="status" class="block text-xs font-semibold text-slate-600 mb-1.5">Status</label>
-              <select id="status" name="status" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
-                <% ['draft','sent','paid','overdue','cancelled'].forEach(s => { %>
-                  <option value="<%= s %>" <%= invoice.status === s ? 'selected' : '' %>><%= s.charAt(0).toUpperCase() + s.slice(1) %></option>
-                <% }) %>
-              </select>
-            </div>
-          </div>
-          <div class="flex gap-4">
-            <div class="flex-1">
-              <label for="issue_date" class="block text-xs font-semibold text-slate-600 mb-1.5">Issue date *</label>
-              <input type="date" id="issue_date" name="issue_date" value="<%= invoice.issue_date || '' %>" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
-            </div>
-            <div class="flex-1">
-              <label for="due_date" class="block text-xs font-semibold text-slate-600 mb-1.5">Due date *</label>
-              <input type="date" id="due_date" name="due_date" value="<%= invoice.due_date || '' %>" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
-            </div>
-          </div>
-        </div>
+            </select>
+            <input type="hidden" class="f-product-id" name="">
+          </td>
+          <td class="py-2.5 px-3"><input type="text"
+              class="f-description w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400"
+              required></td>
+          <td class="py-2.5 px-3"><input type="number"
+              class="f-quantity w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400"
+              min="0" step="0.01" value="1"></td>
+          <td class="py-2.5 px-3"><input type="number"
+              class="f-unit-price w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400"
+              min="0" step="0.01" value="0"></td>
+          <td class="py-2.5 px-3"><input type="number"
+              class="f-tax-rate w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400"
+              min="0" step="0.01" value="<%= defaultDiscountRate || 0 %>"></td>
+          <td class="py-2.5 px-3 font-semibold text-slate-900 text-right line-total-cell">$0.00</td>
+          <td class="py-2.5 px-3 text-center"><button type="button"
+              class="bg-transparent border-0 text-slate-400 cursor-pointer font-bold text-lg hover:text-red-500 remove-row">&times;</button>
+          </td>
+        </tr>
+      </template>
 
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-base font-bold text-slate-900 m-0">Line items</h3>
-            <div class="flex gap-2">
-              <button type="button" class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-3 py-1.5 text-xs font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all cursor-pointer" data-modal-target="modal-product">+ New Product</button>
-              <button type="button" class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-3 py-1.5 text-xs font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all cursor-pointer" id="add-item">+ Add line</button>
-            </div>
-          </div>
-          <table id="items-table" class="w-full border-collapse text-sm mb-4">
-            <thead>
-              <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
-                <th class="py-2.5 px-3 w-[26%]">Product/Service</th>
-                <th class="py-2.5 px-3 w-[26%]">Description</th>
-                <th class="py-2.5 px-3 w-[10%]">Qty</th>
-                <th class="py-2.5 px-3 w-[14%]">Unit Price</th>
-                <th class="py-2.5 px-3 w-[10%]">Discount %</th>
-                <th class="py-2.5 px-3 w-[12%] font-mono text-right">Line Total</th>
-                <th class="py-2.5 px-3 w-[40px]"></th>
-              </tr>
-            </thead>
-            <tbody id="items-body" class="divide-y divide-slate-100"></tbody>
-          </table>
+      <script>
+        const CURRENCY = '<%= currencySymbol %>';
+        const itemsBody = document.getElementById('items-body');
+        const rowTemplate = document.getElementById('row-template');
+        let rowIndex = 0;
 
-          <div class="flex justify-end pt-3 border-t border-slate-100">
-            <div class="w-72 space-y-2 text-sm">
-              <div class="flex justify-between text-slate-600"><span>Subtotal</span><span class="font-mono font-semibold text-slate-900" id="disp-subtotal">$0.00</span></div>
-              <div class="flex justify-between text-slate-600"><span>Discount</span><span class="font-mono font-semibold text-slate-900" id="disp-tax">$0.00</span></div>
-              <div class="flex justify-between pt-2 border-t-2 border-slate-900 font-bold text-base text-slate-900"><span>Total</span><span class="font-mono" id="disp-total">$0.00</span></div>
-            </div>
-          </div>
-        </div>
+        // Existing items passed from the server (for edit mode)
+        const existingItems = <% - JSON.stringify(items || []) %>;
 
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-          <div>
-            <label for="notes" class="block text-xs font-semibold text-slate-600 mb-1.5">Notes</label>
-            <textarea id="notes" name="notes" placeholder="Payment terms, thank-you note, etc." class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 min-h-[70px] resize-y"><%= invoice.notes || '' %></textarea>
-          </div>
-        </div>
+        function addRow(data) {
+          const clone = rowTemplate.content.cloneNode(true);
+          const tr = clone.querySelector('.item-row');
+          const idx = rowIndex++;
 
-        <div class="flex gap-3 pb-8">
-          <button type="submit" class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-6 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-colors border-0">Save Invoice</button>
-          <a href="/invoices" class="inline-flex items-center gap-1.5 bg-transparent text-slate-600 border border-slate-200 font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-slate-100 hover:text-slate-900 transition-all no-underline">Cancel</a>
-        </div>
-      </form>
-    </div>
-  </div>
+          const productSel = clone.querySelector('.f-product');
+          const productIdInput = clone.querySelector('.f-product-id');
+          const descInput = clone.querySelector('.f-description');
+          const qtyInput = clone.querySelector('.f-quantity');
+          const priceInput = clone.querySelector('.f-unit-price');
+          const taxInput = clone.querySelector('.f-tax-rate');
 
-  <!-- Row template -->
-  <template id="row-template">
-    <tr class="item-row border-b border-slate-100">
-      <td class="py-2.5 px-3">
-        <select class="f-product w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
-          <option value="">Custom item...</option>
-          <% products.forEach(p => { %>
-            <option value="<%= p.id %>" data-desc="<%= p.description %>" data-price="<%= p.unit_price %>" data-discount="<%= p.tax_rate %>"><%= p.name %></option>
-          <% }) %>
-        </select>
-        <input type="hidden" class="f-product-id" name="">
-      </td>
-      <td class="py-2.5 px-3"><input type="text" class="f-description w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400" required></td>
-      <td class="py-2.5 px-3"><input type="number" class="f-quantity w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400" min="0" step="0.01" value="1"></td>
-      <td class="py-2.5 px-3"><input type="number" class="f-unit-price w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400" min="0" step="0.01" value="0"></td>
-      <td class="py-2.5 px-3"><input type="number" class="f-tax-rate w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400" min="0" step="0.01" value="<%= defaultDiscountRate || 0 %>"></td>
-      <td class="py-2.5 px-3 font-mono font-semibold text-slate-900 text-right line-total-cell">$0.00</td>
-      <td class="py-2.5 px-3 text-center"><button type="button" class="bg-transparent border-0 text-slate-400 cursor-pointer font-bold text-lg hover:text-red-500 remove-row">&times;</button></td>
-    </tr>
-  </template>
+          productSel.name = `items[${idx}][product_id_select]`;
+          productIdInput.name = `items[${idx}][product_id]`;
+          descInput.name = `items[${idx}][description]`;
+          qtyInput.name = `items[${idx}][quantity]`;
+          priceInput.name = `items[${idx}][unit_price]`;
+          taxInput.name = `items[${idx}][tax_rate]`;
 
-  <script>
-    const CURRENCY = '<%= currencySymbol %>';
-    const itemsBody = document.getElementById('items-body');
-    const rowTemplate = document.getElementById('row-template');
-    let rowIndex = 0;
+          if (data) {
+            if (data.product_id) {
+              productSel.value = data.product_id;
+              productIdInput.value = data.product_id;
+            }
+            descInput.value = data.description || '';
+            qtyInput.value = data.quantity ?? 1;
+            priceInput.value = data.unit_price ?? 0;
+            taxInput.value = data.tax_rate ?? 0;
+          }
 
-    // Existing items passed from the server (for edit mode)
-    const existingItems = <%- JSON.stringify(items || []) %>;
+          productSel.addEventListener('change', () => {
+            const opt = productSel.options[productSel.selectedIndex];
+            if (opt.value) {
+              productIdInput.value = opt.value;
+              if (!descInput.value) descInput.value = opt.textContent + (opt.dataset.desc ? ' — ' + opt.dataset.desc : '');
+              priceInput.value = opt.dataset.price || 0;
+              taxInput.value = opt.dataset.discount || 0;
+            } else {
+              productIdInput.value = '';
+            }
+            recalc();
+          });
 
-    function addRow(data) {
-      const clone = rowTemplate.content.cloneNode(true);
-      const tr = clone.querySelector('.item-row');
-      const idx = rowIndex++;
+          [qtyInput, priceInput, taxInput].forEach(inp => inp.addEventListener('input', recalc));
+          clone.querySelector('.remove-row').addEventListener('click', () => { tr.remove(); recalc(); });
 
-      const productSel = clone.querySelector('.f-product');
-      const productIdInput = clone.querySelector('.f-product-id');
-      const descInput = clone.querySelector('.f-description');
-      const qtyInput = clone.querySelector('.f-quantity');
-      const priceInput = clone.querySelector('.f-unit-price');
-      const taxInput = clone.querySelector('.f-tax-rate');
-
-      productSel.name = `items[${idx}][product_id_select]`;
-      productIdInput.name = `items[${idx}][product_id]`;
-      descInput.name = `items[${idx}][description]`;
-      qtyInput.name = `items[${idx}][quantity]`;
-      priceInput.name = `items[${idx}][unit_price]`;
-      taxInput.name = `items[${idx}][tax_rate]`;
-
-      if (data) {
-        if (data.product_id) {
-          productSel.value = data.product_id;
-          productIdInput.value = data.product_id;
+          itemsBody.appendChild(clone);
+          recalc();
         }
-        descInput.value = data.description || '';
-        qtyInput.value = data.quantity ?? 1;
-        priceInput.value = data.unit_price ?? 0;
-        taxInput.value = data.tax_rate ?? 0;
-      }
 
-      productSel.addEventListener('change', () => {
-        const opt = productSel.options[productSel.selectedIndex];
-        if (opt.value) {
-          productIdInput.value = opt.value;
-          if (!descInput.value) descInput.value = opt.textContent + (opt.dataset.desc ? ' — ' + opt.dataset.desc : '');
-          priceInput.value = opt.dataset.price || 0;
-          taxInput.value = opt.dataset.discount || 0;
+        function recalc() {
+          let subtotal = 0, taxTotal = 0;
+          itemsBody.querySelectorAll('.item-row').forEach(row => {
+            const qty = parseFloat(row.querySelector('.f-quantity').value) || 0;
+            const price = parseFloat(row.querySelector('.f-unit-price').value) || 0;
+            const tax = parseFloat(row.querySelector('.f-tax-rate').value) || 0;
+            const lineSub = qty * price;
+            const lineDiscount = lineSub * (tax / 100);
+            row.querySelector('.line-total-cell').textContent = CURRENCY + (lineSub - lineDiscount).toFixed(2);
+            subtotal += lineSub;
+            taxTotal += lineDiscount;
+          });
+          document.getElementById('disp-subtotal').textContent = CURRENCY + subtotal.toFixed(2);
+          document.getElementById('disp-tax').textContent = CURRENCY + taxTotal.toFixed(2);
+          document.getElementById('disp-total').textContent = CURRENCY + (subtotal - taxTotal).toFixed(2);
+        }
+
+        document.getElementById('add-item').addEventListener('click', () => addRow());
+
+        if (existingItems.length > 0) {
+          existingItems.forEach(it => addRow(it));
         } else {
-          productIdInput.value = '';
+          addRow();
         }
-        recalc();
-      });
-
-      [qtyInput, priceInput, taxInput].forEach(inp => inp.addEventListener('input', recalc));
-      clone.querySelector('.remove-row').addEventListener('click', () => { tr.remove(); recalc(); });
-
-      itemsBody.appendChild(clone);
-      recalc();
-    }
-
-    function recalc() {
-      let subtotal = 0, taxTotal = 0;
-      itemsBody.querySelectorAll('.item-row').forEach(row => {
-        const qty = parseFloat(row.querySelector('.f-quantity').value) || 0;
-        const price = parseFloat(row.querySelector('.f-unit-price').value) || 0;
-        const tax = parseFloat(row.querySelector('.f-tax-rate').value) || 0;
-        const lineSub = qty * price;
-        const lineDiscount = lineSub * (tax / 100);
-        row.querySelector('.line-total-cell').textContent = CURRENCY + (lineSub - lineDiscount).toFixed(2);
-        subtotal += lineSub;
-        taxTotal += lineDiscount;
-      });
-      document.getElementById('disp-subtotal').textContent = CURRENCY + subtotal.toFixed(2);
-      document.getElementById('disp-tax').textContent = CURRENCY + taxTotal.toFixed(2);
-      document.getElementById('disp-total').textContent = CURRENCY + (subtotal - taxTotal).toFixed(2);
-    }
-
-    document.getElementById('add-item').addEventListener('click', () => addRow());
-
-    if (existingItems.length > 0) {
-      existingItems.forEach(it => addRow(it));
-    } else {
-      addRow();
-    }
-  </script>
+      </script>
 </body>
+
 </html>

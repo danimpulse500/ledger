@@ -22,7 +22,7 @@
                 <polyline points="10 9 9 9 8 9"/>
               </svg>
             </div>
-            <div class="text-2xl font-bold font-mono tracking-tight text-slate-900"><%= currencySymbol %><%= totals.total_invoiced.toFixed(2) %></div>
+            <div class="text-2xl font-bold tracking-tight text-slate-900"><%= currencySymbol %><%= (Number(totals.total_invoiced) || 0).toFixed(2) %></div>
           </div>
           <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Total Invoiced</div>
         </div>
@@ -36,7 +36,7 @@
                 <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
               </svg>
             </div>
-            <div class="text-2xl font-bold font-mono tracking-tight text-slate-900"><%= currencySymbol %><%= totals.total_collected.toFixed(2) %></div>
+            <div class="text-2xl font-bold tracking-tight text-slate-900"><%= currencySymbol %><%= (Number(totals.total_collected) || 0).toFixed(2) %></div>
           </div>
           <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Total Collected</div>
         </div>
@@ -50,12 +50,12 @@
                 <polyline points="17 6 23 6 23 12"/>
               </svg>
             </div>
-            <div class="text-2xl font-bold font-mono tracking-tight <%= netProfit >= 0 ? 'text-slate-900' : 'text-red-500' %>"><%= currencySymbol %><%= netProfit.toFixed(2) %></div>
+            <div class="text-2xl font-bold tracking-tight <%= netProfit >= 0 ? 'text-slate-900' : 'text-red-500' %>"><%= currencySymbol %><%= (Number(netProfit) || 0).toFixed(2) %></div>
           </div>
           <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Net Profit <span class="text-slate-400 font-normal lowercase">(collected − expenses)</span></div>
         </div>
 
-        <!-- Client Count -->
+        <!-- Customer Count -->
         <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
           <div class="flex justify-between items-start mb-2">
             <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
@@ -66,9 +66,9 @@
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
             </div>
-            <div class="text-2xl font-bold font-mono tracking-tight text-slate-900"><%= clientCount %></div>
+            <div class="text-2xl font-bold tracking-tight text-slate-900"><%= clientCount %></div>
           </div>
-          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Total Clients</div>
+          <div class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Total Customers</div>
         </div>
       </div>
 
@@ -89,10 +89,10 @@
             <tbody class="divide-y divide-slate-100">
               <% combined.forEach(m => { %>
                 <tr class="hover:bg-slate-50 transition-colors">
-                  <td class="py-3 px-3 font-mono text-slate-800"><%= m.month %></td>
-                  <td class="py-3 px-3 font-mono text-right text-slate-900"><%= currencySymbol %><%= m.revenue.toFixed(2) %></td>
-                  <td class="py-3 px-3 font-mono text-right text-slate-900"><%= currencySymbol %><%= m.expenses.toFixed(2) %></td>
-                  <td class="py-3 px-3 font-mono text-right font-semibold <%= (m.revenue - m.expenses) >= 0 ? 'text-slate-900' : 'text-slate-400' %>"><%= currencySymbol %><%= (m.revenue - m.expenses).toFixed(2) %></td>
+                  <td class="py-3 px-3 text-slate-800"><%= m.month %></td>
+                  <td class="py-3 px-3 text-right text-slate-900"><%= currencySymbol %><%= (Number(m.revenue) || 0).toFixed(2) %></td>
+                  <td class="py-3 px-3 text-right text-slate-900"><%= currencySymbol %><%= (Number(m.expenses) || 0).toFixed(2) %></td>
+                  <td class="py-3 px-3 text-right font-semibold <%= (m.revenue - m.expenses) >= 0 ? 'text-slate-900' : 'text-slate-400' %>"><%= currencySymbol %><%= (Number(m.revenue || 0) - Number(m.expenses || 0)).toFixed(2) %></td>
                 </tr>
               <% }) %>
             </tbody>
@@ -103,7 +103,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
           <h3 class="text-base font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 m-0">
-            Outstanding invoices <span class="text-slate-400 font-normal text-xs">(<%= currencySymbol %><%= outstandingTotal.toFixed(2) %> total)</span>
+            Outstanding invoices <span class="text-slate-400 font-normal text-xs">(<%= currencySymbol %><%= (Number(outstandingTotal) || 0).toFixed(2) %> total)</span>
           </h3>
           <% if (outstanding.length === 0) { %>
             <p class="text-slate-500 text-sm m-0">Nothing outstanding. All caught up.</p>
@@ -112,18 +112,18 @@
               <thead>
                 <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
                   <th class="py-2 px-2.5">Invoice</th>
-                  <th class="py-2 px-2.5">Client</th>
+                  <th class="py-2 px-2.5">Customer</th>
                   <th class="py-2 px-2.5">Due</th>
-                  <th class="py-2 px-2.5 font-mono text-right">Balance</th>
+                  <th class="py-2 px-2.5 text-right">Balance</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
                 <% outstanding.forEach(inv => { %>
                   <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="py-2.5 px-2.5"><a href="/invoices/<%= inv.id %>" class="font-mono font-semibold text-slate-900 no-underline hover:underline"><%= inv.invoice_number %></a></td>
+                    <td class="py-2.5 px-2.5"><a href="/invoices/<%= inv.id %>" class="font-semibold text-slate-900 no-underline hover:underline"><%= inv.invoice_number %></a></td>
                     <td class="py-2.5 px-2.5 text-slate-700"><%= inv.client_name %></td>
                     <td class="py-2.5 px-2.5 text-slate-500"><%= inv.due_date %></td>
-                    <td class="py-2.5 px-2.5 font-mono text-right font-semibold text-slate-900"><%= currencySymbol %><%= (inv.total - inv.amount_paid).toFixed(2) %></td>
+                    <td class="py-2.5 px-2.5 text-right font-semibold text-slate-900"><%= currencySymbol %><%= (Number(inv.total || 0) - Number(inv.amount_paid || 0)).toFixed(2) %></td>
                   </tr>
                 <% }) %>
               </tbody>
@@ -140,14 +140,14 @@
               <thead>
                 <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
                   <th class="py-2 px-2.5">Category</th>
-                  <th class="py-2 px-2.5 font-mono text-right">Total</th>
+                  <th class="py-2 px-2.5 text-right">Total</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
                 <% expensesByCategory.forEach(c => { %>
                   <tr class="hover:bg-slate-50 transition-colors">
                     <td class="py-2.5 px-2.5 text-slate-800"><%= c.category %></td>
-                    <td class="py-2.5 px-2.5 font-mono text-right font-semibold text-slate-900"><%= currencySymbol %><%= c.total.toFixed(2) %></td>
+                    <td class="py-2.5 px-2.5 text-right font-semibold text-slate-900"><%= currencySymbol %><%= (Number(c.total) || 0).toFixed(2) %></td>
                   </tr>
                 <% }) %>
               </tbody>

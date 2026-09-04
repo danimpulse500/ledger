@@ -40,14 +40,15 @@ router.get('/', async (req, res, next) => {
     const orgId = req.session.user.org_id;
     const currentMonth = new Date().toISOString().slice(0, 7); // 'YYYY-MM'
 
-    const outstanding = (await db.prepare(`
+    const draftInvoices = (await db.prepare(`
       SELECT invoices.*, clients.name AS client_name FROM invoices
       JOIN clients ON clients.id = invoices.client_id
-      WHERE invoices.org_id = ? AND invoices.status IN ('sent','overdue') ORDER BY due_date ASC LIMIT 8
+      WHERE invoices.org_id = ? AND invoices.status = 'draft' ORDER BY created_at DESC LIMIT 8
     `).all(orgId)) || [];
 
     const stats = (await db.prepare(`
       SELECT
+        (SELECT COUNT(*) FROM invoices WHERE org_id = ?) AS total_invoice_count,
         (SELECT COUNT(*) FROM clients WHERE org_id = ?) AS client_count,
         (SELECT COUNT(*) FROM invoices WHERE org_id = ? AND status IN ('draft','sent')) AS active_count,
         (SELECT COUNT(*) FROM invoices WHERE org_id = ? AND status='draft') AS draft_count,
@@ -58,7 +59,7 @@ router.get('/', async (req, res, next) => {
           AND issue_date LIKE ?) AS revenue_this_month,
         (SELECT COALESCE(SUM(amount),0) FROM expenses WHERE org_id = ?
           AND expense_date LIKE ?) AS expenses_this_month
-    `).get(orgId, orgId, orgId, orgId, orgId, orgId, orgId, `${currentMonth}%`, orgId, `${currentMonth}%`)) || {};
+    `).get(orgId, orgId, orgId, orgId, orgId, orgId, orgId, orgId, `${currentMonth}%`, orgId, `${currentMonth}%`)) || {};
 
     const recentInvoices = (await db.prepare(`
       SELECT invoices.*, clients.name AS client_name FROM invoices
@@ -67,7 +68,7 @@ router.get('/', async (req, res, next) => {
       ORDER BY invoices.created_at DESC LIMIT 6
     `).all(orgId)) || [];
 
-    res.render('dashboard', { title: 'Dashboard', outstanding, stats, recentInvoices });
+    res.render('dashboard', { title: 'Dashboard', draftInvoices, stats, recentInvoices });
   } catch (err) {
     next(err);
   }

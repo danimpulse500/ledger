@@ -127,30 +127,30 @@
                 <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
                   <th class="py-2.5 px-3">Description</th>
                   <th class="py-2.5 px-3 font-mono">Qty</th>
-                  <th class="py-2.5 px-3 font-mono text-right">Unit Price</th>
-                  <th class="py-2.5 px-3 font-mono">Discount</th>
-                  <th class="py-2.5 px-3 font-mono text-right">Amount</th>
+                  <th class="py-2.5 px-3 text-right">Unit Price</th>
+                  <th class="py-2.5 px-3">Discount</th>
+                  <th class="py-2.5 px-3 text-right">Amount</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
                 <% items.forEach(it => { %>
                   <tr>
                     <td class="py-3 px-3 text-slate-800"><%= it.description %></td>
-                    <td class="py-3 px-3 font-mono text-slate-600"><%= it.quantity %></td>
-                    <td class="py-3 px-3 font-mono text-right text-slate-600"><%= currencySymbol %><%= it.unit_price.toFixed(2) %></td>
-                    <td class="py-3 px-3 font-mono text-slate-600"><%= it.tax_rate %>%</td>
-                    <td class="py-3 px-3 font-mono text-right font-semibold text-slate-900"><%= currencySymbol %><%= it.line_total.toFixed(2) %></td>
+                    <td class="py-3 px-3 text-slate-600"><%= it.quantity %></td>
+                    <td class="py-3 px-3 text-right text-slate-600"><%= currencySymbol %><%= (Number(it.unit_price) || 0).toFixed(2) %></td>
+                    <td class="py-3 px-3 text-slate-600"><%= it.tax_rate %>%</td>
+                    <td class="py-3 px-3 text-right font-semibold text-slate-900"><%= currencySymbol %><%= (Number(it.line_total) || 0).toFixed(2) %></td>
                   </tr>
                 <% }) %>
               </tbody>
             </table>
 
             <div class="w-72 ml-auto space-y-1.5 text-sm">
-              <div class="flex justify-between text-slate-600"><span>Subtotal</span><span class="font-mono text-slate-900"><%= currencySymbol %><%= invoice.subtotal.toFixed(2) %></span></div>
-              <div class="flex justify-between text-slate-600"><span>Discount</span><span class="font-mono text-slate-900"><%= currencySymbol %><%= invoice.tax_total.toFixed(2) %></span></div>
-              <div class="flex justify-between pt-2 border-t-2 border-slate-900 font-bold text-base text-slate-900"><span>Total</span><span class="font-mono"><%= currencySymbol %><%= invoice.total.toFixed(2) %></span></div>
-              <div class="flex justify-between text-slate-600"><span>Paid</span><span class="font-mono text-slate-900"><%= currencySymbol %><%= invoice.amount_paid.toFixed(2) %></span></div>
-              <div class="flex justify-between font-bold text-slate-900"><span>Balance due</span><span class="font-mono"><%= currencySymbol %><%= (invoice.total - invoice.amount_paid).toFixed(2) %></span></div>
+              <div class="flex justify-between text-slate-600"><span>Subtotal</span><span class="text-slate-900 font-semibold"><%= currencySymbol %><%= (Number(invoice.subtotal) || 0).toFixed(2) %></span></div>
+              <div class="flex justify-between text-slate-600"><span>Discount</span><span class="text-slate-900 font-semibold"><%= currencySymbol %><%= (Number(invoice.tax_total) || 0).toFixed(2) %></span></div>
+              <div class="flex justify-between pt-2 border-t-2 border-slate-900 font-bold text-base text-slate-900"><span>Total</span><span class="font-bold"><%= currencySymbol %><%= (Number(invoice.total) || 0).toFixed(2) %></span></div>
+              <div class="flex justify-between text-slate-600"><span>Paid</span><span class="text-slate-900 font-semibold"><%= currencySymbol %><%= (Number(invoice.amount_paid) || 0).toFixed(2) %></span></div>
+              <div class="flex justify-between font-bold text-slate-900"><span>Balance due</span><span class="font-bold"><%= currencySymbol %><%= (Number(invoice.total || 0) - Number(invoice.amount_paid || 0)).toFixed(2) %></span></div>
             </div>
 
             <% if (invoice.notes) { %>
@@ -188,7 +188,7 @@
               <ul class="space-y-2 p-0 m-0 list-none text-sm">
                 <% payments.forEach(p => { %>
                   <li class="flex justify-between items-center py-1.5 border-b border-slate-100 last:border-0">
-                    <span><span class="font-mono font-semibold text-slate-900"><%= currencySymbol %><%= p.amount.toFixed(2) %></span> on <%= p.payment_date %> <span class="text-xs text-slate-400"><%= p.method %></span></span>
+                    <span><span class="font-mono font-semibold text-slate-900"><%= currencySymbol %><%= (Number(p.amount) || 0).toFixed(2) %></span> on <%= p.payment_date %> <span class="text-xs text-slate-400"><%= p.method %></span></span>
                     <form method="POST" action="/invoices/<%= invoice.id %>/payments/<%= p.id %>?_method=DELETE" onsubmit="return confirm('Remove this payment?');" class="m-0">
                       <button type="submit" class="bg-transparent text-slate-400 border border-slate-200 px-2 py-0.5 text-xs font-semibold rounded-full hover:bg-red-50 hover:text-red-600 hover:border-red-200 cursor-pointer">Remove</button>
                     </form>

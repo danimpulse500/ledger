@@ -1,9 +1,9 @@
-<!-- Modal: New Client -->
+<!-- Modal: New Customer -->
 <div class="modal-overlay fixed inset-0 bg-slate-900/45 backdrop-blur-xs z-[1000] items-center justify-center p-4"
   id="modal-client">
   <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
     <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
-      <h3 class="text-base font-bold text-slate-900 m-0">New Client</h3>
+      <h3 class="text-base font-bold text-slate-900 m-0">New Customer</h3>
       <button type="button"
         class="bg-transparent border-0 text-slate-400 cursor-pointer p-1 rounded-md hover:text-slate-900 transition-colors"
         onclick="closeModal('modal-client')">
@@ -16,7 +16,7 @@
     <form method="POST" action="/clients">
       <div class="space-y-4">
         <div>
-          <label for="mc-name" class="block text-xs font-semibold text-slate-600 mb-1">Client Name *</label>
+          <label for="mc-name" class="block text-xs font-semibold text-slate-600 mb-1">Customer Name *</label>
           <input type="text" id="mc-name" name="name" placeholder="Acme Corp or John Doe" required
             class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
         </div>
@@ -54,7 +54,7 @@
           onclick="closeModal('modal-client')">Cancel</button>
         <button type="submit"
           class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-4 h-9.5 rounded-full cursor-pointer hover:bg-slate-800 transition-all border-0">Save
-          Client</button>
+          Customer</button>
       </div>
     </form>
   </div>
@@ -181,118 +181,138 @@
   </div>
 </div>
 
-<!-- Modal: New Invoice -->
-<div class="modal-overlay fixed inset-0 bg-slate-900/45 backdrop-blur-xs z-[1000] items-center justify-center p-4"
-  id="modal-invoice">
-  <div
-    class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
-    <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
-      <h3 class="text-base font-bold text-slate-900 m-0">Create New Invoice</h3>
-      <button type="button"
-        class="bg-transparent border-0 text-slate-400 cursor-pointer p-1 rounded-md hover:text-slate-900 transition-colors"
-        onclick="closeModal('modal-invoice')">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+<!-- Modal: New Invoice (Full Page) -->
+<div class="modal-overlay fixed inset-0 bg-slate-50 z-[1000] flex-col w-full h-full overflow-y-auto" id="modal-invoice">
+  <div class="w-full min-h-screen bg-slate-50 flex flex-col">
+    <!-- Top Bar -->
+    <div
+      class="bg-white border-b border-slate-200 px-6 sm:px-10 py-4 flex justify-between items-center sticky top-0 z-20 shadow-xs">
+      <div class="flex items-center gap-3">
+        <button type="button"
+          class="bg-transparent border-0 text-slate-400 cursor-pointer p-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center justify-center"
+          onclick="closeModal('modal-invoice')" title="Close">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <h2 class="text-xl font-bold text-slate-900 m-0">Create New Invoice</h2>
+      </div>
+      <div class="flex items-center gap-3">
+        <button type="button"
+          class="inline-flex items-center gap-1.5 bg-transparent text-slate-600 border border-slate-200 font-semibold text-sm px-4 py-2 rounded-full cursor-pointer hover:bg-slate-100 hover:text-slate-900 transition-all"
+          onclick="closeModal('modal-invoice')">Cancel</button>
+        <button type="submit" form="modal-invoice-form"
+          class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-6 py-2 rounded-full cursor-pointer hover:bg-slate-800 transition-all border-0">Create
+          Invoice</button>
+      </div>
     </div>
-    <form method="POST" action="/invoices" id="modal-invoice-form">
-      <div class="space-y-4">
-        <div class="flex gap-3">
-          <div class="flex-1">
-            <div class="flex justify-between items-center mb-1">
-              <label for="mi-client" class="block text-xs font-semibold text-slate-600 m-0">Client *</label>
-              <button type="button"
-                class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-2 py-0.5 text-[0.75rem] font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all"
-                data-modal-target="modal-client">+ Add New Client</button>
-            </div>
-            <select id="mi-client" name="client_id" required
-              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
-              <option value="">Select a client...</option>
-              <% if (typeof globalClients !=='undefined' && globalClients.length) { %>
-                <% globalClients.forEach(c=> { %>
-                  <option value="<%= c.id %>">
-                    <%= c.name %>
-                  </option>
-                  <% }) %>
-                    <% } %>
-            </select>
-          </div>
-          <div class="flex-1">
-            <label for="mi-status" class="block text-xs font-semibold text-slate-600 mb-1">Status</label>
-            <select id="mi-status" name="status"
-              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
-              <option value="draft">Draft</option>
-              <option value="sent">Sent</option>
-              <option value="paid">Paid</option>
-            </select>
-          </div>
-        </div>
 
-        <div class="flex gap-3">
-          <div class="flex-1">
-            <label for="mi-issue_date" class="block text-xs font-semibold text-slate-600 mb-1">Issue Date *</label>
-            <input type="date" id="mi-issue_date" name="issue_date" value="<%= new Date().toISOString().slice(0, 10) %>"
-              required
-              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
+    <!-- Main Content Container -->
+    <div class="flex-1 max-w-5xl w-full mx-auto p-6 sm:p-10">
+      <form method="POST" action="/invoices" id="modal-invoice-form" class="space-y-6">
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+              <div class="flex justify-between items-center mb-1.5">
+                <label for="mi-client" class="block text-xs font-semibold text-slate-600 m-0">Customer *</label>
+                <button type="button"
+                  class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-2.5 py-0.5 text-[0.75rem] font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all cursor-pointer"
+                  data-modal-target="modal-client">+ Add New Customer</button>
+              </div>
+              <select id="mi-client" name="client_id" required
+                class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
+                <option value="">Select a customer...</option>
+                <% if (typeof globalClients !=='undefined' && globalClients.length) { %>
+                  <% globalClients.forEach(c=> { %>
+                    <option value="<%= c.id %>">
+                      <%= c.name %>
+                    </option>
+                    <% }) %>
+                      <% } %>
+              </select>
+            </div>
+            <div class="flex-1">
+              <label for="mi-status" class="block text-xs font-semibold text-slate-600 mb-1.5">Status</label>
+              <select id="mi-status" name="status"
+                class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
+                <option value="draft">Draft</option>
+                <option value="sent">Sent</option>
+                <option value="paid">Paid</option>
+              </select>
+            </div>
           </div>
-          <div class="flex-1">
-            <label for="mi-due_date" class="block text-xs font-semibold text-slate-600 mb-1">Due Date *</label>
-            <input type="date" id="mi-due_date" name="due_date"
-              value="<%= new Date(Date.now() + 14*24*60*60*1000).toISOString().slice(0, 10) %>" required
-              class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
+
+          <div class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+              <label for="mi-issue_date" class="block text-xs font-semibold text-slate-600 mb-1.5">Issue Date *</label>
+              <input type="date" id="mi-issue_date" name="issue_date"
+                value="<%= new Date().toISOString().slice(0, 10) %>" required
+                class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
+            </div>
+            <div class="flex-1">
+              <label for="mi-due_date" class="block text-xs font-semibold text-slate-600 mb-1.5">Due Date *</label>
+              <input type="date" id="mi-due_date" name="due_date"
+                value="<%= new Date(Date.now() + 14*24*60*60*1000).toISOString().slice(0, 10) %>" required
+                class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
+            </div>
           </div>
         </div>
 
         <!-- Line Items -->
-        <div class="mt-4">
-          <div class="flex justify-between items-center mb-2">
-            <h4 class="m-0 text-sm font-bold text-slate-900">Line Items</h4>
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="m-0 text-base font-bold text-slate-900">Line Items</h3>
             <div class="flex gap-2">
               <button type="button"
-                class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-3 py-1 text-xs font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all"
+                class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-3 py-1.5 text-xs font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all cursor-pointer"
                 data-modal-target="modal-product">+ New Product</button>
               <button type="button"
-                class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-3 py-1 text-xs font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all"
-                id="mi-add-item">+ Add Line</button>
+                class="inline-flex items-center bg-transparent text-slate-900 border border-slate-900 px-3 py-1.5 text-xs font-semibold rounded-full hover:bg-slate-900 hover:text-white transition-all cursor-pointer"
+                id="mi-add-item">+ Add Item</button>
             </div>
           </div>
-          <table class="w-full border-collapse text-sm">
-            <thead>
-              <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase text-slate-500 font-semibold">
-                <th class="py-2 px-2.5 w-[30%]">Item</th>
-                <th class="py-2 px-2.5">Description</th>
-                <th class="py-2 px-2.5 w-[70px]">Qty</th>
-                <th class="py-2 px-2.5 w-[100px]">Price</th>
-                <th class="py-2 px-2.5 w-[90px] font-mono">Total</th>
-                <th class="py-2 px-2.5 w-[30px]"></th>
-              </tr>
-            </thead>
-            <tbody id="mi-items-body" class="divide-y divide-slate-100"></tbody>
-          </table>
-          <div class="text-right mt-3 font-bold text-base text-slate-900">
-            Total: <span id="mi-disp-total" class="font-mono tracking-tight">
-              <%= currencySymbol %>0.00
-            </span>
+          <div class="overflow-x-auto">
+            <table class="w-full border-collapse text-sm">
+              <thead>
+                <tr
+                  class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase text-slate-500 font-semibold tracking-wider">
+                  <th class="py-2.5 px-3 w-[30%]">Item</th>
+                  <th class="py-2.5 px-3">Description</th>
+                  <th class="py-2.5 px-3 w-[80px]">Qty</th>
+                  <th class="py-2.5 px-3 w-[110px]">Price</th>
+                  <th class="py-2.5 px-3 w-[100px] font-mono text-right">Total</th>
+                  <th class="py-2.5 px-3 w-[40px]"></th>
+                </tr>
+              </thead>
+              <tbody id="mi-items-body" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+          <div class="flex justify-end pt-4 mt-4 border-t border-slate-100">
+            <div class="text-right text-lg font-bold text-slate-900">
+              Total: <span id="mi-disp-total" class="font-mono tracking-tight text-xl ml-2">
+                <%= currencySymbol %>0.00
+              </span>
+            </div>
           </div>
         </div>
 
-        <div class="mt-4">
-          <label for="mi-notes" class="block text-xs font-semibold text-slate-600 mb-1">Notes</label>
-          <textarea id="mi-notes" name="notes" rows="2" placeholder="Payment instructions, notes..."
-            class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 resize-y min-h-[60px]"></textarea>
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs">
+          <label for="mi-notes" class="block text-xs font-semibold text-slate-600 mb-1.5">Notes</label>
+          <textarea id="mi-notes" name="notes" rows="3" placeholder="Payment instructions, notes..."
+            class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 min-h-[80px] resize-y"></textarea>
         </div>
-      </div>
-      <div class="flex justify-end gap-2.5 mt-6 pt-3 border-t border-slate-100">
-        <button type="button"
-          class="inline-flex items-center gap-1.5 bg-transparent text-slate-600 border border-slate-200 font-semibold text-sm px-4 h-9.5 rounded-full cursor-pointer hover:bg-slate-100 hover:text-slate-900 transition-all"
-          onclick="closeModal('modal-invoice')">Cancel</button>
-        <button type="submit"
-          class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-4 h-9.5 rounded-full cursor-pointer hover:bg-slate-800 transition-all border-0">Create
-          Invoice</button>
-      </div>
-    </form>
+
+        <div class="flex justify-end gap-3 pb-8">
+          <button type="button"
+            class="inline-flex items-center gap-1.5 bg-transparent text-slate-600 border border-slate-200 font-semibold text-sm px-6 py-2.5 rounded-full cursor-pointer hover:bg-slate-100 hover:text-slate-900 transition-all"
+            onclick="closeModal('modal-invoice')">Cancel</button>
+          <button type="submit"
+            class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-6 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-all border-0">Create
+            Invoice</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 <!-- Paystack Pop SDK -->
@@ -307,12 +327,14 @@
     id="paystack-modal-card">
 
     <div class="p-6 sm:p-8 modal-scrollable overflow-y-auto flex-1">
-      
+
       <!-- Modal Top Header -->
       <div class="flex justify-between items-center pb-4 mb-6 border-b border-slate-100">
         <div class="flex items-center gap-2">
           <h2 class="text-2xl font-black text-slate-900 m-0 tracking-tight">Ledger Pro</h2>
-          <span class="bg-slate-900 text-white text-[0.68rem] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full">30 Days Free</span>
+          <span
+            class="bg-slate-900 text-white text-[0.68rem] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full">30
+            Days Free</span>
         </div>
         <button type="button"
           class="bg-transparent border-0 text-slate-400 cursor-pointer p-2 rounded-full hover:bg-slate-100 hover:text-slate-900 transition-colors"
@@ -327,7 +349,7 @@
 
       <!-- STEP 1: Plan Overview & Timeline -->
       <div id="paystack-step-overview" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
+
         <!-- Left Column: Choose Plan & Duration -->
         <div class="lg:col-span-7 space-y-6">
           <div>
@@ -344,19 +366,24 @@
             <button type="button" id="toggle-yearly-btn" onclick="selectPlanCycle('yearly')"
               class="flex-1 sm:flex-initial px-5 py-2.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all cursor-pointer flex items-center justify-center gap-1.5">
               <span>Yearly</span>
-              <span class="bg-emerald-600 text-white text-[0.62rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">Save 20%</span>
+              <span
+                class="bg-emerald-600 text-white text-[0.62rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">Save
+                20%</span>
             </button>
           </div>
 
           <!-- Price Card -->
           <div class="space-y-3 mt-4" id="plan-price-display">
-            <p class="text-3xl font-black text-slate-900 m-0"><%= currencySymbol %>5,500 <span class="text-xs font-medium text-slate-500">/ Month</span></p>
+            <p class="text-3xl font-black text-slate-900 m-0">
+              <%= currencySymbol %>5,500 <span class="text-xs font-medium text-slate-500">/ Month</span>
+            </p>
           </div>
 
           <!-- Value Proposition Bullet List -->
           <ul class="space-y-3 m-0 p-0 list-none text-xs font-semibold text-slate-700">
             <li class="flex items-center gap-2.5">
-              <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <div
+                class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
@@ -364,7 +391,8 @@
               <span>Free 30-day trial, cancel anytime with one click</span>
             </li>
             <li class="flex items-center gap-2.5">
-              <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <div
+                class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
@@ -372,7 +400,8 @@
               <span>We'll send a reminder email 7 days before your trial ends</span>
             </li>
             <li class="flex items-center gap-2.5">
-              <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <div
+                class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
@@ -394,19 +423,24 @@
         <!-- Right Column: Timeline Stepper -->
         <div class="lg:col-span-5 space-y-4">
           <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-5">
-            <div class="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+            <div
+              class="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
               <div class="relative">
-                <span class="absolute -left-[1.5625rem] top-1 w-3 h-3 rounded-full bg-emerald-600 ring-4 ring-slate-50"></span>
+                <span
+                  class="absolute -left-[1.5625rem] top-1 w-3 h-3 rounded-full bg-emerald-600 ring-4 ring-slate-50"></span>
                 <div class="text-xs font-bold text-slate-900">Today</div>
                 <div class="text-xs text-slate-500 mt-0.5">Instant unlimited access to all Ledger Pro features.</div>
               </div>
               <div class="relative">
-                <span class="absolute -left-[1.5625rem] top-1 w-3 h-3 rounded-full bg-slate-300 ring-4 ring-slate-50"></span>
+                <span
+                  class="absolute -left-[1.5625rem] top-1 w-3 h-3 rounded-full bg-slate-300 ring-4 ring-slate-50"></span>
                 <div class="text-xs font-bold text-slate-900">Day 23</div>
-                <div class="text-xs text-slate-500 mt-0.5">Trial reminder email sent with single-click cancellation.</div>
+                <div class="text-xs text-slate-500 mt-0.5">Trial reminder email sent with single-click cancellation.
+                </div>
               </div>
               <div class="relative">
-                <span class="absolute -left-[1.5625rem] top-1 w-3 h-3 rounded-full bg-slate-300 ring-4 ring-slate-50"></span>
+                <span
+                  class="absolute -left-[1.5625rem] top-1 w-3 h-3 rounded-full bg-slate-300 ring-4 ring-slate-50"></span>
                 <div class="text-xs font-bold text-slate-900">Day 30</div>
                 <div class="text-xs text-slate-500 mt-0.5">First billing cycle starts unless canceled prior.</div>
               </div>
@@ -418,7 +452,8 @@
 
       <!-- STEP 2: Functional Billing & Card Details Form (Initially Hidden) -->
       <div id="paystack-step-form" class="hidden w-full py-2">
-        <button type="button" onclick="showPaystackOverview()" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 bg-transparent border-0 cursor-pointer p-0 mb-4 transition-colors">
+        <button type="button" onclick="showPaystackOverview()"
+          class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 bg-transparent border-0 cursor-pointer p-0 mb-4 transition-colors">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
@@ -429,37 +464,50 @@
         <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
           <div class="mb-5 pb-3 border-b border-slate-100">
             <h3 class="text-lg font-bold text-slate-900 m-0">Enter Billing Details</h3>
-            <p class="text-xs text-slate-500 mt-1 m-0">Verify your card to activate your 30-day trial. $0.00 due today.</p>
+            <p class="text-xs text-slate-500 mt-1 m-0">Verify your card to activate your 30-day trial. $0.00 due today.
+            </p>
           </div>
 
           <form id="paystack-card-form" onsubmit="handlePaystackCheckout(event)" class="space-y-4">
             <div>
-              <label for="paystack-email" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Billing Email Address *</label>
-              <input type="email" id="paystack-email" name="email" value="<%= currentUser ? currentUser.email : '' %>" placeholder="billing@company.com" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50/50 text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900 transition-all">
+              <label for="paystack-email"
+                class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Billing Email Address
+                *</label>
+              <input type="email" id="paystack-email" name="email" value="<%= currentUser ? currentUser.email : '' %>"
+                placeholder="billing@company.com" required
+                class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50/50 text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900 transition-all">
             </div>
 
             <div>
               <div class="flex justify-between items-center mb-1.5">
-                <label for="paystack-card-num" class="block text-xs font-bold uppercase tracking-wider text-slate-600 m-0">Card Number *</label>
+                <label for="paystack-card-num"
+                  class="block text-xs font-bold uppercase tracking-wider text-slate-600 m-0">Card Number *</label>
                 <span class="text-[0.65rem] font-bold text-slate-400">Visa / MasterCard / Verve</span>
               </div>
-              <input type="text" id="paystack-card-num" placeholder="4532 •••• •••• 8892" maxlength="19" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs font-mono bg-slate-50/50 text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900 transition-all">
+              <input type="text" id="paystack-card-num" placeholder="4532 •••• •••• 8892" maxlength="19" required
+                class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs font-mono bg-slate-50/50 text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900 transition-all">
             </div>
 
             <div class="flex gap-3">
               <div class="flex-1">
-                <label for="paystack-card-exp" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Expiry Date *</label>
-                <input type="text" id="paystack-card-exp" placeholder="MM / YY" maxlength="5" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs font-mono bg-slate-50/50 text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900 transition-all">
+                <label for="paystack-card-exp"
+                  class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Expiry Date *</label>
+                <input type="text" id="paystack-card-exp" placeholder="MM / YY" maxlength="5" required
+                  class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs font-mono bg-slate-50/50 text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900 transition-all">
               </div>
               <div class="flex-1">
-                <label for="paystack-card-cvv" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">CVV / CVC *</label>
-                <input type="password" id="paystack-card-cvv" placeholder="•••" maxlength="4" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs font-mono bg-slate-50/50 text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900 transition-all">
+                <label for="paystack-card-cvv"
+                  class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">CVV / CVC *</label>
+                <input type="password" id="paystack-card-cvv" placeholder="•••" maxlength="4" required
+                  class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs font-mono bg-slate-50/50 text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900 transition-all">
               </div>
             </div>
 
-            <div class="flex items-center justify-between py-2 px-3 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-500">
+            <div
+              class="flex items-center justify-between py-2 px-3 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-500">
               <span class="flex items-center gap-1.5 font-medium">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-600">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  class="text-emerald-600">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
@@ -468,7 +516,8 @@
               <span class="font-mono text-[0.68rem] text-slate-600 font-bold uppercase">$0.00 DUE TODAY</span>
             </div>
 
-            <button type="submit" id="paystack-submit-btn" class="w-full h-12 inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider px-5 rounded-xl cursor-pointer transition-all border-0 shadow-md mt-2">
+            <button type="submit" id="paystack-submit-btn"
+              class="w-full h-12 inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider px-5 rounded-xl cursor-pointer transition-all border-0 shadow-md mt-2">
               <span>Pay</span>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -614,7 +663,7 @@
   <% if (typeof globalProducts !=='undefined' && globalProducts.length) { %>
     <% globalProducts.forEach(p=> { %>
       <option value="<%= p.id %>" data-name="<%= p.name %>" data-desc="<%= p.description %>"
-        data-price="<%= p.unit_price.toFixed(2) %>" data-tax="<%= p.tax_rate %>">
+        data-price="<%= (Number(p.unit_price) || 0).toFixed(2) %>" data-tax="<%= p.tax_rate %>">
         <%= p.name %>
       </option>
       <% }) %>
@@ -649,10 +698,10 @@
         <input type="number" name="items[${idx}][quantity]" value="1" min="1" step="1" class="mi-qty w-14 py-1 px-1.5 text-xs border border-slate-200 rounded-md">
       </td>
       <td class="py-2 px-2.5">
-        <span class="mi-price-text text-xs text-slate-700 font-mono"><%= currencySymbol %>0.00</span>
+        <span class="mi-price-text text-xs text-slate-700"><%= currencySymbol %>0.00</span>
         <input type="hidden" name="items[${idx}][unit_price]" value="0.00" class="mi-price">
       </td>
-      <td class="py-2 px-2.5 font-mono text-xs font-semibold text-slate-900 mi-line-total"><%= currencySymbol %>0.00</td>
+      <td class="py-2 px-2.5 text-xs font-semibold text-slate-900 mi-line-total"><%= currencySymbol %>0.00</td>
       <td class="py-2 px-2.5 text-right">
         <button type="button" class="mi-del-row bg-transparent border-0 text-slate-400 cursor-pointer font-bold text-lg hover:text-red-500 p-0 line-height-none">&minus;</button>
       </td>

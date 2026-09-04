@@ -16,7 +16,7 @@
       <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs max-w-xl">
         <form method="POST" action="<%= clientRecord.id ? '/clients/' + clientRecord.id + '?_method=PUT' : '/clients' %>" class="space-y-4">
           <div>
-            <label for="name" class="block text-xs font-semibold text-slate-600 mb-1.5">Client name *</label>
+            <label for="name" class="block text-xs font-semibold text-slate-600 mb-1.5">Customer name *</label>
             <input type="text" id="name" name="name" value="<%= clientRecord.name || '' %>" required autofocus class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
           </div>
           <div class="flex gap-4">
@@ -42,7 +42,7 @@
             <textarea id="notes" name="notes" rows="3" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 resize-y"><%= clientRecord.notes || '' %></textarea>
           </div>
           <div class="flex gap-3 pt-3 border-t border-slate-100">
-            <button type="submit" class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-6 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-colors border-0">Save Client</button>
+            <button type="submit" class="inline-flex items-center gap-1.5 bg-slate-900 text-white font-semibold text-sm px-6 py-2.5 rounded-full cursor-pointer hover:bg-slate-800 transition-colors border-0">Save Customer</button>
             <a href="/clients" class="inline-flex items-center gap-1.5 bg-transparent text-slate-600 border border-slate-200 font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-slate-100 hover:text-slate-900 transition-all no-underline">Cancel</a>
           </div>
         </form>

@@ -16,7 +16,7 @@
 
       <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
         <form method="GET" class="flex gap-2.5 mb-5 flex-wrap items-center">
-          <input type="text" name="q" placeholder="Search invoice # or client..." value="<%= q %>" class="px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 w-auto">
+          <input type="text" name="q" placeholder="Search invoice # or customer..." value="<%= q %>" class="px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 w-auto">
           <select name="status" onchange="this.form.submit()" class="px-3.5 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400 w-auto">
             <option value="">All statuses</option>
             <% ['draft','sent','paid','overdue','cancelled'].forEach(s => { %>
@@ -38,7 +38,7 @@
             <thead>
               <tr class="border-b-2 border-slate-200 text-left text-[0.74rem] uppercase tracking-wider text-slate-500 font-semibold">
                 <th class="py-2.5 px-3">Invoice #</th>
-                <th class="py-2.5 px-3">Client</th>
+                <th class="py-2.5 px-3">Customer</th>
                 <th class="py-2.5 px-3">Issued</th>
                 <th class="py-2.5 px-3">Due</th>
                 <th class="py-2.5 px-3">Status</th>
@@ -55,8 +55,8 @@
                   <td class="py-3 px-3 text-slate-500"><%= inv.issue_date %></td>
                   <td class="py-3 px-3 text-slate-500"><%= inv.due_date %></td>
                   <td class="py-3 px-3"><span class="badge badge-<%= inv.status %>"><%= inv.status %></span></td>
-                  <td class="py-3 px-3 font-mono text-right font-semibold text-slate-900"><%= currencySymbol %><%= inv.total.toFixed(2) %></td>
-                  <td class="py-3 px-3 font-mono text-right font-semibold text-slate-900"><%= (inv.total - inv.amount_paid) > 0 ? currencySymbol + (inv.total - inv.amount_paid).toFixed(2) : '—' %></td>
+                  <td class="py-3 px-3 text-right font-semibold text-slate-900"><%= currencySymbol %><%= (Number(inv.total) || 0).toFixed(2) %></td>
+                  <td class="py-3 px-3 text-right font-semibold text-slate-900"><%= (Number(inv.total || 0) - Number(inv.amount_paid || 0)) > 0 ? currencySymbol + (Number(inv.total || 0) - Number(inv.amount_paid || 0)).toFixed(2) : '—' %></td>
                   <td class="py-3 px-3 text-right" onclick="event.stopPropagation()">
                     <div class="action-dropdown relative inline-block text-left">
                       <button type="button" class="w-8 h-8 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 inline-flex items-center justify-center border-0 bg-transparent cursor-pointer" onclick="toggleActionDropdown(event, this)" title="Actions">
