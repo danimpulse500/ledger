@@ -77,13 +77,18 @@ async function runMigrations(db) {
           console.log(`[SQLite Migrations] Applying: ${file}`);
           const filePath = path.join(migrationsDir, file);
           const sql = fs.readFileSync(filePath, 'utf8');
-          try {
-            db.exec(sql);
-            db.prepare('INSERT INTO schema_migrations (name) VALUES (?)').run(file);
-            console.log(`[SQLite Migrations] Successfully applied: ${file}`);
-          } catch (err) {
-            console.log(`[SQLite Migrations] Info on ${file}: ${err.message}`);
+          const statements = sql.split(';').map(s => s.trim()).filter(s => s.length > 0);
+          for (const stmt of statements) {
+            try {
+              db.exec(stmt);
+            } catch (err) {
+              console.log(`[SQLite Migrations] Note on ${file}: ${err.message}`);
+            }
           }
+          try {
+            db.prepare('INSERT INTO schema_migrations (name) VALUES (?)').run(file);
+            console.log(`[SQLite Migrations] Successfully recorded: ${file}`);
+          } catch (err) {}
         }
       }
     }

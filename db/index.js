@@ -11,13 +11,18 @@ let db;
 
 if (isPostgres) {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  let connStr = process.env.DATABASE_URL || '';
+  if (connStr.includes('sslmode=require')) {
+    connStr = connStr.replace('sslmode=require', 'sslmode=no-verify');
+  }
+
   const { Pool } = require('pg');
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.DATABASE_SSL === 'false' ? false : { rejectUnauthorized: false },
+    connectionString: connStr,
+    ssl: { rejectUnauthorized: false },
     keepAlive: true,
-    connectionTimeoutMillis: 30000,
-    idleTimeoutMillis: 60000,
+    connectionTimeoutMillis: 15000,
+    idleTimeoutMillis: 30000,
     max: 20,
   });
 

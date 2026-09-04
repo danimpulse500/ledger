@@ -94,12 +94,14 @@ app.use(async (req, res, next) => {
     } else {
       res.locals.companyName = 'My Company';
       res.locals.currencySymbol = '$';
+      res.locals.defaultDiscountRate = 0;
       res.locals.globalClients = [];
       res.locals.globalProducts = [];
     }
   } catch (err) {
     res.locals.companyName = 'My Company';
     res.locals.currencySymbol = '$';
+    res.locals.defaultDiscountRate = 0;
     res.locals.globalClients = [];
     res.locals.globalProducts = [];
   }
@@ -132,7 +134,11 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(500).render('error', { title: 'Error', message: 'Something went wrong. Please try again.' });
+  const isDev = (process.env.NODE_ENV || 'development') === 'development';
+  res.status(500).render('error', {
+    title: 'Error',
+    message: isDev && err ? (err.message || String(err)) : 'Something went wrong. Please try again.',
+  });
 });
 
 const server = app.listen(PORT, () => {

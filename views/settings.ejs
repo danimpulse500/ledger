@@ -42,7 +42,14 @@
               </div>
               <div class="flex-1">
                 <label for="currency_symbol" class="block text-xs font-semibold text-slate-600 mb-1.5">Currency symbol</label>
-                <input type="text" id="currency_symbol" name="currency_symbol" value="<%= settings.currency_symbol %>" placeholder="$" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
+                <select id="currency_symbol" name="currency_symbol" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:border-slate-400">
+                  <option value="$" <%= settings.currency_symbol === '$' ? 'selected' : '' %>>$ (USD)</option>
+                  <option value="€" <%= settings.currency_symbol === '€' ? 'selected' : '' %>>€ (EUR)</option>
+                  <option value="£" <%= settings.currency_symbol === '£' ? 'selected' : '' %>>£ (GBP)</option>
+                  <option value="₦" <%= settings.currency_symbol === '₦' ? 'selected' : '' %>>₦ (NGN)</option>
+                  <option value="KSh" <%= settings.currency_symbol === 'KSh' ? 'selected' : '' %>>KSh (KES)</option>
+                  <option value="R" <%= settings.currency_symbol === 'R' ? 'selected' : '' %>>R (ZAR)</option>
+                </select>
               </div>
             </div>
 

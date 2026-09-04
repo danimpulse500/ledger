@@ -12,42 +12,46 @@
     <!-- Left Column: Pending Info & Resend Form -->
     <div class="w-full lg:w-1/2 max-w-lg px-2 sm:px-6 py-4 flex flex-col justify-center">
 
-      <div class="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center mb-6 shadow-sm">
+      <!-- <div class="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center mb-6 shadow-sm">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
           <polyline points="22,6 12,13 2,6"></polyline>
         </svg>
-      </div>
+      </div> -->
 
       <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-2">Check your email</h1>
       <p class="text-slate-500 text-sm mb-6 leading-relaxed">
-        We sent a verification link to <strong class="text-slate-900"><%= email %></strong>. Please click the link in that email to activate your account.
+        We sent a verification link to <strong class="text-slate-900">
+          <%= email %>
+        </strong>. Please click the link in that email to activate your account.
       </p>
 
       <% if (successMessage) { %>
         <div class="p-3.5 rounded-xl text-sm mb-6 bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
           <%= successMessage %>
         </div>
-      <% } %>
+        <% } %>
 
-      <% if (error) { %>
-        <div class="p-3.5 rounded-xl text-sm mb-6 bg-red-50 text-red-600 border border-red-200 font-medium">
-          <%= error %>
-        </div>
-      <% } %>
+          <% if (error) { %>
+            <div class="p-3.5 rounded-xl text-sm mb-6 bg-red-50 text-red-600 border border-red-200 font-medium">
+              <%= error %>
+            </div>
+            <% } %>
 
-      <form method="POST" action="/resend-verification" class="space-y-4">
-        <input type="hidden" name="email" value="<%= email %>">
+              <form method="POST" action="/resend-verification" class="space-y-4">
+                <input type="hidden" name="email" value="<%= email %>">
 
-        <button type="submit"
-          class="inline-flex items-center justify-center bg-slate-900 text-white font-semibold text-sm px-8 py-3 rounded-full cursor-pointer hover:opacity-90 transition-all border-0 shadow-sm">
-          Resend Verification Email
-        </button>
-      </form>
+                <button type="submit"
+                  class="inline-flex items-center justify-center bg-slate-900 text-white font-semibold text-sm px-8 py-3 rounded-full cursor-pointer hover:opacity-90 transition-all border-0 shadow-sm">
+                  Resend Verification Email
+                </button>
+              </form>
 
-      <div class="mt-8 text-sm text-slate-500">
-        Entered the wrong address? <a href="/signup" class="text-slate-900 font-bold no-underline hover:underline">Sign up again</a> or <a href="/login" class="text-slate-900 font-bold no-underline hover:underline">Log in</a>
-      </div>
+              <div class="mt-8 text-sm text-slate-500">
+                Entered the wrong address? <a href="/signup"
+                  class="text-slate-900 font-bold no-underline hover:underline">Sign up again</a> or <a href="/login"
+                  class="text-slate-900 font-bold no-underline hover:underline">Log in</a>
+              </div>
     </div>
 
     <!-- Right Column: Illustration Card -->

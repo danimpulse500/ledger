@@ -2,8 +2,27 @@
 -- Invoicing App Database Schema (SQLite)
 -- ============================================================
 
+CREATE TABLE IF NOT EXISTS organizations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'suspended')),
+  plan TEXT NOT NULL DEFAULT 'starter',
+  paystack_customer_code TEXT DEFAULT NULL,
+  paystack_subscription_code TEXT DEFAULT NULL,
+  paystack_auth_code TEXT DEFAULT NULL,
+  subscription_status TEXT DEFAULT 'none',
+  trial_ends_at TEXT DEFAULT NULL,
+  card_brand TEXT DEFAULT NULL,
+  card_last4 TEXT DEFAULT NULL,
+  card_exp_month TEXT DEFAULT NULL,
+  card_exp_year TEXT DEFAULT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  org_id INTEGER NOT NULL DEFAULT 1 REFERENCES organizations(id),
   name TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
@@ -15,7 +34,8 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS company_settings (
-  id INTEGER PRIMARY KEY CHECK (id = 1),
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  org_id INTEGER NOT NULL UNIQUE REFERENCES organizations(id),
   company_name TEXT NOT NULL DEFAULT 'My Company',
   address TEXT DEFAULT '',
   email TEXT DEFAULT '',
@@ -27,11 +47,13 @@ CREATE TABLE IF NOT EXISTS company_settings (
   invoice_company_name_enabled INTEGER NOT NULL DEFAULT 1,
   invoice_prefix TEXT DEFAULT 'INV-',
   next_invoice_number INTEGER DEFAULT 1001,
-  default_tax_rate REAL DEFAULT 0
+  default_tax_rate REAL DEFAULT 0,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS clients (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  org_id INTEGER NOT NULL DEFAULT 1 REFERENCES organizations(id),
   name TEXT NOT NULL,
   email TEXT DEFAULT '',
   phone TEXT DEFAULT '',
@@ -43,6 +65,7 @@ CREATE TABLE IF NOT EXISTS clients (
 
 CREATE TABLE IF NOT EXISTS products (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  org_id INTEGER NOT NULL DEFAULT 1 REFERENCES organizations(id),
   name TEXT NOT NULL,
   description TEXT DEFAULT '',
   unit_price REAL NOT NULL DEFAULT 0,
@@ -52,6 +75,7 @@ CREATE TABLE IF NOT EXISTS products (
 
 CREATE TABLE IF NOT EXISTS invoices (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  org_id INTEGER NOT NULL DEFAULT 1 REFERENCES organizations(id),
   invoice_number TEXT NOT NULL UNIQUE,
   client_id INTEGER NOT NULL REFERENCES clients(id),
   issue_date TEXT NOT NULL,
@@ -89,6 +113,7 @@ CREATE TABLE IF NOT EXISTS payments (
 
 CREATE TABLE IF NOT EXISTS expenses (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  org_id INTEGER NOT NULL DEFAULT 1 REFERENCES organizations(id),
   description TEXT NOT NULL,
   category TEXT DEFAULT 'General',
   amount REAL NOT NULL DEFAULT 0,
@@ -98,6 +123,35 @@ CREATE TABLE IF NOT EXISTS expenses (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS billing_transactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  reference TEXT UNIQUE NOT NULL,
+  amount REAL NOT NULL DEFAULT 0.0,
+  currency TEXT NOT NULL DEFAULT 'NGN',
+  status TEXT NOT NULL DEFAULT 'success',
+  plan TEXT NOT NULL DEFAULT 'starter',
+  payment_method TEXT DEFAULT 'Card',
+  card_brand TEXT,
+  card_last4 TEXT,
+  description TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS platform_admins (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'superadmin',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_org ON users(org_id);
+CREATE INDEX IF NOT EXISTS idx_clients_org ON clients(org_id);
+CREATE INDEX IF NOT EXISTS idx_products_org ON products(org_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_org ON invoices(org_id);
+CREATE INDEX IF NOT EXISTS idx_expenses_org ON expenses(org_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_client ON invoices(client_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
 CREATE INDEX IF NOT EXISTS idx_invoice_items_invoice ON invoice_items(invoice_id);

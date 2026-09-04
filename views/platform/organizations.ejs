@@ -17,7 +17,7 @@
       <div class="mt-auto p-3 bg-slate-50 rounded-2xl border border-slate-100">
         <div class="text-[0.83rem] font-semibold text-slate-900 truncate"><%= currentPlatformAdmin ? currentPlatformAdmin.name : 'Operator' %></div>
         <div class="text-[0.72rem] text-slate-500">Super Admin</div>
-        <form method="POST" action="/platform/logout" class="mt-2">
+        <form method="POST" action="/platform/logout" class="mt-2" onsubmit="return confirm('Are you sure you want to log out?');">
           <button type="submit" class="w-full text-xs font-semibold text-red-600 bg-transparent border border-red-200 rounded-lg py-1 hover:bg-red-50 cursor-pointer">Log out</button>
         </form>
       </div>
@@ -39,7 +39,7 @@
       <% } %>
 
       <!-- Provision Form Card -->
-      <div id="createOrgCard" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs mb-6" style="display:<%= error ? 'block' : 'none' %>;">
+      <div id="createOrgCard" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs mb-6" <%= error ? '' : 'style="display: none;"' %>>
         <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
           <h2 class="text-base font-bold text-slate-900 m-0">Provision New Organization</h2>
           <button type="button" onclick="document.getElementById('createOrgCard').style.display='none'" class="inline-flex items-center bg-transparent text-slate-600 border border-slate-200 px-3 py-1 text-xs font-semibold rounded-full hover:bg-slate-100 cursor-pointer">Cancel</button>
