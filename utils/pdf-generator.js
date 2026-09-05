@@ -10,6 +10,18 @@ function sanitizeText(str) {
     .replace(/£/g, 'GBP ')
     .replace(/₹/g, 'INR ')
     .replace(/₵/g, 'GHS ')
+    .replace(/¥/g, 'JPY ')
+    .replace(/zł/g, 'PLN ')
+    .replace(/kr/g, 'SEK ')
+    .replace(/R\$/g, 'BRL ')
+    .replace(/KSh/g, 'KES ')
+    .replace(/R/g, 'ZAR ')
+    .replace(/₱/g, 'PHP ')
+    .replace(/₫/g, 'VND ')
+    .replace(/฿/g, 'THB ')
+    .replace(/₺/g, 'TRY ')
+    .replace(/₸/g, 'KZT ')
+    .replace(/E£/g, 'EGP ')
     .replace(/—/g, '-')
     .replace(/–/g, '-')
     .replace(/’/g, "'")
@@ -34,7 +46,8 @@ function generateInvoicePDF(invoice, items, settings = {}) {
       const FONT_BALANCE = 12;
       const FONT_FINE = 8;
 
-      const rowHeight = 22;
+      const headerRowHeight = 22;
+      const maxY = 720; // Printable threshold before adding a page
 
       const doc = new PDFDocument({ margin: 50, size: 'A4' });
       const buffers = [];
@@ -44,7 +57,8 @@ function generateInvoicePDF(invoice, items, settings = {}) {
       doc.on('error', (err) => reject(err));
 
       const rawCurrency = settings.currency_symbol || '$';
-      const currency = sanitizeText(rawCurrency.trim()) || '$ ';
+      const sanitizedCurrency = sanitizeText(rawCurrency.trim());
+      const currency = (sanitizedCurrency && sanitizedCurrency.length > 0) ? (sanitizedCurrency.endsWith(' ') ? sanitizedCurrency : `${sanitizedCurrency} `) : '$ ';
 
       const leftMargin = 50;
       const rightMargin = 50;
@@ -54,6 +68,7 @@ function generateInvoicePDF(invoice, items, settings = {}) {
       const tableWidth = rightEdge - leftMargin; // 495.28
       const rightColX = 330;
       const rightColWidth = rightEdge - rightColX; // 215.28
+      const descX = leftMargin + cellPadding; // 60
 
       // --- Header: Company Name & Contact ---
       const hasLogo = settings.invoice_logo_enabled && settings.invoice_logo_path && fs.existsSync(settings.invoice_logo_path);
@@ -135,27 +150,45 @@ function generateInvoicePDF(invoice, items, settings = {}) {
          .text(`Issue Date: ${sanitizeText(invoice.issue_date || 'N/A')}`, rightColX, partyY + 14, { align: 'right', width: rightColWidth })
          .text(`Due Date: ${sanitizeText(invoice.due_date || 'N/A')}`, rightColX, partyY + 28, { align: 'right', width: rightColWidth });
 
-      // --- Table Header ---
+      // Helper to render table headers
+      function renderTableHeader(y) {
+        doc.rect(leftMargin, y, tableWidth, headerRowHeight).fill('#000000');
+        doc.fillColor('#ffffff').fontSize(FONT_TABLE_HEADER).font('Helvetica-Bold');
+        doc.text('Description', descX, y + 6, { width: 215 });
+        doc.text('Qty', 275, y + 6, { width: 55, align: 'center' });
+        doc.text('Unit Price', 335, y + 6, { width: 70, align: 'right' });
+        doc.text('Discount', 410, y + 6, { width: 50, align: 'center' });
+        doc.text('Amount', 465, y + 6, { width: 70, align: 'right' });
+      }
+
       let tableY = Math.max(currentClientY + 20, partyY + 70);
-      const descX = leftMargin + cellPadding; // 60
-
-      // Header background
-      doc.rect(leftMargin, tableY, tableWidth, rowHeight).fill('#000000');
-
-      doc.fillColor('#ffffff').fontSize(FONT_TABLE_HEADER).font('Helvetica-Bold');
-      doc.text('Description', descX, tableY + 6, { width: 215 });
-      doc.text('Qty', 275, tableY + 6, { width: 55, align: 'center' });
-      doc.text('Unit Price', 335, tableY + 6, { width: 70, align: 'right' });
-      doc.text('Discount', 410, tableY + 6, { width: 50, align: 'center' });
-      doc.text('Amount', 465, tableY + 6, { width: 70, align: 'right' });
-
-      tableY += rowHeight;
+      renderTableHeader(tableY);
+      tableY += headerRowHeight;
 
       // --- Table Items ---
-      doc.font('Helvetica').fontSize(FONT_BODY);
       (items || []).forEach((item, index) => {
+        const descStr = sanitizeText(item.description || '');
+        doc.font('Helvetica').fontSize(FONT_BODY);
+        const descHeight = doc.heightOfString(descStr, { width: 215 });
+        const currentRowHeight = Math.max(22, Math.ceil(descHeight) + 8);
+
+        // Page overflow check
+        if (tableY + currentRowHeight > maxY) {
+          doc.moveTo(leftMargin, tableY).lineTo(rightEdge, tableY).strokeColor('#e2e0d6').lineWidth(1).stroke();
+          doc.addPage();
+          tableY = 50;
+
+          // Header on continued page
+          doc.fillColor('#1f2421').fontSize(12).font('Helvetica-Bold')
+             .text(`INVOICE ${sanitizeText(invoice.invoice_number || '')} (cont.)`, leftMargin, tableY);
+          tableY += 20;
+
+          renderTableHeader(tableY);
+          tableY += headerRowHeight;
+        }
+
         if (index % 2 === 1) {
-          doc.rect(leftMargin, tableY, tableWidth, rowHeight).fill('#f9f8f4');
+          doc.rect(leftMargin, tableY, tableWidth, currentRowHeight).fill('#f9f8f4');
         }
 
         const qty = parseFloat(item.quantity) || 0;
@@ -165,19 +198,25 @@ function generateInvoicePDF(invoice, items, settings = {}) {
         const textY = tableY + 6;
 
         doc.fillColor('#1f2421').font('Helvetica');
-        doc.text(sanitizeText(item.description || ''), descX, textY, { width: 215, height: rowHeight - 6, ellipsis: true });
+        doc.text(descStr, descX, textY, { width: 215 });
         doc.text(String(qty), 275, textY, { width: 55, align: 'center' });
         doc.text(`${currency}${unitPrice.toFixed(2)}`, 335, textY, { width: 70, align: 'right' });
         doc.text(`${taxRate}%`, 410, textY, { width: 50, align: 'center' });
         doc.text(`${currency}${lineTotal.toFixed(2)}`, 465, textY, { width: 70, align: 'right' });
 
-        tableY += rowHeight;
+        tableY += currentRowHeight;
       });
 
-      // Bottom border line
+      // Bottom border line for line items table
       doc.moveTo(leftMargin, tableY).lineTo(rightEdge, tableY).strokeColor('#e2e0d6').lineWidth(1).stroke();
 
-      // --- Totals Section ---
+      // Check if Totals & Notes section will fit on current page
+      if (tableY + 140 > maxY) {
+        doc.addPage();
+        tableY = 50;
+      }
+
+      // --- Totals Section & Notes ---
       let totalsY = tableY + 15;
       const rightLabelX = 300;
       const valX = 420;
@@ -214,9 +253,9 @@ function generateInvoicePDF(invoice, items, settings = {}) {
 
       // --- Notes / Terms ---
       if (invoice.notes) {
-        let notesY = Math.max(tableY + 15, totalsY - 65);
+        let notesY = tableY + 15;
         doc.fillColor('#63696a').fontSize(FONT_FINE).font('Helvetica-Bold').text('NOTES / TERMS', leftMargin, notesY);
-        doc.fillColor('#1f2421').fontSize(FONT_BODY).font('Helvetica').text(sanitizeText(invoice.notes), leftMargin, notesY + 12, { width: 260 });
+        doc.fillColor('#1f2421').fontSize(FONT_BODY).font('Helvetica').text(sanitizeText(invoice.notes), leftMargin, notesY + 12, { width: 240 });
       }
 
       // Footer

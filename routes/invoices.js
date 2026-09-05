@@ -77,7 +77,7 @@ router.get('/', async (req, res, next) => {
     const orgId = req.session.user.org_id;
     const { status, q } = req.query;
     let sql = `SELECT invoices.*, clients.name AS client_name FROM invoices
-               JOIN clients ON clients.id = invoices.client_id WHERE invoices.org_id = ?`;
+               LEFT JOIN clients ON clients.id = invoices.client_id WHERE invoices.org_id = ?`;
     const params = [orgId];
     if (status) { sql += ' AND invoices.status = ?'; params.push(status); }
     if (q) { sql += ' AND (invoices.invoice_number LIKE ? OR clients.name LIKE ?)'; params.push(`%${q}%`, `%${q}%`); }
@@ -156,7 +156,7 @@ router.get('/:id', async (req, res, next) => {
     const orgId = req.session.user.org_id;
     const invoice = await db.prepare(`SELECT invoices.*, clients.name AS client_name, clients.email AS client_email,
       clients.address AS client_address, clients.tax_id AS client_tax_id
-      FROM invoices JOIN clients ON clients.id = invoices.client_id WHERE invoices.id = ? AND invoices.org_id = ?`).get(req.params.id, orgId);
+      FROM invoices LEFT JOIN clients ON clients.id = invoices.client_id WHERE invoices.id = ? AND invoices.org_id = ?`).get(req.params.id, orgId);
     if (!invoice) return res.status(404).render('error', { title: 'Not Found', message: 'Invoice not found.' });
     const items = (await db.prepare('SELECT * FROM invoice_items WHERE invoice_id = ?').all(req.params.id)) || [];
     const payments = (await db.prepare('SELECT * FROM payments WHERE invoice_id = ? ORDER BY payment_date').all(req.params.id)) || [];
@@ -182,7 +182,7 @@ router.get('/:id/pdf', async (req, res, next) => {
     const orgId = req.session.user.org_id;
     const invoice = await db.prepare(`SELECT invoices.*, clients.name AS client_name, clients.email AS client_email,
       clients.address AS client_address, clients.tax_id AS client_tax_id
-      FROM invoices JOIN clients ON clients.id = invoices.client_id WHERE invoices.id = ? AND invoices.org_id = ?`).get(req.params.id, orgId);
+      FROM invoices LEFT JOIN clients ON clients.id = invoices.client_id WHERE invoices.id = ? AND invoices.org_id = ?`).get(req.params.id, orgId);
     if (!invoice) return res.status(404).render('error', { title: 'Not Found', message: 'Invoice not found.' });
 
     const items = (await db.prepare('SELECT * FROM invoice_items WHERE invoice_id = ?').all(req.params.id)) || [];
@@ -192,8 +192,10 @@ router.get('/:id/pdf', async (req, res, next) => {
 
     const filename = `${invoice.invoice_number}.pdf`;
     res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Length', pdfBuffer.length);
     res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
-    res.send(pdfBuffer);
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.end(pdfBuffer);
   } catch (err) {
     next(err);
   }
@@ -205,7 +207,7 @@ router.post('/:id/send', async (req, res, next) => {
     const orgId = req.session.user.org_id;
     const invoice = await db.prepare(`SELECT invoices.*, clients.name AS client_name, clients.email AS client_email,
       clients.address AS client_address, clients.tax_id AS client_tax_id
-      FROM invoices JOIN clients ON clients.id = invoices.client_id WHERE invoices.id = ? AND invoices.org_id = ?`).get(req.params.id, orgId);
+      FROM invoices LEFT JOIN clients ON clients.id = invoices.client_id WHERE invoices.id = ? AND invoices.org_id = ?`).get(req.params.id, orgId);
     if (!invoice) return res.status(404).render('error', { title: 'Not Found', message: 'Invoice not found.' });
 
     const recipientEmail = (req.body.recipient_email || invoice.client_email || 'daviddominic767@gmail.com').trim();

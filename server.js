@@ -44,7 +44,7 @@ if (process.env.NODE_ENV !== 'production') {
 
     app.use(connectLivereload({
       port: 35729,
-      ignore: [/\.git\//, /node_modules\//],
+      ignore: [/\.git\//, /node_modules\//, /\/pdf$/, /\/logo$/],
     }));
   } catch (err) {
     // livereload ignored if missing in production
